@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love Login</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@300;400;500;600;700&family=Kanit:wght@300;400&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            
+            background-color: #2b0a12; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.5s ease;
+        }
+
+  
+        body.light-on {
+            background: linear-gradient(to right, #ffdde1, #ee9ca7);
+        }
+
+        
+        .lamp-wrapper {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            width: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .lamp-cord {
+            width: 4px;
+            height: 100px;
+            background: #5c1825;
+            z-index: 10;
+        }
+
+        .lamp-shade {
+            width: 120px;
+            height: 80px;
+            background: #d6336c;
+            border-radius: 40px 40px 0 0;
+            position: relative;
+            z-index: 10;
+            box-shadow: inset 0 -5px 10px rgba(0,0,0,0.2);
+        }
+        
+        .lamp-shade::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 0;
+            width: 120px;
+            height: 40px;
+            background: #a61e4d;
+            border-radius: 50%;
+        }
+
+        .bulb {
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: #444;
+            border-radius: 50%;
+            transition: all 0.3s;
+            box-shadow: 0 0 0 rgba(255, 255, 0, 0);
+            z-index: 5;
+        }
+
+        body.light-on .bulb {
+            background: #fff0f3;
+            box-shadow: 0 10px 100px 30px rgba(255, 107, 107, 0.6), 
+                        0 10px 100px 30px rgba(255, 255, 255, 0.4);
+        }
+
+        .pull-string-container {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            width: 2px;
+            height: 0;
+            overflow: visible;
+        }
+
+        svg#cord-svg {
+            position: absolute;
+            top: 0;
+            left: -50px;
+            width: 100px;
+            height: 300px;
+            pointer-events: none;
+            overflow: visible;
+        }
+        
+        path#cord-path {
+            fill: none;
+            stroke: #ff8787;
+            stroke-width: 3;
+            stroke-linecap: round;
+        }
+
+        .knob {
+            width: 40px;
+            height: 40px;
+            background: #ff4d6d;
+            position: absolute;
+            top: 150px;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            cursor: grab;
+            z-index: 20;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            clip-path: path('M15 27.5 L 3.5 16 A 8 8 0 0 1 15 5 A 8 8 0 0 1 26.5 16 L 15 27.5 Z');
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .knob:active {
+            cursor: grabbing;
+            transform: translate(-50%, -50%) scale(0.9);
+        }
+
+        .hint-text {
+            position: absolute;
+            top: 250px;
+            color: #ff8787;
+            font-size: 1rem;
+            font-family: 'Dancing Script', cursive;
+            letter-spacing: 2px;
+            pointer-events: none;
+            opacity: 1;
+            transition: opacity 0.5s;
+            text-shadow: 0 0 5px rgba(255, 77, 109, 0.5);
+        }
+        
+        body.light-on .hint-text {
+            opacity: 0;
+        }
+        .container {
+            background-color: #fff;
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(255, 77, 109, 0.2);
+            position: relative;
+            overflow: hidden;
+            width: 400px;
+            max-width: 90%;
+            min-height: 450px;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.8s ease-in-out;
+            pointer-events: none;
+            margin-top: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        body.light-on .container {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: all;
+        }
+
+        .form-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        form {
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 0 40px;
+            height: 100%;
+        }
+        
+        h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.5rem;
+            color: #ff4d6d;
+            margin-bottom: 20px;
+        }
+
+        .subtitle {
+            font-family: 'Kanit', sans-serif;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        input {
+            background-color: #fff0f3;
+            border: 1px solid #ffccd5;
+            margin: 8px 0;
+            padding: 15px;
+            font-size: 16px;
+            border-radius: 8px;
+            width: 100%;
+            outline: none;
+            text-align: center;
+            font-family: 'Kanit', sans-serif;
+        }
+        
+        input:focus {
+            border-color: #ff4d6d;
+        }
+
+        button {
+            background: linear-gradient(to right, #ff4d6d, #ff8fa3);
+            color: #fff;
+            font-size: 14px;
+            padding: 12px 45px;
+            border: 1px solid transparent;
+            border-radius: 20px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-top: 30px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 5px 15px rgba(255, 77, 109, 0.4);
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="lamp-wrapper">
+        <div class="lamp-cord"></div>
+        <div class="lamp-shade">
+            <div class="bulb"></div>
+        </div>
+        
+        <div class="pull-string-container">
+            <svg id="cord-svg">
+                <path id="cord-path" d="M50,0 Q50,75 50,150" />
+            </svg>
+            <div class="knob" id="knob"></div>
+        </div>
+
+        <div class="hint-text">Pull for Love ❤️</div>
+    </div>
+
+    <div class="container" id="container">
+        <div class="form-container">
+            <form id="loginForm" onsubmit="return false;">
+                <h1>Our Story</h1>
+                <p class="subtitle">จำวันที่เราเจอกันครั้งแรกได้ไหม?</p>
+                
+                <input type="text" id="dateInput" placeholder="วว/ดด/ปป (เช่น 040248)" autocomplete="off">
+                
+                <button type="button" onclick="checkLogin()">Enter ❤️</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+       
+        function checkLogin() {
+            const input = document.getElementById('dateInput').value.trim(); 
+            
+            
+            if (input === '241262') {
+                
+                window.location.href = 'index1.html';
+            } else {
+            
+                alert('วันที่ไม่ถูกต้อง! ลองนึกดูดีๆ นะ \n(ใบ้: คริสต์มาสอีฟ ปี 62)');
+                
+               
+                gsap.from("#dateInput", {x: -10, duration: 0.1, repeat: 5, yoyo: true});
+            }
+        }
+        
+       
+        document.getElementById("dateInput").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                checkLogin();
+            }
+        });
+
+        
+        const knob = document.getElementById('knob');
+        const cordPath = document.getElementById('cord-path');
+        const body = document.body;
+        
+        let isDragging = false;
+        let startY = 0;
+        let currentY = 150; 
+        const originY = 150;
+        const cordX = 50;
+
+        function updateCord(x, y) {
+            const path = `M${cordX},0 Q${x + cordX},${y/2} ${x + cordX},${y}`;
+            cordPath.setAttribute('d', path);
+            gsap.set(knob, { x: x, y: y });
+        }
+
+        knob.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startY = e.clientY;
+            gsap.killTweensOf(knob); 
+            gsap.killTweensOf(cordState); 
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const deltaY = e.clientY - startY;
+            let newY = originY + deltaY;
+            let newX = (e.clientX - window.innerWidth / 2);
+
+            if (newY < 50) newY = 50;
+            if (newY > 400) newY = 400;
+
+            updateCord(newX, newY);
+            currentY = newY;
+        });
+
+        const cordState = { x: 0, y: 150 };
+
+        window.addEventListener('mouseup', () => {
+            if (!isDragging) return;
+            isDragging = false;
+
+            if (currentY > 250) {
+                toggleLight();
+            }
+
+            const animState = { x: parseFloat(gsap.getProperty(knob, "x")), y: currentY };
+            
+            gsap.to(animState, {
+                duration: 1.5,
+                ease: "elastic.out(1, 0.2)",
+                x: 0,
+                y: originY,
+                onUpdate: () => {
+                    updateCord(animState.x, animState.y);
+                }
+            });
+        });
+
+        function toggleLight() {
+            body.classList.toggle('light-on');
+        }
+
+      
+        knob.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            startY = e.touches[0].clientY;
+            e.preventDefault();
+        });
+        
+        window.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const deltaY = e.touches[0].clientY - startY;
+            let newY = originY + deltaY;
+            let newX = (e.touches[0].clientX - window.innerWidth / 2);
+            
+            if (newY < 50) newY = 50;
+            if (newY > 400) newY = 400;
+
+            updateCord(newX, newY);
+            currentY = newY;
+        }, { passive: false });
+
+        window.addEventListener('touchend', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            if (currentY > 250) toggleLight();
+            
+            const animState = { x: parseFloat(gsap.getProperty(knob, "x")), y: currentY };
+            gsap.to(animState, {
+                duration: 1.5,
+                ease: "elastic.out(1, 0.2)",
+                x: 0,
+                y: originY,
+                onUpdate: () => updateCord(animState.x, animState.y)
+            });
+        });
+    </script>
+</body>
+</html>

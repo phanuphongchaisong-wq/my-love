@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Valentine's Day ❤️</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Kanit:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script> 
+    
+    <style>
+        /* ================= ตัวแปรสีและตั้งค่าพื้นฐาน ================= */
+        :root {
+            /* สีจากหน้า 1 */
+            --primary: #ff4d6d;
+            --glass: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --text: #2d3436;
+            
+            /* สีจากหน้า 2 (จดหมาย) */
+            --bg-dark: #2b0a12;
+            --bg-gradient: radial-gradient(circle at center, #521318 0%, #1a0507 100%);
+            --envelope-main: #9e1b21; 
+            --envelope-shadow: #7a1216;
+            --envelope-flap: #b8232a;
+            --card-bg: #fffbf0; 
+            --gold: #d4af37;
+            --text-main: #590d22;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            color: var(--text);
+            overflow-x: hidden;
+            background-color: #000; /* กันขอบขาวเวลากระตุก */
+        }
+
+        /* ================= ระบบจัดการหน้า (Page System) ================= */
+        .page {
+            display: none; /* ซ่อนทุกหน้าไว้ก่อน */
+            width: 100%;
+            min-height: 100vh;
+        }
+        
+        .page.active {
+            display: block; /* แสดงเฉพาะหน้าที่เปิดอยู่ */
+        }
+
+        /* ================= ส่วนของ Overlay และ เพลง ================= */
+        #welcome-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            transition: opacity 1s ease;
+        }
+
+        .open-btn {
+            padding: 20px 50px;
+            font-size: 1.5rem;
+            background: white;
+            color: var(--primary);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            font-family: 'Dancing Script', cursive;
+            animation: pulse 2s infinite;
+        }
+
+        .music-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        /* ================= สไตล์สำหรับหน้า 1 (Home/Gallery) ================= */
+        #page-home {
+            background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+        .hero {
+            height: 100vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+            position: relative; padding: 20px;
+        }
+        .hero h1 {
+            font-family: 'Dancing Script', cursive; font-size: 4rem;
+            color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px; animation: float 3s ease-in-out infinite;
+        }
+        .subtitle { color: #fff; font-size: 1.2rem; letter-spacing: 2px; margin-bottom: 40px; }
+        .scroll-down { position: absolute; bottom: 30px; color: #fff; animation: bounce 2s infinite; }
+        .gallery {
+            padding: 80px 20px; max-width: 1200px; margin: 0 auto; display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;
+        }
+        .photo-card {
+            height: 400px; position: relative; overflow: hidden;
+            border-radius: 20px; cursor: pointer; transition: transform 0.3s ease;
+            opacity: 0; transform: translateY(50px);
+        }
+        .photo-card:hover { transform: translateY(-10px); }
+        .photo-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .photo-card:hover img { transform: scale(1.1); }
+        .caption {
+            position: absolute; bottom: 0; left: 0; right: 0; padding: 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            color: white; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .photo-card:hover .caption { opacity: 1; }
+        .letter-section { padding: 100px 20px; display: flex; justify-content: center; }
+        .letter { max-width: 600px; padding: 50px; text-align: center; }
+        .heart-btn {
+            margin-top: 30px; padding: 15px 40px; background: #fff;
+            color: var(--primary); border: none; border-radius: 50px;
+            font-size: 1.2rem; font-weight: bold; cursor: pointer;
+            transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .heart-btn:hover { transform: scale(1.05); background: var(--primary); color: #fff; }
+        
+        .visible { animation: fadeUp 0.8s forwards; }
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-10px); } 60% { transform: translateY(-5px); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+        /* ================= สไตล์สำหรับหน้า 2 (Letter/Envelope) ================= */
+        #page-letter.active {
+            display: flex; /* ใช้ flex เมื่อเปิดหน้า */
+            background: var(--bg-gradient);
+            justify-content: center; align-items: center;
+            flex-direction: column; position: relative;
+            overflow: hidden;
+        }
+        .particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .particle { position: absolute; background: rgba(212, 175, 55, 0.6); border-radius: 50%; animation: floatUp linear infinite; }
+        @keyframes floatUp { 0% { transform: translateY(100vh) scale(0); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(-10vh) scale(1); opacity: 0; } }
+        
+        .envelope-container { position: relative; cursor: pointer; z-index: 10; transition: transform 0.3s; margin-top: 50px; }
+        .envelope-container:hover { transform: scale(1.02); }
+        .envelope {
+            position: relative; width: 340px; height: 220px;
+            background-color: var(--envelope-main); border-radius: 6px; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+        .envelope-lid {
+            position: absolute; top: 0; left: 0; width: 0; height: 0;
+            border-left: 170px solid transparent; border-right: 170px solid transparent;
+            border-top: 120px solid var(--envelope-flap); transform-origin: top;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), z-index 0.6s; z-index: 5;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+        }
+        .card {
+            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 300px; height: 200px; background: var(--card-bg); border-radius: 4px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 30px; box-sizing: border-box;
+            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) 0.3s, height 0.8s ease;
+            z-index: 2; box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+            background-image: linear-gradient(#e8e3d3 1px, transparent 1px), linear-gradient(90deg, #e8e3d3 1px, transparent 1px);
+            background-size: 20px 20px; background-position: center;
+        }
+        .card::after {
+            content: ''; position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px;
+            border: 2px solid var(--gold); pointer-events: none;
+        }
+        .card h1 {
+            font-family: 'Playfair Display', serif; color: var(--text-main);
+            margin: 0 0 15px 0; font-size: 1.8rem; line-height: 1.2; text-shadow: 1px 1px 0 rgba(212, 175, 55, 0.2);
+        }
+        .card p { font-size: 1rem; color: #4a4a4a; line-height: 1.8; margin: 0; font-weight: 400; }
+        .card strong { color: #a4161a; font-weight: 600; }
+        .card .signature { margin-top: 20px; font-size: 0.9rem; color: #888; font-style: italic; }
+        
+        .envelope-front {
+            position: absolute; bottom: 0; left: 0; width: 0; height: 0;
+            border-left: 170px solid var(--envelope-main); border-right: 170px solid var(--envelope-shadow);
+            border-top: 120px solid transparent; z-index: 4; pointer-events: none;
+        }
+        .envelope-front::after {
+            content: ''; position: absolute; bottom: 0; left: -170px; width: 0; height: 0;
+            border-left: 170px solid transparent; border-right: 170px solid transparent; border-bottom: 120px solid var(--envelope-main);
+        }
+        .seal-wrapper {
+            position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 6; transition: opacity 0.4s;
+        }
+        .wax-seal {
+            width: 55px; height: 55px; background: radial-gradient(circle at 30% 30%, #ffd700, #d4af37, #8a6e05);
+            border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 0 10px rgba(255,255,255,0.4);
+            display: flex; justify-content: center; align-items: center;
+            font-family: 'Playfair Display', serif; font-weight: bold; font-size: 1.2rem;
+            color: #521318; border: 2px solid #b8860b;
+        }
+        
+        /* แก้ระยะของ Desktop ให้น้อยลงกว่าเดิมนิดหน่อย */
+        .envelope-container.open .envelope-lid { transform: rotateX(180deg); z-index: 1; }
+        .envelope-container.open .card { height: 380px; transform: translateX(-50%) translateY(-140px); z-index: 6; box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
+        .envelope-container.open .seal-wrapper { opacity: 0; pointer-events: none; }
+        
+        .hint-text {
+            margin-top: 50px; color: var(--gold); font-family: 'Playfair Display', serif;
+            font-size: 1.1rem; letter-spacing: 2px; text-transform: uppercase; animation: pulseLetter 2s infinite;
+        }
+        @keyframes pulseLetter { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+        
+        .back-btn {
+            position: fixed; bottom: 30px; padding: 12px 35px; background: rgba(0,0,0,0.3);
+            color: var(--gold); border: 1px solid var(--gold); border-radius: 50px;
+            cursor: pointer; font-family: 'Kanit', sans-serif; font-size: 1rem;
+            opacity: 0; pointer-events: none; transition: all 0.5s ease 1s; z-index: 20;
+        }
+        .back-btn:hover { background: var(--gold); color: #2b0a12; }
+        .envelope-container.open ~ .back-btn { opacity: 1; pointer-events: all; }
+        .envelope-container.open ~ .hint-text { display: none; }
+
+        /* ==========================================
+           ปรับแต่งสำหรับหน้าจอมือถือโดยเฉพาะ (แก้ปัญหาทะลุขอบจอ) 
+           (ส่วนนี้คือส่วนที่หล่นหายไปครับ)
+           ========================================== */
+        @media (max-width: 600px) {
+            .envelope-container {
+                margin-top: 150px; /* ดันซองลงมาให้ลึกกว่าเดิม จะได้มีที่ว่างข้างบนให้การ์ดเด้ง */
+                transform: scale(0.85); /* ย่อขนาดลงอีกนิดให้พอดีจอ */
+            }
+            .envelope-container:hover {
+                transform: scale(0.85); /* ป้องกันการขยายตอนกดบนมือถือ */
+            }
+            .envelope-container.open .card {
+                height: 350px; /* ลดความสูงการ์ดลงมา */
+                transform: translateX(-50%) translateY(-100px); /* เด้งขึ้นแค่ 100px พอ ไม่ทะลุจอแน่นอน */
+            }
+            .card h1 {
+                font-size: 1.5rem; /* ตัวหนังสือเล็กลงนิดนึงให้อยู่ในกรอบสวยๆ */
+                margin-bottom: 10px;
+            }
+            .card p {
+                font-size: 0.9rem;
+                line-height: 1.6;
+            }
+            .hint-text {
+                margin-top: 30px;
+            }
+        }
+
+        /* ================= สไตล์สำหรับหน้า 3 (Game) ================= */
+        #page-game.active {
+            display: flex; /* ใช้ flex เมื่อเปิดหน้า */
+            flex-direction: column; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            text-align: center;
+        }
+        #page-game h1 { color: #ff4d6d; margin-bottom: 10px; font-family: 'Kanit', sans-serif;}
+        #page-game p { color: #555; margin-bottom: 30px; }
+        .game-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 350px; margin: 0 auto;}
+        .box {
+            width: 80px; height: 80px; background-color: #ffccd5; border-radius: 15px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; box-shadow: 0 5px 15px rgba(255, 77, 109, 0.2);
+            transition: transform 0.2s, background-color 0.3s;
+        }
+        .box:hover { transform: scale(1.05); background-color: #ffb3c1; }
+        .box.opened { background-color: #fff; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); cursor: default; }
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 200;
+        }
+        .modal-content {
+            background: white; padding: 30px; border-radius: 20px; text-align: center;
+            animation: popUp 0.5s ease; max-width: 80%;
+        }
+        @keyframes popUp { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .modal button {
+            background: #ff4d6d; color: white; border: none; padding: 10px 20px;
+            border-radius: 20px; margin-top: 15px; cursor: pointer; font-size: 1rem;
+        }
+        .modal button:hover { background: #e01e4a; }
+        .nav-btn {
+            margin-top: 40px; background: transparent; color: #ff4d6d;
+            border: 2px solid #ff4d6d; padding: 10px 20px; border-radius: 20px; cursor: pointer;
+            font-family: 'Kanit', sans-serif; transition: all 0.3s;
+        }
+        .nav-btn:hover { background: #ff4d6d; color: white; }
+    </style>
+</head>
+<body>
+
+    <div id="welcome-overlay">
+        <h1 style="font-size: 3rem; margin-bottom: 20px; font-family: 'Kanit', sans-serif; color: #2d3436;">For You ❤️</h1>
+        <button class="open-btn" onclick="startExperience()">Tap to Open 💌</button>
+    </div>
+
+    <div class="music-control" onclick="toggleMusic()">🎵</div>
+
+    <div id="page-home" class="page active">
+        <section class="hero">
+            <h1>Happy Valentine's Day</h1>
+            <p class="subtitle">To my special one</p>
+            <div class="glass-card" style="padding: 20px 40px; margin-top: 20px;">
+                <p>ขอบคุณที่อยู่ข้างกันมานะ ❤️</p>
+            </div>
+            <div class="scroll-down">↓ Scroll for our memories</div>
+        </section>
+
+        <section class="gallery">
+            <div class="photo-card glass-card">
+                <img src="https://res.cloudinary.com/dwm5zpyhi/image/upload/v1770480684/F67DD476-7FEB-43C8-AD43-8FBAAB479C19_rk4m3o.jpg" alt="Our Memory">
+                <div class="caption">
+                    <h3>เจอกันครั้งแรก</h3>
+                    <p>จำได้ไหมว่าวันนั้นตื่นเต้นแค่ไหน?</p>
+                </div>
+            </div>
+            <div class="photo-card glass-card">
+                <img src="https://res.cloudinary.com/dwm5zpyhi/image/upload/v1770481346/IMG_1955_a7iots.jpg" alt="Our Memory">
+                <div class="caption">
+                    <h3>ทริปทะเล</h3>
+                    <p>อยากไปอีกจังเลยเนอะ</p>
+                </div>
+            </div>
+            <div class="photo-card glass-card">
+                <img src="https://res.cloudinary.com/dwm5zpyhi/image/upload/v1770486031/28C658A4-D74C-4E48-8C62-DD7712D60780_susfqb.jpg" alt="Our Memory">
+                <div class="caption">
+                    <h3>รูปนี้ตลกมาก</h3>
+                    <p>แต่ก็น่ารักที่สุดเลย</p>
+                </div>
+            </div>
+            <div class="photo-card glass-card">
+                <img src="https://res.cloudinary.com/dwm5zpyhi/image/upload/v1770486031/IMG_1254_bswijc.jpg" alt="Our Memory">
+                <div class="caption">
+                    <h3>ลอยกระทง</h3>
+                    <p>สนุกตื่นเต้นมากเลย</p>
+                </div>
+            </div>
+            <div class="photo-card glass-card">
+                <img src="https://res.cloudinary.com/dwm5zpyhi/image/upload/v1770486032/IMG_3765_ykb35d.jpg" alt="Our Memory">
+                <div class="caption">
+                    <h3>จับมือกันไว้</h3>
+                    <p>ไม่ว่าจะเจออะไร เราจะผ่านไปด้วยกัน</p>
+                </div>
+            </div>
+            <div class="photo-card glass-card">
+                <img src="https://res.cloudinary.com/dwm5zpyhi/image/upload/v1770481346/IMG_8577_jxq7ml.jpg" alt="Our Memory">
+                <div class="caption">
+                    <h3></h3>
+                    <p></p>
+                </div>
+            </div>
+        </section>
+
+        <section class="letter-section">
+            <div class="glass-card letter">
+                <h2>ถึง เธอที่รัก</h2><br>
+                <p style="line-height: 1.8;">
+                    ไม่รู้จะเริ่มยังไงดี แต่อยากบอกว่าดีใจมากที่มีเธอเข้ามาในชีวิต  <br><br> อยู่รักกันไปอีกนานๆนะครับ  <br><br> 
+                    หวังว่าจะชอบนะครับ <br><br> รักนะ ❤️
+                </p>
+                <button class="heart-btn" onclick="alert('รักเหมือนกันครับ! 💖')">Love You Too</button>
+            </div>
+        </section>
+
+        <div style="text-align: center; margin-top: 20px; margin-bottom: 50px;">
+            <button onclick="changePage('page-letter')" style="
+                padding: 15px 30px; font-size: 1.2rem; background: linear-gradient(45deg, #ff9a9e, #fecfef);
+                color: #d6336c; border: none; border-radius: 50px; cursor: pointer;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1); font-family: 'Kanit', sans-serif; font-weight: bold;
+            "> 💌 เปิดอ่านจดหมาย </button>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 50px;">
+            <button onclick="changePage('page-game')" style="
+                padding: 15px 30px; font-size: 1.2rem; background: linear-gradient(45deg, #ff4d6d, #ff8fa3);
+                color: white; border: none; border-radius: 50px; cursor: pointer;
+                box-shadow: 0 5px 15px rgba(255, 77, 109, 0.4); font-family: 'Kanit', sans-serif;
+            "> 🎮 ไปเล่นเกมกันเถอะ! </button>
+        </div>
+    </div>
+
+
+    <div id="page-letter" class="page">
+        <div class="particles" id="particles"></div>
+
+        <div class="envelope-container" onclick="openEnvelope()">
+            <div class="envelope">
+                <div class="envelope-lid"></div>
+                
+                <div class="card">
+                    <h1>Happy<br>Valentine's Day</h1>
+                    <p>
+                        ถึง <strong>น้องอั่งเปา</strong>,<br><br>
+                        ขอบคุณสำหรับทุกอย่างตลอด<br>
+                        <strong>6 ปี</strong> ที่ผ่านมานะ<br>
+                        ขอให้ปีนี้เป็นปีที่ดีของเรา<br>
+                        รักกันแบบนี้ตลอดไปนะ ❤️
+                    </p>
+                    <div class="signature">- จากเค้าเอง -</div>
+                </div>
+
+                <div class="envelope-front"></div>
+                <div class="seal-wrapper">
+                    <div class="wax-seal">Love</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="hint-text">Tap to Open</div>
+        <button class="back-btn" onclick="changePage('page-home')">Back to Home 🏠</button>
+    </div>
+
+
+    <div id="page-game" class="page">
+        <h1>Find My Heart ❤️</h1>
+        <p>ก็ลองทายดูซิ... หัวใจของเค้าอยู่ที่กล่องไหน?</p>
+
+        <div class="game-board" id="game-board"></div>
+        
+        <button class="nav-btn" onclick="changePage('page-home')">กลับไปหน้าความทรงจำ 🏠</button>
+
+        <div class="modal" id="winModal">
+            <div class="modal-content">
+                <h2 style="color: #ff4d6d;">หาเจอแล้วหลออออออ 🎉</h2>
+                <p>เก่งจังเลยแฟนใครเนี่ย</p>
+                <p style="font-size: 1.2rem;">"หัวใจดวงนี้ มอบให้เธอคนเดียวนะ"</p>
+                <button onclick="closeModal()">จร้าๆ 🥰</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ---------------- ระบบเสียงและเริ่มต้น ----------------
+        const audio = new Audio('p.mp3'); 
+        audio.volume = 0.3; 
+        audio.loop = true; 
+        let isPlaying = false;
+
+        function startExperience() {
+            const overlay = document.getElementById('welcome-overlay');
+            overlay.style.opacity = '0';
+            
+            audio.play().then(() => {
+                isPlaying = true;
+            }).catch(error => {
+                console.log("Audio play failed:", error);
+            });
+
+            setTimeout(() => {
+                overlay.remove();
+            }, 1000);
+            
+            // สร้าง Particles ให้หน้าจดหมายเตรียมไว้เลย
+            createParticles();
+            // สร้างกล่องเกมเตรียมไว้
+            initGame();
+        }
+
+        function toggleMusic() {
+            if (isPlaying) {
+                audio.pause();
+                isPlaying = false;
+            } else {
+                audio.play();
+                isPlaying = true;
+            }
+        }
+
+        // ---------------- ระบบเปลี่ยนหน้า (Navigation) ----------------
+        function changePage(pageId) {
+            // ซ่อนทุกหน้า
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            // แสดงหน้าที่เราต้องการ
+            document.getElementById(pageId).classList.add('active');
+            // เลื่อนจอไปบนสุด
+            window.scrollTo(0, 0);
+        }
+
+        // ---------------- ระบบแอนิเมชันหน้าแรก ----------------
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.photo-card').forEach(card => {
+            observer.observe(card);
+        });
+
+        // ---------------- ระบบจดหมายหน้า 2 ----------------
+        function openEnvelope() {
+            document.querySelector('.envelope-container').classList.toggle('open');
+        }
+
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            // กันไม่ให้สร้างซ้ำถ้ากดเข้ามาใหม่
+            if(particlesContainer.innerHTML !== '') return; 
+            
+            for (let i = 0; i < 30; i++) {
+                const p = document.createElement('div');
+                p.classList.add('particle');
+                const size = Math.random() * 5 + 2 + 'px';
+                p.style.width = size; p.style.height = size;
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.animationDuration = Math.random() * 5 + 5 + 's';
+                p.style.animationDelay = Math.random() * 5 + 's';
+                particlesContainer.appendChild(p);
+            }
+        }
+
+        // ---------------- ระบบเกมหน้า 3 ----------------
+        let heartIndex = Math.floor(Math.random() * 9);
+        const modal = document.getElementById('winModal');
+
+        function initGame() {
+            const board = document.getElementById('game-board');
+            if(board.innerHTML !== '') return; // กันสร้างซ้ำ
+            
+            for (let i = 0; i < 9; i++) {
+                const box = document.createElement('div');
+                box.classList.add('box');
+                box.dataset.index = i;
+                box.innerHTML = '🎁'; 
+                box.addEventListener('click', handleClick);
+                board.appendChild(box);
+            }
+        }
+
+        function handleClick(e) {
+            const box = e.target;
+            const index = parseInt(box.dataset.index);
+
+            if (box.classList.contains('opened')) return;
+            box.classList.add('opened');
+
+            if (index === heartIndex) {
+                box.innerHTML = '❤️';
+                box.style.backgroundColor = '#ff4d6d'; 
+                box.style.color = 'white';
+                
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+                
+                setTimeout(() => {
+                    modal.style.display = 'flex';
+                }, 500);
+            } else {
+                box.innerHTML = '💨'; 
+                box.style.backgroundColor = '#f0f0f0';
+            }
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
