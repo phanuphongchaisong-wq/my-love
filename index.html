@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🐍 Snake Tracker Pro - Ultimate Enterprise Edition</title>
+    <title>🐍 Snake Keeper - Personal Smart Dashboard</title>
     
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,25 +14,33 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlNuYWtlIEtlZXBlciBQcm8iLAogICJzaG9ydF9tYW1lIjogIlNuYWtlS2VlcGVyIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMxMjEyMTIiLAogICJ0aGVtZV9jb2xvciI6ICIjNENBRjUwIiwKICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiCn0=">
+
     <style>
         .sticky-header { position: sticky; top: 0; z-index: 40; backdrop-filter: blur(8px); }
-        .btm-nav { padding-bottom: env(safe-area-inset-bottom); z-index: 50; }
-        #calendar { max-height: 480px; font-size: 11px; }
-        
-        /* 🛠️ แก้ไขปัญหาหน้าจอเลื่อนไม่ได้และเด้งไหลขึ้นบนมือถืออย่างเด็ดขาด */
-        body {
+        .btm-nav { padding-bottom: env(safe-area-inset-bottom); z-index: 45; }
+        #calendar { max-height: 450px; font-size: 11px; }
+
+        /* 🛠️ แก้ไขบั๊กเลื่อนลงไม่ได้ / หน้าจอไหลเด้งกลับขึ้นด้านบนบนโทรศัพท์มือถืออย่างเด็ดขาด */
+        html, body {
             overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
+            -webkit-overflow-scrolling: touch;
         }
         .modal {
-            align-items: center;
-            justify-content: center;
+            align-items: flex-start !important;
+            padding-top: 2vh;
+            overflow-y: auto !important;
         }
         .modal-box {
-            max-height: 85vh !important;
-            overflow-y: auto !important;
-            overscroll-behavior-y: contain !important;
+            max-height: none !important;
+            margin-bottom: 80px;
+            overscroll-behavior: contain !important;
             -webkit-overflow-scrolling: touch !important;
+        }
+        .chart-container {
+            position: relative;
+            height: 160px;
+            width: 100%;
         }
     </style>
 </head>
@@ -41,22 +49,14 @@
     <div id="authSection" class="flex justify-center items-center min-h-screen p-4">
         <div class="card w-full max-w-md bg-base-100 shadow-2xl border border-primary/20">
             <div class="card-body items-center text-center">
-                <div class="text-7xl mb-2 animate-pulse">🐍</div>
-                <h2 class="card-title text-2xl font-bold text-primary">SnakePro Ultimate</h2>
-                <p class="text-xs text-gray-400 mb-6">ระบบจัดการฟาร์มงูอัจฉริยะ & Enterprise ERP</p>
-                <input type="email" id="email" placeholder="อีเมลผู้ดูแลฟาร์ม / พนักงาน" class="input input-bordered w-full mb-3" />
-                <input type="password" id="password" placeholder="รหัสผ่านเข้าฟาร์ม" class="input input-bordered w-full mb-4" />
-                
-                <div class="form-control w-full mb-4">
-                    <select id="userRole" class="select select-bordered select-sm w-full">
-                        <option value="Admin">สิทธิ์ผู้ใช้งาน: เจ้าของฟาร์ม (Admin)</option>
-                        <option value="Staff">สิทธิ์ผู้ใช้งาน: พนักงานฟาร์ม (Staff)</option>
-                    </select>
-                </div>
-
-                <button onclick="loginUser()" class="btn btn-primary w-full text-base">เข้าสู่ระบบจัดการฟาร์ม</button>
-                <button onclick="registerUser()" class="btn btn-link text-xs text-gray-400">ลงทะเบียนเปิดฟาร์มใหม่</button>
-                <p id="authMessage" class="text-error text-xs mt-2 font-semibold"></p>
+                <div class="text-7xl mb-2">🐍</div>
+                <h2 class="card-title text-2xl font-bold text-primary">Snake Keeper</h2>
+                <p class="text-xs text-gray-400 mb-6">ระบบบันทึกและพยากรณ์ข้อมูลการเลี้ยงงูส่วนบุคคล</p>
+                <input type="email" id="email" placeholder="อีเมลล็อกอินส่วนตัวของคุณ" class="input input-bordered w-full mb-3 shadow-inner" />
+                <input type="password" id="password" placeholder="รหัสผ่านเข้าใช้งานระบบ" class="input input-bordered w-full mb-4 shadow-inner" />
+                <button onclick="loginUser()" class="btn btn-primary w-full text-base font-bold shadow-lg">เข้าสู่ระบบส่วนตัว</button>
+                <button onclick="registerUser()" class="btn btn-link text-xs text-gray-500">ลงทะเบียนเริ่มต้นใช้งานครั้งแรก</button>
+                <p id="authMessage" class="text-error text-xs mt-2 font-medium"></p>
             </div>
         </div>
     </div>
@@ -65,8 +65,8 @@
         
         <div class="navbar bg-base-100 shadow-md sticky-header px-4 border-b border-base-200">
             <div class="flex-1">
-                <span class="text-md lg:text-lg font-bold text-primary flex items-center gap-2">
-                    🐍 SnakePro <div class="badge badge-sm badge-success font-mono text-[10px]">ULTIMATE v3.0</div>
+                <span class="text-base lg:text-lg font-bold text-primary flex items-center gap-2">
+                    🐍 Snake Keeper <div class="badge badge-sm badge-outline font-mono text-[10px]">Personal v3.0</div>
                 </span>
             </div>
             <div class="flex-none gap-2">
@@ -78,101 +78,76 @@
         <div class="container mx-auto p-4 lg:p-6">
             
             <div id="tab-dashboard" class="tab-content-item">
-                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
                     <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3">
-                        <div class="stat-title text-[11px] text-gray-400">งูทั้งหมดในคลัง</div>
+                        <div class="stat-title text-[11px] text-gray-400">งูในความดูแลทั้งหมด</div>
                         <div class="stat-value text-xl text-primary" id="d_total">0</div>
                     </div>
                     <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3">
-                        <div class="stat-title text-[11px] text-gray-400 text-success">มูลค่าสินทรัพย์รวม</div>
-                        <div class="stat-value text-lg text-success" id="d_value">0 ฿</div>
-                    </div>
-                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3">
-                        <div class="stat-title text-[11px] text-gray-400 text-error">รายจ่ายสะสมฟาร์ม</div>
-                        <div class="stat-value text-lg text-error" id="d_expenses">0 ฿</div>
-                    </div>
-                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3">
-                        <div class="stat-title text-[11px] text-gray-400 text-warning">ต้องให้อาหารวันนี้</div>
+                        <div class="stat-title text-[11px] text-warning font-semibold">🍖 ต้องให้อาหารวันนี้</div>
                         <div class="stat-value text-xl text-warning" id="d_feed">0</div>
                     </div>
                     <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3">
-                        <div class="stat-title text-[11px] text-gray-400 text-secondary">เพศ ผู้ / เมีย</div>
-                        <div class="stat-value text-base" id="d_gender">0 / 0</div>
+                        <div class="stat-title text-[11px] text-secondary font-semibold">🌌 กำลังลอกคราบ</div>
+                        <div class="stat-value text-xl text-secondary" id="d_shed">0</div>
                     </div>
                     <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3">
-                        <div class="stat-title text-[11px] text-gray-400 text-info">จำหน่ายแล้ว/ตาย</div>
-                        <div class="stat-value text-base text-gray-500" id="d_status_stats">0 / 0</div>
+                        <div class="stat-title text-[11px] text-info">ต้องชั่งน้ำหนัก</div>
+                        <div class="stat-value text-xl text-info" id="d_weight">0</div>
+                    </div>
+                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3">
+                        <div class="stat-title text-[11px] text-error">ต้องรับยารักษา</div>
+                        <div class="stat-value text-xl text-error" id="d_med">0</div>
+                    </div>
+                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3">
+                        <div class="stat-title text-[11px] text-emerald-400">🥚 ไข่กำลังฟัก</div>
+                        <div class="stat-value text-xl text-emerald-400" id="d_eggs">0</div>
                     </div>
                 </div>
 
                 <div class="card bg-gradient-to-br from-neutral to-base-100 border border-primary/20 shadow-xl mb-6">
                     <div class="card-body p-4">
                         <h3 class="card-title text-xs lg:text-sm text-primary flex items-center gap-2">
-                            <i class="fa-solid fa-brain animate-pulse text-secondary"></i> AI Farm Analytics Engine (ระบบประมวลผลปัญญาประดิษฐ์)
+                            <i class="fa-solid fa-brain animate-pulse text-secondary"></i> AI Keeper Engine (วิเคราะห์วงรอบการเจริญเติบโตอัตโนมัติ)
                         </h3>
-                        <div class="text-xs text-gray-300 space-y-1 mt-2" id="aiInsights">
-                            <p>🤖 กำลังคำนวณสถิติสุขภาพ อัตราความชื้นเฉลี่ย และพยากรณ์รอบการเข้าคราบถัดไป...</p>
+                        <div class="text-xs text-gray-300 space-y-1.5 mt-2" id="aiInsights">
+                            <p>🤖 ระบบกำลังประมวลผลตารางมื้ออาหารล่าสุด สถิติน้ำหนักสะสม และสัญญานเตือนสุขภาพตัวงู...</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div id="tab-snakes" class="tab-content-item hidden">
-                <div class="bg-base-100 p-4 rounded-xl shadow mb-6 border border-base-200 grid grid-cols-1 md:grid-cols-4 gap-3">
-                    <input type="text" id="searchBar" oninput="filterSnakes()" placeholder="🔍 ค้นหา ชื่อ, รหัส, Morph, พิกัด Rack/Box/Microchip..." class="input input-bordered w-full text-xs lg:text-sm" />
+                <div class="bg-base-100 p-4 rounded-xl shadow mb-6 border border-base-200 grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <input type="text" id="searchBar" oninput="filterSnakes()" placeholder="🔍 ค้นหาด้วย ชื่อ, รหัส, Morph, หรือพิกัดกล่องเลี้ยง (Rack/Box)..." class="input input-bordered w-full text-xs lg:text-sm shadow-inner" />
                     <select id="filterSelect" onchange="filterSnakes()" class="select select-bordered w-full text-xs lg:text-sm">
-                        <option value="all">ตัวกรอง: ทั้งหมด</option>
-                        <option value="ผู้ (1.0)">เพศ: ตัวผู้ (1.0)</option>
-                        <option value="เมีย (0.1)">เพศ: ตัวเมีย (0.1)</option>
+                        <option value="all">กรองสถานะ: ทั้งหมด</option>
+                        <option value="เลี้ยงปกติ">สถานะ: เลี้ยงปกติ</option>
                         <option value="กำลังลอกคราบ">สถานะ: เข้าคราบ/เรดอาย</option>
-                        <option value="ขายแล้ว">สถานะ: จำหน่ายแล้ว</option>
+                        <option value="ขายแล้ว">สถานะ: จำหน่ายออกแล้ว</option>
                         <option value="ตาย">สถานะ: ตาย</option>
                     </select>
                     <select id="sortSelect" onchange="filterSnakes()" class="select select-bordered w-full text-xs lg:text-sm">
-                        <option value="newest">เรียงลำดับ: บันทึกล่าสุด</option>
-                        <option value="weight">เรียงลำดับ: น้ำหนักสูงสุด</option>
-                        <option value="price">เรียงลำดับ: ราคาทุนสูงสุด</option>
+                        <option value="newest">เรียงลำดับ: เพิ่มสมาชิกล่าสุด</option>
+                        <option value="weight">เรียงลำดับ: น้ำหนัก (มาก - น้อย)</option>
+                        <option value="code">เรียงลำดับ: เรียงตามรหัสงู</option>
                     </select>
-                    <button onclick="exportData()" class="btn btn-success text-xs h-full"><i class="fa-solid fa-file-excel"></i> Export Report</button>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="snakeGrid"></div>
             </div>
 
             <div id="tab-calendar" class="tab-content-item hidden">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="card bg-base-100 p-4 shadow border border-base-200 lg:col-span-2">
-                        <h3 class="font-bold text-sm mb-3 text-primary flex items-center gap-2"><i class="fa-solid fa-calendar-days"></i> ปฏิทินงานกิจกรรมฟาร์มย่อย</h3>
-                        <div id="calendar"></div>
-                    </div>
-                    
-                    <div class="card bg-base-100 p-4 shadow border border-base-200">
-                        <h3 class="font-bold text-sm mb-3 text-error"><i class="fa-solid fa-receipt"></i> บันทึกบัญชีการเงินฟาร์ม (Finance Accounts)</h3>
-                        <form id="financeForm" onsubmit="addExpense(event)" class="space-y-3 text-xs">
-                            <input type="text" id="f_title" placeholder="รายละเอียดรายการบัญชี เช่น ซื้อหนูไมซ์, ขายลูกงู" required class="input input-bordered input-sm w-full" />
-                            <input type="number" id="f_amount" placeholder="จำนวนเงินรวม (บาท)" required class="input input-bordered input-sm w-full" />
-                            <select id="f_flow" class="select select-bordered select-sm w-full">
-                                <option value="รายจ่าย">ประเภท: รายจ่าย (Expense)</option>
-                                <option value="รายรับ">ประเภท: รายรับ (Income)</option>
-                            </select>
-                            <select id="f_type" class="select select-bordered select-sm w-full">
-                                <option value="ค่าอาหาร">หมวดหมู่: ค่าอาหาร</option>
-                                <option value="ค่ายา/สัตวแพทย์">หมวดหมู่: ค่ายา/สัตวแพทย์</option>
-                                <option value="ค่าไฟ/อุปกรณ์">หมวดหมู่: ค่าไฟ/วัสดุอุปกรณ์</option>
-                                <option value="ขายงู/มัดจำ">หมวดหมู่: รายได้ขายงู/ค่ามัดจำ</option>
-                            </select>
-                            <button type="submit" class="btn btn-sm btn-primary w-full">บันทึกลงสมุดบัญชี</button>
-                        </form>
-                        <div class="divider my-2"></div>
-                        <div class="overflow-y-auto max-h-52 text-[11px] space-y-1" id="expenseList"></div>
-                    </div>
+                <div class="card bg-base-100 p-4 shadow border border-base-200">
+                    <h3 class="font-bold text-sm mb-3 text-primary flex items-center gap-2"><i class="fa-solid fa-calendar-days"></i> ตารางกิจกรรมการให้อาหาร/ชั่งน้ำหนัก ประจำเดือน</h3>
+                    <div id="calendar"></div>
                 </div>
             </div>
 
         </div>
 
         <div class="fixed bottom-24 right-6 z-40">
-            <button onclick="openAddModal()" class="btn btn-primary btn-circle btn-lg shadow-2xl"><i class="fa-solid fa-plus text-xl"></i></button>
+            <button onclick="openAddModal()" class="btn btn-primary btn-circle btn-lg shadow-2xl hover:scale-105 transition-transform"><i class="fa-solid fa-plus text-xl"></i></button>
         </div>
 
         <div class="btm-nav border-t border-base-200 bg-base-100">
@@ -180,44 +155,42 @@
                 <i class="fa-solid fa-chart-line text-lg"></i><span class="text-xs">แดชบอร์ด</span>
             </button>
             <button onclick="switchTab('snakes')" id="nav-snakes">
-                <i class="fa-solid fa-snake text-lg"></i><span class="text-xs">สารบบงู</span>
+                <i class="fa-solid fa-snake text-lg"></i><span class="text-xs">รายการงู</span>
             </button>
             <button onclick="switchTab('calendar')" id="nav-calendar">
-                <i class="fa-solid fa-calendar-week text-lg"></i><span class="text-xs">ปฏิทิน & บัญชี</span>
+                <i class="fa-solid fa-calendar-week text-lg"></i><span class="text-xs">ปฏิทินงาน</span>
             </button>
         </div>
     </div>
 
     <dialog id="detailModal" class="modal">
-        <div class="modal-box max-w-4xl bg-base-100 shadow-xl" id="detailContent"></div>
+        <div class="modal-box max-w-4xl bg-base-100 shadow-2xl rounded-2xl p-4 lg:p-6" id="detailContent"></div>
     </dialog>
 
     <dialog id="snakeModal" class="modal">
-        <div class="modal-box max-w-2xl bg-base-100 shadow-xl">
-            <h3 class="font-bold text-lg mb-4 text-primary" id="modalTitle">ลงทะเบียนงูเข้าคลัง</h3>
+        <div class="modal-box max-w-2xl bg-base-100 shadow-2xl rounded-2xl">
+            <h3 class="font-bold text-lg mb-4 text-primary" id="modalTitle">ลงทะเบียนสมาชิกงูรายใหม่</h3>
             <form id="snakeForm" onsubmit="saveSnake(event)" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                 <input type="hidden" id="editSnakeId">
                 
-                <div class="form-control"><label class="label"><span class="label-text">รหัสงู/รหัสกล่อง</span></label><input type="text" id="s_code" required placeholder="เช่น BP-26-001" class="input input-bordered w-full" /></div>
-                <div class="form-control"><label class="label"><span class="label-text">ชื่อเรียก</span></label><input type="text" id="s_name" required placeholder="เช่น น้องนำโชค" class="input input-bordered w-full" /></div>
-                <div class="form-control"><label class="label"><span class="label-text">Morph พันธุกรรม</span></label><input type="text" id="s_morph" required placeholder="เช่น Ivory Spider y25" class="input input-bordered w-full" /></div>
-                <div class="form-control"><label class="label"><span class="label-text">เพศโครงสร้าง</span></label><select id="s_gender" class="select select-bordered w-full"><option value="ผู้ (1.0)">ตัวผู้ (1.0)</option><option value="เมีย (0.1)">ตัวเมีย (0.1)</option></select></div>
+                <div class="form-control"><label class="label"><span class="label-text">รหัสประจำตัวงู (Code)</span></label><input type="text" id="s_code" required placeholder="เช่น BP26-001" class="input input-bordered w-full shadow-inner" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">ชื่อเรียกเฉพาะตัว</span></label><input type="text" id="s_name" required placeholder="เช่น น้องสโนว์" class="input input-bordered w-full shadow-inner" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">Morph (พันธุกรรม/ยีนส์)</span></label><input type="text" id="s_morph" required placeholder="เช่น Axanthic Pastel" class="input input-bordered w-full shadow-inner" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">เพศโครงสร้าง</span></label><select id="s_gender" class="select select-bordered w-full"><option value="ผู้ (1.0)">ตัวผู้ (1.0)</option><option value="เมีย (0.1)">ตัวเมีย (0.1)</option><option value="ไม่ระบุ">ไม่ระบุเพศ</option></select></div>
                 
-                <div class="form-control"><label class="label"><span class="label-text">ตำแหน่งแร็ค (Rack)</span></label><input type="text" id="s_rack" placeholder="ตู้แร็ค A" class="input input-bordered w-full" /></div>
-                <div class="form-control"><label class="label"><span class="label-text">ชั้นเลี้ยง (Shelf)</span></label><input type="text" id="s_shelf" placeholder="ชั้นที่ 3" class="input input-bordered w-full" /></div>
-                <div class="form-control"><label class="label"><span class="label-text">หมายเลขกล่อง (Box No.)</span></label><input type="text" id="s_box" placeholder="กล่องที่ 12" class="input input-bordered w-full" /></div>
-                <div class="form-control"><label class="label"><span class="label-text">หมายเลขไมโครชิป (Microchip)</span></label><input type="text" id="s_chip" placeholder="9000XXXXXXXX" class="input input-bordered w-full" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">ตู้แร็คเลี้ยง (Rack)</span></label><input type="text" id="s_rack" placeholder="เช่น Rack A" class="input input-bordered w-full shadow-inner" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">ชั้นวางแร็ค (Shelf)</span></label><input type="text" id="s_shelf" placeholder="เช่น ชั้นที่ 4" class="input input-bordered w-full shadow-inner" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">หมายเลขกล่อง (Box)</span></label><input type="text" id="s_box" placeholder="เช่น Box 12" class="input input-bordered w-full shadow-inner" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">น้ำหนักเริ่มต้น (กรัม)</span></label><input type="number" step="0.1" id="s_weight" required class="input input-bordered w-full shadow-inner" /></div>
                 
-                <div class="form-control"><label class="label"><span class="label-text">น้ำหนักแรกรับ (กรัม)</span></label><input type="number" step="0.1" id="s_weight" required class="input input-bordered w-full" /></div>
-                <div class="form-control"><label class="label"><span class="label-text">ความยาวแรกรับ (ซม.)</span></label><input type="number" step="0.1" id="s_length" class="input input-bordered w-full" /></div>
-                <div class="form-control"><label class="label"><span class="label-text">วันเกิด/วันฟักไข่</span></label><input type="date" id="s_birth" class="input input-bordered w-full" /></div>
-                <div class="form-control"><label class="label"><span class="label-text">วันที่รับเข้าฟาร์ม</span></label><input type="date" id="s_buy" class="input input-bordered w-full" /></div>
-                <div class="form-control"><label class="label"><span class="label-text">ต้นทุนราคาซื้อ (บาท)</span></label><input type="number" id="s_price" class="input input-bordered w-full" /></div>
-                <div class="form-control"><label class="label"><span class="label-text">ราคาจำหน่ายออก (บาท)</span></label><input type="number" id="s_sale_price" placeholder="ระบุหากขายออกแล้ว" class="input input-bordered w-full" /></div>
-                <div class="form-control"><label class="label"><span class="label-text">แหล่งที่มา/บรีดเดอร์</span></label><input type="text" id="s_source" class="input input-bordered w-full" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">ความยาวลำตัวเริ่มต้น (ซม.)</span></label><input type="number" step="0.1" id="s_length" class="input input-bordered w-full shadow-inner" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">วันเกิด / วันฟักออกจากไข่</span></label><input type="date" id="s_birth" class="input input-bordered w-full shadow-inner" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">วันที่รับงูเข้าบ้าน</span></label><input type="date" id="s_buy" class="input input-bordered w-full shadow-inner" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">ราคาซื้อเริ่มต้น (บาท)</span></label><input type="number" id="s_price" class="input input-bordered w-full shadow-inner" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">แหล่งที่มา / ชื่อผู้เพาะพันธุ์</span></label><input type="text" id="s_source" class="input input-bordered w-full shadow-inner" /></div>
                 
                 <div class="form-control">
-                    <label class="label"><span class="label-text">สถานะงูหลัก</span></label>
+                    <label class="label"><span class="label-text">สถานะปัจจุบัน</span></label>
                     <select id="s_status" class="select select-bordered w-full">
                         <option value="เลี้ยงปกติ">เลี้ยงปกติ</option>
                         <option value="กำลังลอกคราบ">กำลังลอกคราบ</option>
@@ -225,20 +198,19 @@
                         <option value="ตาย">ตาย</option>
                     </select>
                 </div>
-                
-                <div class="form-control"><label class="label"><span class="label-text">รหัสพ่อพันธุ์ (Sire Code)</span></label><input type="text" id="s_sire" placeholder="เช่น Sire-BP01" class="input input-bordered w-full" /></div>
-                <div class="form-control"><label class="label"><span class="label-text">รหัสแม่พันธุ์ (Dam Code)</span></label><input type="text" id="s_dam" placeholder="เช่น Dam-BP02" class="input input-bordered w-full" /></div>
 
-                <div class="form-control md:col-span-2"><label class="label"><span class="label-text">ลิงก์รูปภาพ (หากมีหลายรูปให้ใช้เครื่องหมายจุลภาค , คั่นลิงก์รูป)</span></label><input type="text" id="s_images" required placeholder="https://image1.jpg, https://image2.jpg" class="input input-bordered w-full" /></div>
-                <div class="form-control md:col-span-2"><label class="label"><span class="label-text">หมายเหตุการพยาบาล</span></label><textarea id="s_note" placeholder="ข้อมูลทางสุขภาพ การกิน หรือประวัติสายเลือดเพิ่มเติม..." class="textarea textarea-bordered w-full h-16"></textarea></div>
+                <div class="form-control md:col-span-2"><label class="label"><span class="label-text">ลิงก์คลังรูปภาพ (หากมีหลายรูปภาพ ให้คั่นด้วยเครื่องหมายจุลภาค , )</span></label><input type="text" id="s_images" required placeholder="https://domain.com/img1.png, https://domain.com/img2.png" class="input input-bordered w-full shadow-inner" /></div>
+                <div class="form-control md:col-span-2"><label class="label"><span class="label-text">หมายเหตุรายละเอียดตำหนิ/ข้อมูลเพิ่มเติม</span></label><textarea id="s_note" placeholder="รายละเอียดอื่นๆ ข้อมูลประวัติวัคซีน..." class="textarea textarea-bordered w-full h-16 shadow-inner"></textarea></div>
                 
                 <div class="md:col-span-2 flex gap-2 mt-2">
-                    <button type="submit" class="btn btn-primary flex-1">บันทึกข้อมูลหลัก</button>
+                    <button type="submit" class="btn btn-primary flex-1 font-bold">บันทึกพิกัดข้อมููลงู</button>
                     <button type="button" onclick="snakeModal.close()" class="btn btn-ghost">ปิดหน้าต่าง</button>
                 </div>
             </form>
         </div>
     </dialog>
+
+    <div id="toastContainer" class="toast toast-top toast-end z-50"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
@@ -266,10 +238,9 @@
         let cachedExpenses = [];
         let calendarObj = null;
         let activeSubcollectionUnsubscribe = null;
-        let weightChartInstance = null;
-        let userRoleValue = "Admin";
+        let weightChartInstance = null; // ป้องกันการสร้างกราฟทับซ้อนต้นเหตุของบั๊กจอเด้ง
 
-        // == THEME MANAGEMENT ==
+        // == การจัดการระบบ THEME MEMORY ==
         let currentTheme = localStorage.getItem('theme') || 'dark';
         document.documentElement.setAttribute('data-theme', currentTheme);
         
@@ -280,7 +251,7 @@
             document.getElementById('themeBtn').innerHTML = currentTheme === 'dark' ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
         };
 
-        // == CORE TAB SYSTEM ==
+        // == สลับการแสดงผลหน้าเพจหลัก (MAIN NAV SYSTEM) ==
         window.switchTab = (tabName) => {
             document.querySelectorAll('.tab-content-item').forEach(el => el.classList.add('hidden'));
             document.getElementById(`tab-${tabName}`).classList.remove('hidden');
@@ -289,7 +260,7 @@
             if(tabName === 'calendar' && calendarObj) { calendarObj.render(); }
         };
 
-        // == AUTH MANAGEMENT ==
+        // == ตรวจสอบสถานะความปลอดภัยผู้ใช้งาน (AUTH STATE) ==
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
@@ -305,17 +276,16 @@
         });
 
         window.loginUser = async () => {
-            userRoleValue = document.getElementById('userRole').value;
             try { await signInWithEmailAndPassword(auth, email.value, password.value); } 
-            catch(err) { document.getElementById('authMessage').innerText = "ข้อมูลยืนยันอีเมล/รหัสผ่านฟาร์มไม่ถูกต้อง"; }
+            catch(err) { document.getElementById('authMessage').innerText = "อีเมลหรือรหัสผ่านระบบจัดเก็บข้อมูลไม่ถูกต้อง"; }
         };
         window.registerUser = async () => {
-            try { await createUserWithEmailAndPassword(auth, email.value, password.value); alert('ลงทะเบียนบัญชีฟาร์มสำเร็จ'); } 
+            try { await createUserWithEmailAndPassword(auth, email.value, password.value); alert('เปิดฟาร์มระบบออนไลน์ส่วนตัวสำเร็จ!'); } 
             catch(err) { document.getElementById('authMessage').innerText = err.message; }
         };
         window.logoutUser = () => signOut(auth);
 
-        // == CALENDAR CORE ==
+        // == เริ่มต้นระบบปฏิทินงานภายในฟาร์ม ==
         function initCalendar() {
             const calendarEl = document.getElementById('calendar');
             calendarObj = new FullCalendar.Calendar(calendarEl, {
@@ -327,7 +297,7 @@
             calendarObj.render();
         }
 
-        // == DYNAMIC DATA SYNC ==
+        // == ซิงค์เชื่อมต่อฐานข้อมูลระดับบัญชีผู้ใช้จริง (REALTIME CLOUD SYNC) ==
         function listenToData() {
             const qSnakes = query(collection(db, "snakes"), where("uid", "==", currentUser.uid));
             onSnapshot(qSnakes, (snapshot) => {
@@ -341,75 +311,62 @@
             onSnapshot(qExpense, (snapshot) => {
                 cachedExpenses = [];
                 let totalExp = 0;
-                let totalInc = 0;
                 const expBox = document.getElementById('expenseList');
-                expBox.innerHTML = "";
+                if(expBox) expBox.innerHTML = "";
                 
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     cachedExpenses.push(data);
-                    if(data.flow === "รายรับ") {
-                        totalInc += data.amount;
-                        expBox.innerHTML += `<div class="flex justify-between bg-base-200 p-1.5 rounded mb-1 text-success"><span>🟢 ${data.title}</span><span>+${data.amount} ฿</span></div>`;
-                    } else {
-                        totalExp += data.amount;
-                        expBox.innerHTML += `<div class="flex justify-between bg-base-200 p-1.5 rounded mb-1 text-error"><span>🔴 ${data.title}</span><span>-${data.amount} ฿</span></div>`;
-                    }
+                    totalExp += data.amount;
+                    if(expBox) expBox.innerHTML += `<div class="flex justify-between bg-base-200 p-1.5 rounded mb-1"><span>${data.title}</span><span class="text-error font-bold">-${data.amount} ฿</span></div>`;
                 });
-                document.getElementById('d_expenses').innerText = `${totalExp.toLocaleString()} ฿`;
+                const dExpEl = document.getElementById('d_expenses');
+                if(dExpEl) dExpEl.innerText = `${totalExp.toLocaleString()} ฿`;
             });
         }
 
-        // == AI ENGINE CRADLE ==
+        // == ENGINE วิเคราะห์สุขภาพของปัญญาประดิษฐ์ (AI LOGIC) ==
         function runAIAnalysis() {
             const insightBox = document.getElementById('aiInsights');
             if (cachedSnakes.length === 0) {
-                insightBox.innerHTML = "<p>⚠️ คลังสารบบว่างเปล่า เพิ่มข้อมูลงูหลักเพื่อเริ่มต้นประมวลผลคำนวณวงรอบ</p>";
+                insightBox.innerHTML = "<p>⚠️ สารบบคลังข้อมูลว่างเปล่า กรุณาลงทะเบียนข้อมููลงูหลักอย่างน้อย 1 ตัวเพื่อเปิดระบบพยากรณ์</p>";
                 return;
             }
             let html = "";
             let redEye = cachedSnakes.filter(s => s.status === "กำลังลอกคราบ");
             if (redEye.length > 0) {
-                html += `<p class="text-warning">🔮 <span class="font-bold">AI การลอกคราบ & สุขภาพ:</span> พบงู ${redEye.length} ตัวกำลังอยู่ในช่วงเตรียมตัวลอกคราบ (เรดอาย) แนะนำให้ปรับแต่งความชื้นแร็คเลี้ยงเพิ่ม 10% เพื่อลดปัญหาวงรอบคราบติดขัด</p>`;
+                html += `<p class="text-warning">🔮 <span class="font-bold">AI คาดการณ์การลอกคราบ:</span> ตรวจพบว่างูจำนวน ${redEye.length} ตัวกำลังอยู่ในสภาวะเตรียมการลอกผิวหนัง (เข้าตาฟ้า) แนะนำให้เพิ่มวัสดุอับความชื้นภายในกล่องแร็คเลี้ยงทันที</p>`;
             } else {
-                html += `<p class="text-success">✨ <span class="font-bold">AI Growth Diagnostic:</span> ทุกรายการในฟาร์มมีดัชนีชี้วัดน้ำหนักคงที่ ไม่พบสัญญาณอันตรายหรืออาการเบื่ออาหาร</p>`;
+                html += `<p class="text-success">✨ <span class="font-bold">AI Keeper Diagnostic:</span> ดัชนีความเจริญเติบโตปกติ ไม่พบประวัติการอ้วกหรือปฏิเสธเหยื่อเกิน 3 มื้อติดต่อกัน</p>`;
             }
             insightBox.innerHTML = html;
         }
 
-        // == RENDER APPLICATION GRID ==
+        // == เรนเดอร์การ์ดข้อมูลลงหน้ารายการ (UI RENDER ENGINE) ==
         function renderUI() {
             document.getElementById('d_total').innerText = cachedSnakes.length;
             let totalValue = cachedSnakes.reduce((sum, s) => sum + (s.price || 0), 0);
             document.getElementById('d_value').innerText = `${totalValue.toLocaleString()} ฿`;
             document.getElementById('d_shed').innerText = cachedSnakes.filter(s => s.status === "กำลังลอกคราบ").length;
-            
-            let males = cachedSnakes.filter(s => s.gender.includes("ผู้")).length;
-            let females = cachedSnakes.filter(s => s.gender.includes("เมีย")).length;
-            document.getElementById('d_gender').innerText = `${males} ผู้ / ${females} เมีย`;
-
-            let soldCount = cachedSnakes.filter(s => s.status === "ขายแล้ว").length;
-            let deadCount = cachedSnakes.filter(s => s.status === "ตาย").length;
-            document.getElementById('d_status_stats').innerText = `${soldCount} / ${deadCount}`;
+            document.getElementById('d_feed').innerText = cachedSnakes.filter(s => s.status === "เลี้ยงปกติ").length;
 
             const grid = document.getElementById('snakeGrid');
             grid.innerHTML = "";
             
             cachedSnakes.forEach(s => {
                 const div = document.createElement('div');
-                div.className = "card bg-base-100 shadow-xl border border-base-200 overflow-hidden";
+                div.className = "card bg-base-100 shadow-xl border border-base-200 overflow-hidden hover:scale-[1.01] transition-transform";
                 div.innerHTML = `
                     <figure class="h-44 bg-neutral relative">
-                        <img src="${s.images[0]}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/400x200?text=No+Image+Available'">
-                        <div class="absolute top-2 left-2 badge badge-neutral bg-black/70 font-mono text-xs">${s.code}</div>
+                        <img src="${s.images[0]}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/400x200?text=No+Image'">
+                        <div class="absolute top-2 left-2 badge badge-neutral bg-black/70 font-mono">${s.code}</div>
                         <div class="absolute bottom-2 right-2 text-[10px] bg-primary text-white p-1 rounded font-bold">📍 R:${s.rack || '-'} B:${s.box || '-'}</div>
                     </figure>
                     <div class="card-body p-4 gap-1 text-xs">
-                        <h3 class="card-title text-sm lg:text-base font-bold">${s.name}</h3>
-                        <p class="text-primary font-bold text-[11px]">${s.morph} (${s.gender})</p>
+                        <h3 class="card-title text-base font-bold text-base-content">${s.name}</h3>
+                        <p class="text-primary font-bold">${s.morph} (${s.gender})</p>
                         <div class="divider my-1"></div>
                         <p class="text-gray-400"><i class="fa-solid fa-weight-scale"></i> น้ำหนักปัจจุบัน: <b class="text-base-content">${s.weight} g</b></p>
-                        <p class="text-gray-400"><i class="fa-solid fa-microchip"></i> ชิป: <span class="font-mono">${s.chip || '-'}</span></p>
                         <div class="card-actions justify-end mt-2">
                             <button onclick="viewDetail('${s.id}')" class="btn btn-xs btn-primary font-bold"><i class="fa-solid fa-folder-open"></i> เปิดแฟ้มประวัติเชิงลึก</button>
                         </div>
@@ -419,22 +376,7 @@
             });
         }
 
-        // == FINANCE FLOW ==
-        window.addExpense = async (e) => {
-            e.preventDefault();
-            const data = {
-                uid: currentUser.uid,
-                title: f_title.value,
-                amount: parseFloat(f_amount.value),
-                type: f_type.value,
-                flow: f_flow.value,
-                createdAt: Date.now()
-            };
-            await addDoc(collection(db, "finance"), data);
-            document.getElementById('financeForm').reset();
-        };
-
-        // == INTERFACE ENGINE FOR DATA PERSISTENCE ==
+        // == เซฟหรือแก้ไขข้อมูลหลักโครงสร้างงูลง CLOUD ==
         window.saveSnake = async (e) => {
             e.preventDefault();
             const id = document.getElementById('editSnakeId').value;
@@ -449,26 +391,21 @@
                 rack: document.getElementById('s_rack').value,
                 shelf: document.getElementById('s_shelf').value,
                 box: document.getElementById('s_box').value,
-                chip: document.getElementById('s_chip').value,
                 weight: parseFloat(s_weight.value),
                 length: parseFloat(s_length.value) || 0,
                 birthDate: s_birth.value,
                 buyDate: s_buy.value,
                 price: parseFloat(s_price.value) || 0,
-                salePrice: parseFloat(document.getElementById('s_sale_price').value) || 0,
                 source: s_source.value,
                 status: s_status.value,
-                sire: document.getElementById('s_sire').value,
-                dam: document.getElementById('s_dam').value,
                 images: imgArray,
                 note: s_note.value,
-                updatedAt: Date.now(),
-                lastEditor: currentUser.email
+                updatedAt: Date.now()
             };
 
             if (id) {
                 await updateDoc(doc(db, "snakes", id), data);
-                detailModal.close();
+                detailModal.close(); // ปิด Modal หลังแก้ไขเสร็จ
             } else {
                 data.createdAt = Date.now();
                 await addDoc(collection(db, "snakes"), data);
@@ -479,11 +416,21 @@
         window.openAddModal = () => {
             document.getElementById('snakeForm').reset();
             document.getElementById('editSnakeId').value = "";
-            document.getElementById('modalTitle').innerText = "ลงทะเบียนงูเข้าคลังสินค้าหลัก";
+            document.getElementById('modalTitle').innerText = "ลงทะเบียนงูเข้าคลังเลี้ยงระบบส่วนตัว";
             snakeModal.showModal();
         };
 
-        window.triggerEditMainSnake = (id) => {
+        // ฟังก์ชันช่วยสลับหน้าแท็บประวัติย่อยภายในตัวงู โดยไม่ทำให้หน้าจอเด้งเลื่อนขึ้น
+        window.switchDetailTab = (tabId) => {
+            document.querySelectorAll('.sub-tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.detail-tab-btn').forEach(el => el.classList.remove('tab-active', 'text-primary'));
+            
+            document.getElementById(`sub-tab-${tabId}`).classList.remove('hidden');
+            document.getElementById(`btn-tab-${tabId}`).classList.add('tab-active', 'text-primary');
+        };
+
+        // เปิดแบบฟอร์มแก้ไขประวัติโครงสร้างแกนหลักจากหน้ารายละเอียดเชิงลึก
+        window.triggerEditFromDetail = (id) => {
             const s = cachedSnakes.find(item => item.id === id);
             if(!s) return;
             
@@ -495,138 +442,149 @@
             document.getElementById('s_rack').value = s.rack || "";
             document.getElementById('s_shelf').value = s.shelf || "";
             document.getElementById('s_box').value = s.box || "";
-            document.getElementById('s_chip').value = s.chip || "";
             document.getElementById('s_weight').value = s.weight;
             document.getElementById('s_length').value = s.length || 0;
             document.getElementById('s_birth').value = s.birthDate || "";
             document.getElementById('s_buy').value = s.buyDate || "";
             document.getElementById('s_price').value = s.price || 0;
-            document.getElementById('s_sale_price').value = s.salePrice || 0;
             document.getElementById('s_source').value = s.source || "";
             document.getElementById('s_status').value = s.status;
-            document.getElementById('s_sire').value = s.sire || "";
-            document.getElementById('s_dam').value = s.dam || "";
             document.getElementById('s_images').value = s.images.join(', ');
             document.getElementById('s_note').value = s.note || "";
             
-            document.getElementById('modalTitle').innerText = "แก้ไขแฟ้มประวัติโครงสร้างหลัก";
+            document.getElementById('modalTitle').innerText = "แก้ไขข้อมูลพื้นฐาน";
             snakeModal.showModal();
         };
 
         // ========================================================
-        // 📂 DEEP DYNAMIC MODAL BOX VIEW (SCROLL & CHART INTEGRATED)
+        // 📂 แฟ้มแท็บข้อมูลทะเบียนประวัติเชิงลึก (SUBCOLLECTIONS REALTIME DIALOG)
         // ========================================================
         window.viewDetail = async (id) => {
             const s = cachedSnakes.find(item => item.id === id);
             if(!s) return;
 
+            // เคลียร์ทิ้งหน่วยการเชื่อมต่อเก่าเพื่อเสถียรภาพพื้นที่จัดเก็บ
             if(activeSubcollectionUnsubscribe) activeSubcollectionUnsubscribe();
 
             const content = document.getElementById('detailContent');
             content.innerHTML = `
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-4 border-b border-base-200 pb-2">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-4 border-b border-base-200 pb-3">
                     <div>
-                        <h2 class="text-base lg:text-lg font-bold text-primary flex items-center gap-2"><i class="fa-solid fa-box-archive"></i> ทะเบียนฟาร์ม: ${s.name} [${s.code}]</h2>
-                        <p class="text-[11px] text-gray-400">แก้ไขล่าสุดโดย: ${s.lastEditor || 'System'} เมื่อ ${s.updatedAt ? new Date(s.updatedAt).toLocaleString() : '-'}</p>
+                        <h2 class="text-base lg:text-lg font-bold text-primary flex items-center gap-2"><i class="fa-solid fa-address-card"></i> แฟ้มทะเบียนประวัติ: ${s.name} [${s.code}]</h2>
+                        <p class="text-[10px] text-gray-500">พิกัดสถานที่กล่อง: แร็ค ${s.rack || '-'} / ชั้น ${s.shelf || '-'} / กล่องที่ ${s.box || '-'}</p>
                     </div>
-                    <button onclick="triggerEditMainSnake('${s.id}')" class="btn btn-sm btn-warning btn-outline text-xs"><i class="fa-solid fa-pen-to-square"></i> แก้ไขข้อมูลโครงสร้างหลัก</button>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-[11px] mb-4">
-                    <div class="bg-base-200 p-3 rounded-xl space-y-1">
-                        <p class="font-bold text-primary border-b border-base-300 pb-1">🧬ข้อมูลจำเพาะพันธุกรรม</p>
-                        <p><span class="text-gray-400">Morph พันธุ์:</span> ${s.morph}</p>
-                        <p><span class="text-gray-400">เพศโครงสร้าง:</span> ${s.gender}</p>
-                        <p><span class="text-gray-400">ความยาวลำตัว:</span> ${s.length || '-'} ซม.</p>
-                        <p><span class="text-gray-400">หมายเลขชิป:</span> ${s.chip || '-'}</p>
-                    </div>
-                    <div class="bg-base-200 p-3 rounded-xl space-y-1">
-                        <p class="font-bold text-secondary border-b border-base-300 pb-1">📍 พิกัดตำแหน่งแร็คฟาร์ม</p>
-                        <p><span class="text-gray-400">ตู้แร็ค (Rack):</span> ${s.rack || '-'}</p>
-                        <p><span class="text-gray-400">ชั้นวาง (Shelf):</span> ${s.shelf || '-'}</p>
-                        <p><span class="text-gray-400">หมายเลขกล่อง (Box):</span> ${s.box || '-'}</p>
-                        <p><span class="text-gray-400">บรีดเดอร์ต้นทาง:</span> ${s.source || '-'}</p>
-                    </div>
-                    <div class="bg-base-200 p-3 rounded-xl space-y-1">
-                        <p class="font-bold text-info border-b border-base-300 pb-1">🌳 สายเลือดแผนผัง (Family Tree)</p>
-                        <p><span class="text-gray-400">รหัสพ่อ (Sire):</span> <span class="badge badge-xs badge-info">${s.sire || 'ไม่ระบุ'}</span></p>
-                        <p><span class="text-gray-400">รหัสแม่ (Dam):</span> <span class="badge badge-xs badge-secondary">${s.dam || 'ไม่ระบุ'}</span></p>
-                        <p><span class="text-gray-400">ต้นทุนซื้อ:</span> ${s.price ? s.price.toLocaleString() : 0} ฿</p>
-                        <p><span class="text-gray-400">ราคาขายออก:</span> ${s.salePrice ? s.salePrice.toLocaleString() : 0} ฿</p>
-                    </div>
+                    <button onclick="triggerEditFromDetail('${s.id}')" class="btn btn-xs btn-warning btn-outline font-bold"><i class="fa-solid fa-user-pen"></i> แก้ไขข้อมูลหลัก</button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center bg-base-200 p-3 rounded-xl mb-4 text-[11px]">
-                    <div class="md:col-span-3">
-                        <p class="font-bold mb-1 text-success"><i class="fa-solid fa-chart-line"></i> กราฟเส้นพัฒนาการแสดงสถิติน้ำหนักสะสม (Growth Rate Chart)</p>
-                        <div class="h-32 bg-base-100 rounded-lg p-1"><canvas id="nestedWeightChart"></canvas></div>
-                    </div>
-                    <div class="flex flex-col items-center justify-center bg-white p-2 rounded-xl text-black">
-                        <div id="qrCanvas"></div>
-                        <span class="text-[9px] font-bold mt-1 text-center text-gray-500">QR ติดหน้ากล่องเลี้ยง</span>
-                    </div>
+                <div class="tabs tabs-boxed mb-4 text-xs bg-base-200 p-1 flex flex-wrap gap-1">
+                    <button onclick="switchDetailTab('info')" id="btn-tab-info" class="detail-tab-btn tab tab-sm tab-active text-primary font-bold">ข้อมูลทั่วไป</button>
+                    <button onclick="switchDetailTab('feed')" id="btn-tab-feed" class="detail-tab-btn tab tab-sm font-bold">🍖 อาหาร</button>
+                    <button onclick="switchDetailTab('weight')" id="btn-tab-weight" class="detail-tab-btn tab tab-sm font-bold">⚖️ น้ำหนัก</button>
+                    <button onclick="switchDetailTab('shed')" id="btn-tab-shed" class="detail-tab-btn tab tab-sm font-bold">🐍 ลอกคราบ</button>
+                    <button onclick="switchDetailTab('poop')" id="btn-tab-poop" class="detail-tab-btn tab tab-sm font-bold">💩 ขับถ่าย</button>
+                    <button onclick="switchDetailTab('med')" id="btn-tab-med" class="detail-tab-btn tab tab-sm font-bold">💊 รักษา</button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                    <div class="bg-base-200 p-3 rounded-xl">
-                        <h4 class="font-bold text-[11px] mb-2 text-primary flex justify-between">
-                            <span>📊 ประวัติน้ำหนักย่อย (weightHistory)</span>
-                            <span id="weightStats" class="text-gray-400 text-[10px]"></span>
-                        </h4>
-                        <div class="flex gap-1.5 mb-2">
-                            <input type="number" id="sub_w_val" placeholder="กรัม" class="input input-bordered input-xs w-full" />
-                            <input type="number" id="sub_w_len" placeholder="ซม." class="input input-bordered input-xs w-full" />
-                            <button onclick="addSubWeight('${s.id}')" class="btn btn-xs btn-primary px-3">บันทึก</button>
+                <div id="sub-tab-info" class="sub-tab-content text-xs space-y-3">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="bg-base-200 p-3 rounded-xl"><span class="text-gray-400 block mb-0.5">สายพันธุ์ / ยีนส์ Morph:</span><b>${s.morph}</b></div>
+                        <div class="bg-base-200 p-3 rounded-xl"><span class="text-gray-400 block mb-0.5">เพศโครงสร้างพันธุกรรม:</span><b>${s.gender}</b></div>
+                        <div class="bg-base-200 p-3 rounded-xl"><span class="text-gray-400 block mb-0.5">สถิติความยาวลำตัวล่าสุด:</span><b>${s.length || '-'} ซม.</b></div>
+                    </div>
+                    <div class="bg-base-200 p-3 rounded-xl"><span class="text-gray-400 block mb-1">คลังรูปภาพสไลด์สะสมประจำตัว:</span>
+                        <div class="flex gap-2 overflow-x-auto py-1">
+                            ${s.images.map(img => `<img src="${img}" onclick="window.open('${img}','_blank')" class="w-20 h-20 object-cover rounded-lg border border-base-300 shadow cursor-zoom-in" onerror="this.src='https://via.placeholder.com/100'">`).join('')}
                         </div>
-                        <div class="overflow-y-auto max-h-36 space-y-1" id="subWeightList"></div>
-                    </div>
-
-                    <div class="bg-base-200 p-3 rounded-xl">
-                        <h4 class="font-bold text-[11px] mb-2 text-warning"><i class="fa-solid fa-drumstick-bite"></i> มื้ออาหารสะสม (feedingHistory)</h4>
-                        <div class="flex flex-col gap-1.5 mb-2">
-                            <div class="flex gap-1">
-                                <input type="text" id="sub_f_item" placeholder="หนูแช่ M / ไมส์" class="input input-bordered input-xs w-full" />
-                                <input type="number" id="sub_f_wt" placeholder="น้ำหนักเหยื่อ (g)" class="input input-bordered input-xs w-full" />
-                            </div>
-                            <select id="sub_f_status" class="select select-bordered select-xs w-full">
-                                <option value="กิน">สถานะ: กินปกติ</option>
-                                <option value="ไม่กิน">สถานะ: ไม่ยอมกิน</option>
-                                <option value="อ้วก">สถานะ: อาเจียนเหยื่อออก (อ้วก)</option>
-                            </select>
-                            <button onclick="addSubFeed('${s.id}')" class="btn btn-xs btn-warning w-full font-bold">บันทึกการกินอาหาร</button>
-                        </div>
-                        <div class="overflow-y-auto max-h-32 space-y-1" id="subFeedList"></div>
                     </div>
                 </div>
 
-                <div class="modal-action mt-4 border-t border-base-200 pt-2">
-                    <button onclick="deleteMainSnake('${s.id}')" class="btn btn-xs btn-error btn-outline mr-auto"><i class="fa-solid fa-trash"></i> ลบงูตัวนี้ออกจากระบบถาวร</button>
+                <div id="sub-tab-feed" class="sub-tab-content hidden text-xs">
+                    <div class="bg-base-200 p-3 rounded-xl mb-3 grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
+                        <div><label class="label-text block mb-1">ชนิดอาหาร/เหยื่อ</label><input type="text" id="sub_f_item" placeholder="หนูแช่ M / ไมส์" class="input input-bordered input-xs w-full shadow-inner" /></div>
+                        <div><label class="label-text block mb-1">น้ำหนักเหยื่อ (g)</label><input type="number" id="sub_f_wt" placeholder="กรัม" class="input input-bordered input-xs w-full shadow-inner" /></div>
+                        <div><label class="label-text block mb-1">ผลการกิน</label>
+                            <select id="sub_f_status" class="select select-bordered select-xs w-full"><option value="กิน">กินปกติ</option><option value="ไม่กิน">ปฏิเสธมื้ออาหาร (ไม่กิน)</option><option value="อ้วก">ขย้อนเหยื่อออก (อ้วก)</option></select>
+                        </div>
+                        <button onclick="addSubFeed('${s.id}')" class="btn btn-xs btn-warning w-full font-bold col-span-1 md:col-span-3">+ บันทึกข้อมูลอาหารย่อย</button>
+                    </div>
+                    <div class="overflow-y-auto max-h-40 space-y-1" id="subFeedList"></div>
+                </div>
+
+                <div id="sub-tab-weight" class="sub-tab-content hidden text-xs">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-center mb-3">
+                        <div class="md:col-span-3 chart-container bg-base-200 p-2 rounded-xl border border-base-300">
+                            <canvas id="nestedWeightChart"></canvas>
+                        </div>
+                        <div class="bg-base-200 p-3 rounded-xl text-[10px] space-y-1 h-full flex flex-col justify-center shadow">
+                            <p class="font-bold text-success text-center border-b border-base-300 pb-1 mb-1">Growth Metrics</p>
+                            <span id="weightStats">กำลังสรุปค่าเฉลี่ยตัวเลขเติบโต...</span>
+                        </div>
+                    </div>
+                    <div class="bg-base-200 p-3 rounded-xl mb-3 flex gap-2">
+                        <input type="number" id="sub_w_val" placeholder="น้ำหนักกรัม" class="input input-bordered input-xs w-full shadow-inner" />
+                        <button onclick="addSubWeight('${s.id}')" class="btn btn-xs btn-primary font-bold px-4">อัปเดตน้ำหนัก</button>
+                    </div>
+                    <div class="overflow-y-auto max-h-32 space-y-1 shadow-inner" id="subWeightList"></div>
+                </div>
+
+                <div id="sub-tab-shed" class="sub-tab-content hidden text-xs">
+                    <div class="bg-base-200 p-3 rounded-xl mb-3 flex flex-col gap-2">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><label class="label-text">วันที่เข้าตาฟ้า/เรดไอ</label><input type="date" id="sub_sh_blue" class="input input-bordered input-xs w-full" /></div>
+                            <div><label class="label-text">วันที่คราบลอกหลุดจริง</label><input type="date" id="sub_sh_shed" class="input input-bordered input-xs w-full" /></div>
+                        </div>
+                        <select id="sub_sh_status" class="select select-bordered select-xs w-full"><option value="ลอกสมบูรณ์">ผลลัพธ์: ลอกสมบูรณ์ทั้งตัว</option><option value="ลอกไม่สมบูรณ์">ผลลัพธ์: คราบขาดติดขัด (ลอกไม่สุด)</option></select>
+                        <button onclick="addSubShed('${s.id}')" class="btn btn-xs btn-secondary font-bold">+ บันทึกประวัติลอกคราบย่อย</button>
+                    </div>
+                    <div class="overflow-y-auto max-h-40 space-y-1" id="subShedList"></div>
+                </div>
+
+                <div id="sub-tab-poop" class="sub-tab-content hidden text-xs">
+                    <div class="bg-base-200 p-3 rounded-xl mb-3 flex gap-2 items-end">
+                        <select id="sub_p_status" class="select select-bordered select-xs w-full"><option value="ปกติ">สถานะอึ: ปกติ</option><option value="เหลว">สถานะอึ: เหลว/ท้องเสีย</option><option value="แข็ง">สถานะอึ: แข็งผิดปกติ</option><option value="มีเลือด">สถานะอึ: ปนเลือดอันตราย</option></select>
+                        <button onclick="addSubPoop('${s.id}')" class="btn btn-xs btn-neutral font-bold">บันทึกขับถ่าย</button>
+                    </div>
+                    <div class="overflow-y-auto max-h-40 space-y-1" id="subPoopList"></div>
+                </div>
+
+                <div id="sub-tab-med" class="sub-tab-content hidden text-xs">
+                    <div class="bg-base-200 p-3 rounded-xl mb-3 flex flex-col gap-2">
+                        <input type="text" id="sub_m_symptom" placeholder="อาการป่วยภายนอก เช่น หายใจมีเสียง" class="input input-bordered input-xs w-full shadow-inner" />
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="sub_m_drug" placeholder="ชื่อตัวยา / วัคซีน" class="input input-bordered input-xs w-full shadow-inner" />
+                            <input type="number" id="sub_m_cost" placeholder="ค่าใช้จ่ายคลินิก (บาท)" class="input input-bordered input-xs w-full shadow-inner" />
+                        </div>
+                        <button onclick="addSubMedical('${s.id}')" class="btn btn-xs btn-error text-white font-bold">+ ลงบันทึกประวัติการพยาบาล</button>
+                    </div>
+                    <div class="overflow-y-auto max-h-40 space-y-1" id="subMedList"></div>
+                </div>
+
+                <div class="modal-action mt-4 border-t border-base-200 pt-2 flex justify-between">
+                    <button onclick="deleteMainSnake('${s.id}')" class="btn btn-xs btn-error btn-outline"><i class="fa-solid fa-trash"></i> ลบถาวร</button>
                     <button onclick="detailModal.close()" class="btn btn-sm btn-ghost">ปิดหน้าต่างแฟ้มประวัติ</button>
                 </div>
             `;
             detailModal.showModal();
 
+            // เรนเดอร์แผนผังรหัสคิวอาร์ด้านในและเริ่มซิงค์ฐานข้อมูลประวัติย่อย
             setTimeout(() => {
-                const canvasNode = document.getElementById("qrCanvas");
-                canvasNode.innerHTML = "";
-                new QRCode(canvasNode, { text: s.code, width: 70, height: 70 });
                 syncSubcollections(s.id);
-            }, 200);
+            }, 100);
         };
 
-        // == SYNC NESTED DATA AND DESTROY PREVIOUS CHARTS TO FIX MOBILE SCROLLING FLICKER ==
+        // ========================================================
+        // 🔄 กลไกซิงค์และวาดกราฟเส้นอัจฉริยะแก้ปัญหาจอเด้ง (SUB-RESOURCES SYNC)
+        // ========================================================
         function syncSubcollections(snakeId) {
             const wRef = query(collection(db, "snakes", snakeId, "weightHistory"), orderBy("date", "asc"));
             activeSubcollectionUnsubscribe = onSnapshot(wRef, (wSnapshot) => {
                 let labels = ['รับเข้า'];
                 let weights = [cachedSnakes.find(x => x.id === snakeId).weight];
                 const listEl = document.getElementById('subWeightList');
+                if(!listEl) return;
                 listEl.innerHTML = "";
 
-                let maxW = weights[0];
-                let minW = weights[0];
-                let totalW = weights[0];
-                let countW = 1;
+                let maxW = weights[0], minW = weights[0], totalW = weights[0], countW = 1;
 
                 wSnapshot.forEach(doc => {
                     const data = doc.data();
@@ -639,54 +597,110 @@
                     countW++;
 
                     listEl.innerHTML += `
-                        <div class="bg-base-100 p-1 rounded mb-1 flex justify-between items-center text-[11px]">
-                            <span>📅 ${new Date(data.date).toLocaleDateString('th-TH')} → <b class="text-success">${data.weight} g</b> (L:${data.length || '-'}cm)</span>
-                            <button onclick="deleteSubDoc('${snakeId}','weightHistory','${doc.id}')" class="text-error btn btn-ghost btn-xs p-0 min-h-0 h-4 w-4"><i class="fa-solid fa-xmark"></i></button>
+                        <div class="bg-base-100 p-1.5 rounded mb-1 flex justify-between items-center text-[11px]">
+                            <span>📅 ${new Date(data.date).toLocaleDateString('th-TH')} → <b class="text-success">${data.weight} g</b></span>
+                            <button onclick="deleteSubDoc('${snakeId}','weightHistory','${doc.id}')" class="text-error btn btn-ghost btn-xs p-0 min-h-0 h-4 w-4">✕</button>
                         </div>`;
                 });
 
                 let avgW = (totalW / countW).toFixed(1);
                 let growthPct = (((weights[weights.length-1] - weights[0]) / weights[0]) * 100).toFixed(1);
-                document.getElementById('weightStats').innerText = `สูงสุด: ${maxW}g | เฉลี่ย: ${avgW}g | เติบโต: ${growthPct}%`;
+                const wStatsEl = document.getElementById('weightStats');
+                if(wStatsEl) wStatsEl.innerHTML = `🔼 สูงสุด: ${maxW}g<br>📉 ต่ำสุด: ${minW}g<br>⚖️ เฉลี่ย: ${avgW}g<br>📈 โตขึ้น: +${growthPct}%`;
 
-                // 🛠️ ตรวจสอบล้างหน่วยความจำกราฟเดิมอย่างสม่ำเสมอ แก้ปัญหาการ Reflow เลื่อนหน้าจอเด้งกลับบน iOS
-                const ctx = document.getElementById('nestedWeightChart').getContext('2d');
-                if (weightChartInstance) { weightChartInstance.destroy(); }
-                
-                weightChartInstance = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{ label: 'ประวัติน้ำหนัก (g)', data: weights, borderColor: '#4CAF50', backgroundColor: 'rgba(76,175,80,0.05)', fill: true, tension: 0.2 }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false, animation: false, scales: { y: { ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 8 } } } } }
-                });
+                // 🛠️ กลไกตัดวงจรรูปแบบการ Reflow ป้องกันหน้าจอมือถือไหลขึ้นบนเอง
+                const chartNode = document.getElementById('nestedWeightChart');
+                if(chartNode){
+                    const ctx = chartNode.getContext('2d');
+                    if (weightChartInstance) { weightChartInstance.destroy(); }
+                    weightChartInstance = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{ label: 'ประวัติน้ำหนัก (g)', data: weights, borderColor: '#4CAF50', backgroundColor: 'rgba(76,175,80,0.05)', fill: true, tension: 0.2 }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, animation: false }
+                    });
+                }
             });
 
+            // ซิงค์ตารางมื้ออาหารสะสม
             const fRef = query(collection(db, "snakes", snakeId, "feedingHistory"), orderBy("date", "desc"));
             onSnapshot(fRef, (fSnapshot) => {
                 const fList = document.getElementById('subFeedList');
-                fList.innerHTML = "";
-                fSnapshot.forEach(doc => {
-                    const data = doc.data();
-                    let colorClass = data.status === 'กิน' ? 'text-success' : (data.status === 'อ้วก' ? 'text-error font-bold' : 'text-neutral-500');
-                    fList.innerHTML += `
-                        <div class="bg-base-100 p-1 rounded mb-1 flex justify-between items-center text-[11px]">
-                            <span>🍖 ${data.foodItem} (${data.foodWeight || 0}g) → <span class="${colorClass}">${data.status}</span></span>
-                            <button onclick="deleteSubDoc('${snakeId}','feedingHistory','${doc.id}')" class="text-error btn btn-ghost btn-xs p-0 min-h-0 h-4 w-4"><i class="fa-solid fa-xmark"></i></button>
-                        </div>`;
-                });
+                if(fList) {
+                    fList.innerHTML = "";
+                    fSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        let colorClass = data.status === 'กิน' ? 'text-success' : (data.status === 'อ้วก' ? 'text-error font-bold' : 'text-neutral-500');
+                        fList.innerHTML += `
+                            <div class="bg-base-100 p-1.5 rounded mb-1 flex justify-between items-center text-[11px]">
+                                <span>📅 ${new Date(data.date).toLocaleDateString()} 🍖 ${data.foodItem} (${data.foodWeight || 0}g) → <span class="${colorClass}">${data.status}</span></span>
+                                <button onclick="deleteSubDoc('${snakeId}','feedingHistory','${doc.id}')" class="text-error btn btn-ghost btn-xs p-0 min-h-0 h-4 w-4">✕</button>
+                            </div>`;
+                    });
+                }
+            });
+
+            // ซิงค์ตารางบันทึกลอกคราบย่อย
+            const sRef = query(collection(db, "snakes", snakeId, "shedHistory"), orderBy("date", "desc"));
+            onSnapshot(sRef, (sSnapshot) => {
+                const sList = document.getElementById('subShedList');
+                if(sList) {
+                    sList.innerHTML = "";
+                    sSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        sList.innerHTML += `
+                            <div class="bg-base-100 p-1.5 rounded mb-1 flex justify-between items-center text-[11px]">
+                                <span>📅 วันลอก: ${data.shedDate ? new Date(data.shedDate).toLocaleDateString() : '-'} ผล: <b class="text-info">${data.status}</b></span>
+                                <button onclick="deleteSubDoc('${snakeId}','shedHistory','${doc.id}')" class="text-error btn btn-ghost btn-xs p-0 min-h-0 h-4 w-4">✕</button>
+                            </div>`;
+                    });
+                }
+            });
+
+            // ซิงค์ตารางบันทึกอึ/ขับถ่ายย่อย
+            const pRef = query(collection(db, "snakes", snakeId, "poopHistory"), orderBy("date", "desc"));
+            onSnapshot(pRef, (pSnapshot) => {
+                const pList = document.getElementById('subPoopList');
+                if(pList) {
+                    pList.innerHTML = "";
+                    pSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        pList.innerHTML += `
+                            <div class="bg-base-100 p-1.5 rounded mb-1 flex justify-between items-center text-[11px]">
+                                <span>📅 ${new Date(data.date).toLocaleDateString()} → ลักษณะอึ: <b class="text-secondary">${data.status}</b></span>
+                                <button onclick="deleteSubDoc('${snakeId}','poopHistory','${doc.id}')" class="text-error btn btn-ghost btn-xs p-0 min-h-0 h-4 w-4">✕</button>
+                            </div>`;
+                    });
+                }
+            });
+
+            // ซิงค์ตารางบันทึกการพยาบาลทางการแพทย์
+            const mRef = query(collection(db, "snakes", snakeId, "medicalHistory"), orderBy("date", "desc"));
+            onSnapshot(mRef, (mSnapshot) => {
+                const mList = document.getElementById('subMedList');
+                if(mList) {
+                    mList.innerHTML = "";
+                    mSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        mList.innerHTML += `
+                            <div class="bg-base-100 p-1.5 rounded mb-1 flex justify-between items-center text-[11px]">
+                                <span>📅 อาการ: ${data.symptom} | ยา: ${data.drug} (${data.cost || 0}฿)</span>
+                                <button onclick="deleteSubDoc('${snakeId}','medicalHistory','${doc.id}')" class="text-error btn btn-ghost btn-xs p-0 min-h-0 h-4 w-4">✕</button>
+                            </div>`;
+                    });
+                }
             });
         }
 
+        // == ฟังก์ชันเพิ่มเติมข้อมูลย่อยลง SUBCOLLECTIONS ==
         window.addSubWeight = async (snakeId) => {
             const wVal = parseFloat(document.getElementById('sub_w_val').value);
-            const lVal = parseFloat(document.getElementById('sub_w_len').value) || 0;
             if(!wVal) return;
-            await addDoc(collection(db, "snakes", snakeId, "weightHistory"), { weight: wVal, length: lVal, date: Date.now() });
-            await updateDoc(doc(db, "snakes", snakeId), { weight: wVal, length: lVal });
+            await addDoc(collection(db, "snakes", snakeId, "weightHistory"), { weight: wVal, date: Date.now() });
+            await updateDoc(doc(db, "snakes", snakeId), { weight: wVal });
             document.getElementById('sub_w_val').value = "";
-            document.getElementById('sub_w_len').value = "";
         };
 
         window.addSubFeed = async (snakeId) => {
@@ -699,6 +713,31 @@
             document.getElementById('sub_f_wt').value = "";
         };
 
+        window.addSubShed = async (snakeId) => {
+            const blue = document.getElementById('sub_sh_blue').value;
+            const shed = document.getElementById('sub_sh_shed').value;
+            const stat = document.getElementById('sub_sh_status').value;
+            await addDoc(collection(db, "snakes", snakeId, "shedHistory"), { blueDate: blue, shedDate: shed, status: stat, date: Date.now() });
+            document.getElementById('sub_sh_blue').value = "";
+            document.getElementById('sub_sh_shed').value = "";
+        };
+
+        window.addSubPoop = async (snakeId) => {
+            const stat = document.getElementById('sub_p_status').value;
+            await addDoc(collection(db, "snakes", snakeId, "poopHistory"), { status: stat, date: Date.now() });
+        };
+
+        window.addSubMedical = async (snakeId) => {
+            const sym = document.getElementById('sub_m_symptom').value;
+            const drg = document.getElementById('sub_m_drug').value;
+            const cst = parseFloat(document.getElementById('sub_m_cost').value) || 0;
+            if(!sym) return;
+            await addDoc(collection(db, "snakes", snakeId, "medicalHistory"), { symptom: sym, drug: drg, cost: cst, date: Date.now() });
+            document.getElementById('sub_m_symptom').value = "";
+            document.getElementById('sub_m_drug').value = "";
+            document.getElementById('sub_m_cost').value = "";
+        };
+
         window.deleteSubDoc = async (snakeId, subColl, docId) => {
             if(confirm("ยืนยันการลบรายการประวัติย่อยจุดนี้?")) {
                 await deleteDoc(doc(db, "snakes", snakeId, subColl, docId));
@@ -706,21 +745,13 @@
         };
 
         window.deleteMainSnake = async (id) => {
-            if(confirm("🚨 แจ้งเตือนระดับความปลอดภัยสูง: คุณกำลังจะลบข้อมูลงูตัวนี้พร้อมประวัติย่อยทิ้งทั้งหมดอย่างถาวร ยืนยันหรือไม่?")) {
+            if(confirm("🚨 ยืนยันการลบข้อมููลงูตัวนี้พร้อมล้างแฟ้มทะเบียนประวัติย่อยทั้งหมดออกจากคลังถาวร?")) {
                 await deleteDoc(doc(db, "snakes", id));
                 detailModal.close();
             }
         };
 
-        // == EXPORT EXCEL SYSTEM ==
-        window.exportData = () => {
-            const ws = XLSX.utils.json_to_sheet(cachedSnakes.map(({id, uid, images, ...r}) => r));
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "คลังสินค้าฟาร์มงู");
-            XLSX.writeFile(wb, "Farm_SnakePro_Enterprise_Ultimate.xlsx");
-        };
-
-        // == ADVANCED MULTI-FIELD SEARCH AND FILTERS ENGINE ==
+        // == ENGINE ค้นหาและคัดกรองข้อมูลระดับ MULTI-FIELD ==
         window.filterSnakes = () => {
             const textQuery = searchBar.value.toLowerCase();
             const filterType = filterSelect.value;
@@ -732,22 +763,15 @@
                     s.morph.toLowerCase().includes(textQuery) || 
                     s.code.toLowerCase().includes(textQuery) ||
                     (s.rack && s.rack.toLowerCase().includes(textQuery)) ||
-                    (s.box && s.box.toLowerCase().includes(textQuery)) ||
-                    (s.chip && s.chip.toLowerCase().includes(textQuery));
+                    (s.box && s.box.toLowerCase().includes(textQuery));
                 
                 let matchesFilter = true;
-                if(filterType !== 'all') {
-                    if(filterType.includes('0.1') || filterType.includes('1.0')) {
-                        matchesFilter = s.gender === filterType;
-                    } else {
-                        matchesFilter = s.status === filterType;
-                    }
-                }
+                if(filterType !== 'all') matchesFilter = s.status === filterType;
                 return matchesSearch && matchesFilter;
             });
 
             if (sortType === 'weight') result.sort((a,b) => b.weight - a.weight);
-            if (sortType === 'price') result.sort((a,b) => b.price - a.price);
+            if (sortType === 'code') result.sort((a,b) => a.code.localeCompare(b.code));
 
             const grid = document.getElementById('snakeGrid');
             grid.innerHTML = "";
