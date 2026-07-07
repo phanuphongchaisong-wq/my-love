@@ -145,9 +145,39 @@
             </div>
 
             <div id="tab-calendar" class="tab-content-item hidden">
-                <div class="card bg-base-100 p-4 shadow border border-base-200">
-                    <h3 class="font-bold text-sm mb-3 text-primary flex items-center gap-2"><i class="fa-solid fa-calendar-days"></i> ตารางกิจกรรมการให้อาหาร/ชั่งน้ำหนัก ประจำเดือน</h3>
-                    <div id="calendar"></div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <div class="card bg-base-100 p-4 shadow border border-base-200 lg:col-span-1 h-fit">
+                        <h3 class="font-bold text-sm mb-3 text-warning flex items-center gap-2"><i class="fa-solid fa-clock"></i> นัดหมายด่วน (Quick Schedule)</h3>
+                        
+                        <div class="form-control mb-2">
+                            <label class="label"><span class="label-text text-xs text-gray-400">เลือกน้องงูที่ต้องการตั้งเวลา</span></label>
+                            <select id="quick_sched_snake" onchange="loadQuickSchedule()" class="select select-bordered select-sm w-full">
+                                <option value="" disabled selected>-- เลือกงู --</option>
+                            </select>
+                        </div>
+
+                        <div class="form-control mb-2">
+                            <label class="label"><span class="label-text text-warning font-bold text-[11px]">กำหนดวันให้อาหาร:</span></label>
+                            <div class="flex gap-2">
+                                <input type="date" id="quick_feed_date" class="input input-bordered input-sm w-full shadow-inner border-warning" />
+                                <button onclick="saveQuickSchedule('nextFeedDate', 'quick_feed_date')" class="btn btn-sm btn-warning">บันทึก</button>
+                            </div>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label"><span class="label-text text-info font-bold text-[11px]">กำหนดวันชั่ง นน.:</span></label>
+                            <div class="flex gap-2">
+                                <input type="date" id="quick_weight_date" class="input input-bordered input-sm w-full shadow-inner border-info" />
+                                <button onclick="saveQuickSchedule('nextWeightDate', 'quick_weight_date')" class="btn btn-sm btn-info">บันทึก</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card bg-base-100 p-4 shadow border border-base-200 lg:col-span-2">
+                        <h3 class="font-bold text-sm mb-3 text-primary flex items-center gap-2"><i class="fa-solid fa-calendar-days"></i> ตารางกิจกรรมการให้อาหาร/ชั่งน้ำหนัก ประจำเดือน</h3>
+                        <div id="calendar"></div>
+                    </div>
                 </div>
             </div>
 
@@ -344,14 +374,15 @@
             calendarObj.render();
         }
 
-        // ฟังก์ชันช่วยบันทึกการตั้งนัดหมายด่วนจากหน้าแฟ้มประวัติ (แท็บให้อาหาร / น้ำหนัก)
+        // ==========================================
+        // 📌 ฟังก์ชันนัดหมายด่วน (จากทุกๆ ที่)
+        // ==========================================
         window.updateNextDate = async (snakeId, fieldName, inputId) => {
             const dateVal = document.getElementById(inputId).value;
             if(!dateVal) return;
             try {
                 await updateDoc(doc(db, "snakes", snakeId), { [fieldName]: dateVal });
                 
-                // แจ้งเตือน Notification เล็กๆ วิ่งลงมาจากมุมจอ
                 const container = document.getElementById('toastContainer');
                 const toast = document.createElement('div');
                 toast.className = `alert alert-success shadow-lg text-white font-bold text-xs`;
@@ -363,17 +394,36 @@
             }
         };
 
+        window.loadQuickSchedule = () => {
+            const snakeId = document.getElementById('quick_sched_snake').value;
+            const s = cachedSnakes.find(item => item.id === snakeId);
+            if(s) {
+                document.getElementById('quick_feed_date').value = s.nextFeedDate || "";
+                document.getElementById('quick_weight_date').value = s.nextWeightDate || "";
+            }
+        };
+
+        window.saveQuickSchedule = async (fieldName, inputId) => {
+            const snakeId = document.getElementById('quick_sched_snake').value;
+            if (!snakeId) {
+                alert("กรุณาเลือกน้องงูที่ต้องการตั้งเวลาจาก Dropdown ก่อนครับ!");
+                return;
+            }
+            await window.updateNextDate(snakeId, fieldName, inputId);
+        };
+
+
         function listenToData() {
             const qSnakes = query(collection(db, "snakes"), where("uid", "==", currentUser.uid));
             onSnapshot(qSnakes, (snapshot) => {
                 cachedSnakes = [];
-                let calendarEvents = []; // เก็บ Event สำหรับปฏิทิน
+                let calendarEvents = []; 
 
                 snapshot.forEach(doc => {
                     let data = doc.data();
                     cachedSnakes.push({id: doc.id, ...data});
                     
-                    // --- เพิ่ม Event ลงปฏิทินจากฟิลด์กำหนดวันที่ ---
+                    // เพิ่ม Event ลงปฏิทิน
                     if(data.nextFeedDate) {
                         calendarEvents.push({ title: '🍖 ให้อาหาร: ' + data.name, start: data.nextFeedDate, color: '#fbbd23', allDay: true });
                     }
@@ -385,7 +435,17 @@
                 renderUI();
                 runAIAnalysis();
 
-                // อัปเดตข้อมูลบนปฏิทินแบบ Real-time
+                // อัปเดต Dropdown ในหน้าปฏิทินนัดหมายด่วน
+                const quickSelect = document.getElementById('quick_sched_snake');
+                if(quickSelect) {
+                    const currentVal = quickSelect.value;
+                    quickSelect.innerHTML = '<option value="" disabled selected>-- เลือกงู --</option>';
+                    cachedSnakes.forEach(s => {
+                        quickSelect.innerHTML += `<option value="${s.id}">${s.name} (${s.code})</option>`;
+                    });
+                    if(currentVal) quickSelect.value = currentVal;
+                }
+
                 if(calendarObj) {
                     calendarObj.removeAllEventSources();
                     calendarObj.addEventSource(calendarEvents);
@@ -578,8 +638,8 @@
                 price: parseFloat(s_price.value) || 0,
                 source: s_source.value,
                 status: s_status.value,
-                nextFeedDate: document.getElementById('s_next_feed').value || "",    // <--- ดึงค่าฟิลด์ใหม่
-                nextWeightDate: document.getElementById('s_next_weight').value || "", // <--- ดึงค่าฟิลด์ใหม่
+                nextFeedDate: document.getElementById('s_next_feed').value || "",    
+                nextWeightDate: document.getElementById('s_next_weight').value || "", 
                 images: imgArray,
                 note: s_note.value,
                 updatedAt: Date.now()
@@ -629,7 +689,6 @@
             document.getElementById('s_source').value = s.source || "";
             document.getElementById('s_status').value = s.status;
             
-            // นำค่ามากรอกในฟอร์มแก้ไข
             document.getElementById('s_next_feed').value = s.nextFeedDate || "";
             document.getElementById('s_next_weight').value = s.nextWeightDate || "";
 
