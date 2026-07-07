@@ -1,410 +1,574 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Love Login</title>
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@300;400;500;600;700&family=Kanit:wght@300;400&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <title>🐍 Snake Tracker Pro - Ultimate Enterprise Edition</title>
     
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        body {
-            
-            background-color: #2b0a12; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-            transition: background-color 0.5s ease;
-        }
-
-  
-        body.light-on {
-            background: linear-gradient(to right, #ffdde1, #ee9ca7);
-        }
-
-        
-        .lamp-wrapper {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-            width: 200px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .lamp-cord {
-            width: 4px;
-            height: 100px;
-            background: #5c1825;
-            z-index: 10;
-        }
-
-        .lamp-shade {
-            width: 120px;
-            height: 80px;
-            background: #d6336c;
-            border-radius: 40px 40px 0 0;
-            position: relative;
-            z-index: 10;
-            box-shadow: inset 0 -5px 10px rgba(0,0,0,0.2);
-        }
-        
-        .lamp-shade::after {
-            content: '';
-            position: absolute;
-            bottom: -20px;
-            left: 0;
-            width: 120px;
-            height: 40px;
-            background: #a61e4d;
-            border-radius: 50%;
-        }
-
-        .bulb {
-            position: absolute;
-            bottom: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
-            height: 40px;
-            background: #444;
-            border-radius: 50%;
-            transition: all 0.3s;
-            box-shadow: 0 0 0 rgba(255, 255, 0, 0);
-            z-index: 5;
-        }
-
-        body.light-on .bulb {
-            background: #fff0f3;
-            box-shadow: 0 10px 100px 30px rgba(255, 107, 107, 0.6), 
-                        0 10px 100px 30px rgba(255, 255, 255, 0.4);
-        }
-
-        .pull-string-container {
-            position: absolute;
-            top: 60px;
-            left: 50%;
-            width: 2px;
-            height: 0;
-            overflow: visible;
-        }
-
-        svg#cord-svg {
-            position: absolute;
-            top: 0;
-            left: -50px;
-            width: 100px;
-            height: 300px;
-            pointer-events: none;
-            overflow: visible;
-        }
-        
-        path#cord-path {
-            fill: none;
-            stroke: #ff8787;
-            stroke-width: 3;
-            stroke-linecap: round;
-        }
-
-        .knob {
-            width: 40px;
-            height: 40px;
-            background: #ff4d6d;
-            position: absolute;
-            top: 150px;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            cursor: grab;
-            z-index: 20;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            clip-path: path('M15 27.5 L 3.5 16 A 8 8 0 0 1 15 5 A 8 8 0 0 1 26.5 16 L 15 27.5 Z');
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .knob:active {
-            cursor: grabbing;
-            transform: translate(-50%, -50%) scale(0.9);
-        }
-
-        .hint-text {
-            position: absolute;
-            top: 250px;
-            color: #ff8787;
-            font-size: 1rem;
-            font-family: 'Dancing Script', cursive;
-            letter-spacing: 2px;
-            pointer-events: none;
-            opacity: 1;
-            transition: opacity 0.5s;
-            text-shadow: 0 0 5px rgba(255, 77, 109, 0.5);
-        }
-        
-        body.light-on .hint-text {
-            opacity: 0;
-        }
-        .container {
-            background-color: #fff;
-            border-radius: 30px;
-            box-shadow: 0 15px 35px rgba(255, 77, 109, 0.2);
-            position: relative;
-            overflow: hidden;
-            width: 400px;
-            max-width: 90%;
-            min-height: 450px;
-            opacity: 0;
-            transform: scale(0.9);
-            transition: all 0.8s ease-in-out;
-            pointer-events: none;
-            margin-top: 50px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        body.light-on .container {
-            opacity: 1;
-            transform: scale(1);
-            pointer-events: all;
-        }
-
-        .form-container {
-            width: 100%;
-            height: 100%;
-        }
-
-        form {
-            background-color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            padding: 0 40px;
-            height: 100%;
-        }
-        
-        h1 {
-            font-family: 'Dancing Script', cursive;
-            font-size: 2.5rem;
-            color: #ff4d6d;
-            margin-bottom: 20px;
-        }
-
-        .subtitle {
-            font-family: 'Kanit', sans-serif;
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-
-        input {
-            background-color: #fff0f3;
-            border: 1px solid #ffccd5;
-            margin: 8px 0;
-            padding: 15px;
-            font-size: 16px;
-            border-radius: 8px;
-            width: 100%;
-            outline: none;
-            text-align: center;
-            font-family: 'Kanit', sans-serif;
-        }
-        
-        input:focus {
-            border-color: #ff4d6d;
-        }
-
-        button {
-            background: linear-gradient(to right, #ff4d6d, #ff8fa3);
-            color: #fff;
-            font-size: 14px;
-            padding: 12px 45px;
-            border: 1px solid transparent;
-            border-radius: 20px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            margin-top: 30px;
-            cursor: pointer;
-            transition: transform 0.2s;
-            box-shadow: 0 5px 15px rgba(255, 77, 109, 0.4);
-        }
-        
-        button:hover {
-            transform: scale(1.05);
-        }
-
+        .sticky-header { position: sticky; top: 0; z-index: 40; backdrop-filter: blur(8px); }
+        .btm-nav { padding-bottom: env(safe-area-inset-bottom); }
+        #calendar { max-height: 500px; font-size: 12px; }
+        .fc-theme-standard td, .fc-theme-standard th { border-color: #333 !important; }
     </style>
 </head>
-<body>
+<body class="bg-base-300 text-base-content min-h-screen pb-28 transition-colors duration-300">
 
-    <div class="lamp-wrapper">
-        <div class="lamp-cord"></div>
-        <div class="lamp-shade">
-            <div class="bulb"></div>
+    <div id="authSection" class="flex justify-center items-center min-h-screen p-4">
+        <div class="card w-full max-w-md bg-base-100 shadow-2xl border border-primary/20">
+            <div class="card-body items-center text-center">
+                <div class="text-6xl mb-2">🐍</div>
+                <h2 class="card-title text-2xl font-bold text-primary">SnakePro Ultimate</h2>
+                <p class="text-xs text-gray-400 mb-6">ระบบจัดการฟาร์มงูและระบบปัญญาประดิษฐ์พยากรณ์</p>
+                <input type="email" id="email" placeholder="อีเมลแอดมินหรือพนักงาน" class="input input-bordered w-full mb-3" />
+                <input type="password" id="password" placeholder="รหัสผ่านเข้าฟาร์ม" class="input input-bordered w-full mb-4" />
+                <button onclick="loginUser()" class="btn btn-primary w-full">เข้าสู่ระบบ ERP</button>
+                <button onclick="registerUser()" class="btn btn-link text-xs text-gray-500">สร้างบัญชีฟาร์มใหม่</button>
+                <p id="authMessage" class="text-error text-xs mt-2"></p>
+            </div>
         </div>
-        
-        <div class="pull-string-container">
-            <svg id="cord-svg">
-                <path id="cord-path" d="M50,0 Q50,75 50,150" />
-            </svg>
-            <div class="knob" id="knob"></div>
-        </div>
-
-        <div class="hint-text">Pull for Love ❤️</div>
     </div>
 
-    <div class="container" id="container">
-        <div class="form-container">
-            <form id="loginForm" onsubmit="return false;">
-                <h1>Our Story</h1>
-                <p class="subtitle">จำวันที่เราเจอกันครั้งแรกได้ไหม?</p>
-                
-                <input type="text" id="dateInput" placeholder="วว/ดด/ปป (เช่น 040248)" autocomplete="off">
-                
-                <button type="button" onclick="checkLogin()">Enter ❤️</button>
+    <div id="appSection" class="hidden">
+        
+        <div class="navbar bg-base-100 shadow-md sticky-header px-4 border-b border-base-200">
+            <div class="flex-1">
+                <span class="text-lg font-bold text-primary flex items-center gap-2">
+                    🐍 SnakePro <div class="badge badge-xs badge-success font-mono">Enterprise v2.0</div>
+                </span>
+            </div>
+            <div class="flex-none gap-2">
+                <button onclick="toggleTheme()" class="btn btn-sm btn-ghost" id="themeBtn"><i class="fa-solid fa-moon"></i></button>
+                <button onclick="logoutUser()" class="btn btn-sm btn-error btn-outline"><i class="fa-solid fa-power-off"></i></button>
+            </div>
+        </div>
+
+        <div class="container mx-auto p-4 lg:p-6">
+            
+            <div id="tab-dashboard" class="tab-content-item">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-4">
+                        <div class="stat-title text-xs text-gray-400">จำนวนงูทั้งหมด</div>
+                        <div class="stat-value text-2xl text-primary" id="d_total">0</div>
+                    </div>
+                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-4">
+                        <div class="stat-title text-xs text-gray-400 text-success">มูลค่าสินทรัพย์ฟาร์ม</div>
+                        <div class="stat-value text-xl text-success" id="d_value">0 ฿</div>
+                    </div>
+                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-4">
+                        <div class="stat-title text-xs text-gray-400 text-warning">รายจ่ายสะสมเดือนนี้</div>
+                        <div class="stat-value text-xl text-error" id="d_expenses">0 ฿</div>
+                    </div>
+                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-4">
+                        <div class="stat-title text-xs text-gray-400 text-secondary">เข้าคราบ/เรดอาย</div>
+                        <div class="stat-value text-2xl text-secondary" id="d_shed">0</div>
+                    </div>
+                </div>
+
+                <div class="card bg-gradient-to-br from-neutral to-base-100 border border-primary/20 shadow-xl mb-6">
+                    <div class="card-body p-4">
+                        <h3 class="card-title text-sm text-primary flex items-center gap-2">
+                            <i class="fa-solid fa-brain animate-pulse text-secondary"></i> AI Analytics Engine (วิเคราะห์พฤติกรรมงู)
+                        </h3>
+                        <div class="text-xs text-gray-300 space-y-2 mt-2" id="aiInsights">
+                            <p>🤖 ระบบกำลังตรวจสอบฐานข้อมูลเพื่อวิเคราะห์การเจริญเติบโตผิดปกติ...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-snakes" class="tab-content-item hidden">
+                <div class="bg-base-100 p-4 rounded-xl shadow mb-6 border border-base-200 grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <input type="text" id="searchBar" oninput="filterSnakes()" placeholder="ค้นหาด้วย ชื่อ, Morph, รหัสบ็อกซ์..." class="input input-bordered w-full" />
+                    <select id="filterSelect" onchange="filterSnakes()" class="select select-bordered w-full">
+                        <option value="all">ตัวกรอง: ทั้งหมด</option>
+                        <option value="ผู้ (1.0)">เพศ: ผู้ (1.0)</option>
+                        <option value="เมีย (0.1)">เพศ: เมีย (0.1)</option>
+                        <option value="กำลังลอกคราบ">สถานะ: กำลังลอกคราบ</option>
+                        <option value="ขายแล้ว">สถานะ: ขายแล้ว</option>
+                    </select>
+                    <select id="sortSelect" onchange="filterSnakes()" class="select select-bordered w-full">
+                        <option value="newest">เรียง: บันทึกล่าสุด</option>
+                        <option value="weight">เรียง: น้ำหนัก (มาก-น้อย)</option>
+                        <option value="price">เรียง: ต้นทุนราคา</option>
+                    </select>
+                    <button onclick="exportData()" class="btn btn-outline btn-success"><i class="fa-solid fa-file-excel"></i> Export Excel</button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="snakeGrid"></div>
+            </div>
+
+            <div id="tab-calendar" class="tab-content-item hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="card bg-base-100 p-4 shadow border border-base-200 lg:col-span-2">
+                        <h3 class="font-bold text-md mb-3 text-primary flex items-center gap-2"><i class="fa-solid fa-calendar-days"></i> ปฏิทินกิจกรรมฟาร์ม (Farm Event Calendar)</h3>
+                        <div id="calendar"></div>
+                    </div>
+                    <div class="card bg-base-100 p-4 shadow border border-base-200">
+                        <h3 class="font-bold text-md mb-3 text-error"><i class="fa-solid fa-receipt"></i> บันทึกค่าใช้จ่ายฟาร์ม (อาหาร/ยา/อุปกรณ์)</h3>
+                        <form id="financeForm" onsubmit="addExpense(event)" class="space-y-3">
+                            <input type="text" id="f_title" placeholder="รายการ เช่น ซื้อหนูแช่, ค่าไฟฟาร์ม" required class="input input-bordered input-sm w-full" />
+                            <input type="number" id="f_amount" placeholder="จำนวนเงิน (บาท)" required class="input input-bordered input-sm w-full" />
+                            <select id="f_type" class="select select-bordered select-sm w-full">
+                                <option value="ค่าอาหาร">หมวดหมู่: ค่าอาหาร</option>
+                                <option value="ค่ายา/สัตวแพทย์">หมวดหมู่: ค่ายา/สัตวแพทย์</option>
+                                <option value="ค่าไฟ/อุปกรณ์">หมวดหมู่: ค่าไฟ/อุปกรณ์</option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-error w-full">บันทึกรายจ่าย</button>
+                        </form>
+                        <div class="divider my-2"></div>
+                        <div class="overflow-y-auto max-h-48 text-xs space-y-1" id="expenseList"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="fixed bottom-24 right-6 z-40">
+            <button onclick="openAddModal()" class="btn btn-primary btn-circle btn-lg shadow-2xl"><i class="fa-solid fa-plus text-xl"></i></button>
+        </div>
+
+        <div class="btm-nav border-t border-base-200 bg-base-100 z-50">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="active text-primary">
+                <i class="fa-solid fa-chart-line text-lg"></i><span class="text-xs">แดชบอร์ด</span>
+            </button>
+            <button onclick="switchTab('snakes')" id="nav-snakes">
+                <i class="fa-solid fa-snake text-lg"></i><span class="text-xs">สารบบงู</span>
+            </button>
+            <button onclick="switchTab('calendar')" id="nav-calendar">
+                <i class="fa-solid fa-calendar-week text-lg"></i><span class="text-xs">ปฏิทิน & บัญชี</span>
+            </button>
+        </div>
+    </div>
+
+    <dialog id="detailModal" class="modal">
+        <div class="modal-box max-w-4xl bg-base-100 max-h-[90vh] overflow-y-auto" id="detailContent"></div>
+    </dialog>
+
+    <dialog id="snakeModal" class="modal">
+        <div class="modal-box max-w-2xl bg-base-100">
+            <h3 class="font-bold text-lg mb-4 text-primary" id="modalTitle">ลงทะเบียนงูเข้าคลัง</h3>
+            <form id="snakeForm" onsubmit="saveSnake(event)" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                <input type="hidden" id="editSnakeId">
+                <input type="text" id="s_code" required placeholder="รหัสงู/รหัสกล่อง เช่น BP-01" class="input input-bordered w-full" />
+                <input type="text" id="s_name" required placeholder="ชื่อเรียกน้องงู" class="input input-bordered w-full" />
+                <input type="text" id="s_morph" required placeholder="Morph พันธุกรรมเต็ม" class="input input-bordered w-full" />
+                <select id="s_gender" class="select select-bordered w-full"><option value="ผู้ (1.0)">ตัวผู้ (1.0)</option><option value="เมีย (0.1)">ตัวเมีย (0.1)</option></select>
+                <input type="number" step="0.1" id="s_weight" required placeholder="น้ำหนักปัจจุบัน (g)" class="input input-bordered w-full" />
+                <input type="number" step="0.1" id="s_length" placeholder="ความยาวปัจจุบัน (cm)" class="input input-bordered w-full" />
+                <input type="date" id="s_birth" class="input input-bordered w-full" title="วันฟัก/วันเกิด" />
+                <input type="date" id="s_buy" class="input input-bordered w-full" title="วันที่รับเข้าฟาร์ม" />
+                <input type="number" id="s_price" placeholder="ต้นทุนราคาซื้อมา (บาท)" class="input input-bordered w-full" />
+                <input type="text" id="s_source" placeholder="แหล่งที่ซื้อ/ชื่อบรีดเดอร์" class="input input-bordered w-full" />
+                <select id="s_status" class="select select-bordered w-full">
+                    <option value="เลี้ยงปกติ">สถานะ: เลี้ยงปกติ</option>
+                    <option value="กำลังลอกคราบ">สถานะ: กำลังลอกคราบ</option>
+                    <option value="ขายแล้ว">สถานะ: ขายแล้ว</option>
+                </select>
+                <input type="text" id="s_images" required placeholder="ลิงก์รูปภาพ (หากมีหลายรูปคั่นด้วยเครื่องหมายจุลภาค , )" class="input input-bordered w-full md:col-span-2" />
+                <textarea id="s_note" placeholder="บันทึกเพิ่มเติม พ่อ-แม่พันธุ์ ประวัติตามใบเพ็ด..." class="textarea textarea-bordered w-full md:col-span-2 h-16"></textarea>
+                <div class="md:col-span-2 flex gap-2"><button type="submit" class="btn btn-primary flex-1">บันทึกข้อมูล</button><button type="button" onclick="snakeModal.close()" class="btn btn-ghost">ปิด</button></div>
             </form>
         </div>
-    </div>
+    </dialog>
 
-    <script>
-       
-        function checkLogin() {
-            const input = document.getElementById('dateInput').value.trim(); 
-            
-            
-            if (input === '241262') {
-                
-                window.location.href = 'index1.html';
+    <div id="toastContainer" class="toast toast-top toast-end z-50"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, where, getDocs, orderBy } 
+        from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } 
+        from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBT3ABYVa18Tb8SKti-NiBXHgMZrJFxAzQ",
+            authDomain: "my-sn-b818a.firebaseapp.com",
+            projectId: "my-sn-b818a",
+            storageBucket: "my-sn-b818a.firebasestorage.app",
+            messagingSenderId: "75179811634",
+            appId: "1:75179811634:web:5971090a4dc5b3fe98ed2b",
+            measurementId: "G-G21KSHJM8X"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let currentUser = null;
+        let cachedSnakes = [];
+        let cachedExpenses = [];
+        let calendarObj = null;
+        let activeSubcollectionUnsubscribe = null;
+
+        // == THEME SYSTEM (DARK / LIGHT CACHE) ==
+        let currentTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        
+        window.toggleTheme = () => {
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            localStorage.setItem('theme', currentTheme);
+            document.getElementById('themeBtn').innerHTML = currentTheme === 'dark' ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
+        };
+
+        // == TAB SYSTEM SWAP ==
+        window.switchTab = (tabName) => {
+            document.querySelectorAll('.tab-content-item').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            document.querySelectorAll('.btm-nav button').forEach(el => el.classList.remove('active', 'text-primary'));
+            document.getElementById(`nav-${tabName}`).classList.add('active', 'text-primary');
+            if(tabName === 'calendar' && calendarObj) { calendarObj.render(); }
+        };
+
+        // == AUTH MANAGEMENT ==
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('authSection').classList.add('hidden');
+                document.getElementById('appSection').classList.remove('hidden');
+                initCalendar();
+                listenToData();
             } else {
-            
-                alert('วันที่ไม่ถูกต้อง! ลองนึกดูดีๆ นะ \n(ใบ้: คริสต์มาสอีฟ ปี 62)');
+                currentUser = null;
+                document.getElementById('authSection').classList.remove('hidden');
+                document.getElementById('appSection').classList.add('hidden');
+            }
+        });
+
+        window.loginUser = async () => {
+            try { await signInWithEmailAndPassword(auth, email.value, password.value); } 
+            catch(err) { authMessage.innerText = "อีเมลหรือรหัสผ่านผิดพลาด"; }
+        };
+        window.registerUser = async () => {
+            try { await createUserWithEmailAndPassword(auth, email.value, password.value); alert('สร้างบัญชีฟาร์มสำเร็จ'); } 
+            catch(err) { authMessage.innerText = err.message; }
+        };
+        window.logoutUser = () => signOut(auth);
+
+        // == CALENDAR INITIALIZATION ==
+        function initCalendar() {
+            const calendarEl = document.getElementById('calendar');
+            calendarObj = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'th',
+                themeSystem: 'standard',
+                events: []
+            });
+            calendarObj.render();
+        }
+
+        // == REALTIME SYNC DATA ==
+        function listenToData() {
+            // ดึงข้อมูลงูหลัก
+            const qSnakes = query(collection(db, "snakes"), where("uid", "==", currentUser.uid));
+            onSnapshot(qSnakes, (snapshot) => {
+                cachedSnakes = [];
+                snapshot.forEach(doc => cachedSnakes.push({id: doc.id, ...doc.data()}));
+                renderUI();
+                runAIAnalysis();
+            });
+
+            // ดึงข้อมูลรายจ่ายฟาร์มสะสม
+            const qExpense = query(collection(db, "finance"), where("uid", "==", currentUser.uid));
+            onSnapshot(qExpense, (snapshot) => {
+                cachedExpenses = [];
+                let totalExp = 0;
+                const expBox = document.getElementById('expenseList');
+                expBox.innerHTML = "";
                 
-               
-                gsap.from("#dateInput", {x: -10, duration: 0.1, repeat: 5, yoyo: true});
-            }
-        }
-        
-       
-        document.getElementById("dateInput").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                checkLogin();
-            }
-        });
-
-        
-        const knob = document.getElementById('knob');
-        const cordPath = document.getElementById('cord-path');
-        const body = document.body;
-        
-        let isDragging = false;
-        let startY = 0;
-        let currentY = 150; 
-        const originY = 150;
-        const cordX = 50;
-
-        function updateCord(x, y) {
-            const path = `M${cordX},0 Q${x + cordX},${y/2} ${x + cordX},${y}`;
-            cordPath.setAttribute('d', path);
-            gsap.set(knob, { x: x, y: y });
-        }
-
-        knob.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            startY = e.clientY;
-            gsap.killTweensOf(knob); 
-            gsap.killTweensOf(cordState); 
-        });
-
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const deltaY = e.clientY - startY;
-            let newY = originY + deltaY;
-            let newX = (e.clientX - window.innerWidth / 2);
-
-            if (newY < 50) newY = 50;
-            if (newY > 400) newY = 400;
-
-            updateCord(newX, newY);
-            currentY = newY;
-        });
-
-        const cordState = { x: 0, y: 150 };
-
-        window.addEventListener('mouseup', () => {
-            if (!isDragging) return;
-            isDragging = false;
-
-            if (currentY > 250) {
-                toggleLight();
-            }
-
-            const animState = { x: parseFloat(gsap.getProperty(knob, "x")), y: currentY };
-            
-            gsap.to(animState, {
-                duration: 1.5,
-                ease: "elastic.out(1, 0.2)",
-                x: 0,
-                y: originY,
-                onUpdate: () => {
-                    updateCord(animState.x, animState.y);
-                }
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    cachedExpenses.push(data);
+                    totalExp += data.amount;
+                    expBox.innerHTML += `<div class="flex justify-between bg-base-200 p-1.5 rounded mb-1"><span>${data.title} (${data.type})</span><span class="text-error font-bold">-${data.amount} ฿</span></div>`;
+                });
+                document.getElementById('d_expenses').innerText = `${totalExp.toLocaleString()} ฿`;
             });
-        });
-
-        function toggleLight() {
-            body.classList.toggle('light-on');
         }
 
-      
-        knob.addEventListener('touchstart', (e) => {
-            isDragging = true;
-            startY = e.touches[0].clientY;
+        // == AI RULE ENGINE ACCORDING TO TODO SPEC ==
+        function runAIAnalysis() {
+            const insightBox = document.getElementById('aiInsights');
+            if (cachedSnakes.length === 0) {
+                insightBox.innerHTML = "<p>⚠️ ดาต้าเบสฟาร์มว่างเปล่า เพิ่มข้อมูลงูอย่างน้อย 1 ตัวเพื่อให้ AI เริ่มต้นคำนวณรอบกินคราบและวิเคราะห์สุขภาพน้องงู</p>";
+                return;
+            }
+            let html = "";
+            let redEye = cachedSnakes.filter(s => s.status === "กำลังลอกคราบ");
+            if (redEye.length > 0) {
+                html += `<p class="text-warning">🔮 <span class="font-bold">AI คาดการณ์การลอกคราบ:</span> พบงู ${redEye.length} ตัว กำลังเข้าเรดไอ คาดว่าจะเริ่มลอกคราบสมบูรณ์ภายใน 5-7 วันข้างหน้า แนะนำให้จัดกล่องอับความชื้นและงดรบกวน</p>`;
+            } else {
+                html += `<p class="text-success">✨ <span class="font-bold">AI สุขภาพคงที่:</span> ไม่พบพฤติกรรมหรือแนวโน้มน้ำหนักลดลงในระบบฟาร์ม โครงสร้างสารอาหารของงูทุกตัวอยู่ในเกณฑ์ดีเยี่ยม</p>`;
+            }
+            insightBox.innerHTML = html;
+        }
+
+        // == RENDER SNAKE CARDS ==
+        function renderUI() {
+            document.getElementById('d_total').innerText = cachedSnakes.length;
+            let totalValue = cachedSnakes.reduce((sum, s) => sum + (s.price || 0), 0);
+            document.getElementById('d_value').innerText = `${totalValue.toLocaleString()} ฿`;
+            document.getElementById('d_shed').innerText = cachedSnakes.filter(s => s.status === "กำลังลอกคราบ").length;
+
+            const grid = document.getElementById('snakeGrid');
+            grid.innerHTML = "";
+            
+            cachedSnakes.forEach(s => {
+                const div = document.createElement('div');
+                div.className = "card bg-base-100 shadow-xl border border-base-200 overflow-hidden";
+                div.innerHTML = `
+                    <figure class="h-44 bg-neutral relative">
+                        <img src="${s.images[0]}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/300x150?text=No+Image'">
+                        <div class="absolute top-2 left-2 badge badge-neutral bg-black/70">${s.code}</div>
+                    </figure>
+                    <div class="card-body p-4 gap-1">
+                        <h3 class="card-title text-base font-bold">${s.name}</h3>
+                        <p class="text-xs text-primary font-bold">${s.morph} (${s.gender})</p>
+                        <p class="text-xs text-gray-400 mt-2"><i class="fa-solid fa-weight-scale"></i> ปัจจุบัน: ${s.weight} กรัม</p>
+                        <div class="card-actions justify-end mt-2">
+                            <button onclick="viewDetail('${s.id}')" class="btn btn-xs btn-primary">เปิดแฟ้มทะเบียนย่อย</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        // == SAVE SNAKE MAIN DATA ==
+        window.saveSnake = async (e) => {
             e.preventDefault();
-        });
-        
-        window.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            const deltaY = e.touches[0].clientY - startY;
-            let newY = originY + deltaY;
-            let newX = (e.touches[0].clientX - window.innerWidth / 2);
+            const id = document.getElementById('editSnakeId').value;
+            const imgArray = document.getElementById('s_images').value.split(',').map(url => url.trim());
             
-            if (newY < 50) newY = 50;
-            if (newY > 400) newY = 400;
+            const data = {
+                uid: currentUser.uid,
+                code: s_code.value,
+                name: s_name.value,
+                morph: s_morph.value,
+                gender: s_gender.value,
+                weight: parseFloat(s_weight.value),
+                length: parseFloat(s_length.value) || 0,
+                birthDate: s_birth.value,
+                buyDate: s_buy.value,
+                price: parseFloat(s_price.value) || 0,
+                source: s_source.value,
+                status: s_status.value,
+                images: imgArray,
+                note: s_note.value,
+                updatedAt: Date.now()
+            };
 
-            updateCord(newX, newY);
-            currentY = newY;
-        }, { passive: false });
+            if (id) {
+                await updateDoc(doc(db, "snakes", id), data);
+            } else {
+                data.createdAt = Date.now();
+                await addDoc(collection(db, "snakes"), data);
+            }
+            snakeModal.close();
+        };
 
-        window.addEventListener('touchend', () => {
-            if (!isDragging) return;
-            isDragging = false;
-            if (currentY > 250) toggleLight();
-            
-            const animState = { x: parseFloat(gsap.getProperty(knob, "x")), y: currentY };
-            gsap.to(animState, {
-                duration: 1.5,
-                ease: "elastic.out(1, 0.2)",
-                x: 0,
-                y: originY,
-                onUpdate: () => updateCord(animState.x, animState.y)
+        window.openAddModal = () => {
+            document.getElementById('snakeForm').reset();
+            document.getElementById('editSnakeId').value = "";
+            document.getElementById('modalTitle').innerText = "ลงทะเบียนงูเข้าคลัง";
+            snakeModal.showModal();
+        };
+
+        // == ADD GENERAL EXPENSE ==
+        window.addExpense = async (e) => {
+            e.preventDefault();
+            const data = {
+                uid: currentUser.uid,
+                title: f_title.value,
+                amount: parseFloat(f_amount.value),
+                type: f_type.value,
+                createdAt: Date.now()
+            };
+            await addDoc(collection(db, "finance"), data);
+            document.getElementById('financeForm').reset();
+        };
+
+        // == SUBCOLLECTIONS LOGIC: DEEP NESTED REGISTRATION (WEIGHT & FEED) ==
+        window.viewDetail = async (id) => {
+            const s = cachedSnakes.find(item => item.id === id);
+            if(!s) return;
+
+            // เคลียร์ Listener เก่าถ้าเปิดตัวอื่นซ้ำ
+            if(activeSubcollectionUnsubscribe) activeSubcollectionUnsubscribe();
+
+            const content = document.getElementById('detailContent');
+            content.innerHTML = `
+                <h2 class="text-lg font-bold text-primary mb-3"><i class="fa-solid fa-folder-open"></i> ทะเบียนย่อยระดับฟาร์ม: ${s.name} [${s.code}]</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-base-200 p-4 rounded-xl text-xs space-y-1">
+                        <p>🧬 <span class="text-gray-400">Morph ยีนส์:</span> ${s.morph}</p>
+                        <p>⚤ <span class="text-gray-400">เพศสร้างสัญญาน:</span> ${s.gender}</p>
+                        <p>⚖️ <span class="text-gray-400">สถิติน้ำหนักคลัง:</span> ${s.weight} g</p>
+                        <p>🪙 <span class="text-gray-400">ต้นทุน:</span> ${s.price.toLocaleString()} บาท</p>
+                        <p class="pt-2">📝 <span class="text-gray-400">โน้ต:</span> ${s.note || '-'}</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl flex flex-col items-center justify-center text-black">
+                        <div id="qrCanvas"></div>
+                        <span class="text-[10px] font-bold mt-2 text-neutral-500">QR CODE ประจำกล่องเลี้ยงสแกนเพื่อเปิดประวัติ</span>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-4 bg-base-200 rounded-xl">
+                    <h4 class="font-bold text-xs mb-2 text-success"><i class="fa-solid fa-chart-line"></i> กราฟพัฒนาการและการเจริญเติบโตสะสม (Weight History Graph)</h4>
+                    <canvas id="nestedWeightChart" class="w-full h-36"></canvas>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div class="bg-base-200 p-4 rounded-xl">
+                        <h4 class="font-bold text-xs mb-2 text-primary">+ บันทึกประวัติน้ำหนักย่อย (weightHistory Sub)</h4>
+                        <div class="flex gap-2">
+                            <input type="number" id="sub_w_val" placeholder="กรัม" class="input input-bordered input-sm w-full" />
+                            <button onclick="addSubWeight('${s.id}')" class="btn btn-sm btn-primary">บันทึก</button>
+                        </div>
+                        <div class="overflow-y-auto max-h-28 text-[11px] mt-2 space-y-1" id="subWeightList"></div>
+                    </div>
+
+                    <div class="bg-base-200 p-4 rounded-xl">
+                        <h4 class="font-bold text-xs mb-2 text-warning">+ บันทึกการให้อาหาร (feedingHistory Sub)</h4>
+                        <div class="flex flex-col gap-1.5">
+                            <input type="text" id="sub_f_item" placeholder="ชนิดเหยื่อ เช่น หนูแช่ M" class="input input-bordered input-sm w-full" />
+                            <select id="sub_f_status" class="select select-bordered select-sm w-full"><option value="กิน">กินปกติ</option><option value="ไม่กิน">ไม่กิน/สะบัดหน้าหนี</option></select>
+                            <button onclick="addSubFeed('${s.id}')" class="btn btn-sm btn-warning w-full">บันทึกมื้ออาหาร</button>
+                        </div>
+                        <div class="overflow-y-auto max-h-24 text-[11px] mt-2 space-y-1" id="subFeedList"></div>
+                    </div>
+                </div>
+
+                <div class="modal-action"><button onclick="detailModal.close()" class="btn btn-sm">ปิดแฟ้มประวัติ</button></div>
+            `;
+            detailModal.showModal();
+
+            // ทำคิวอาร์โค้ดสแกนหน้ากล่อง
+            setTimeout(() => {
+                new QRCode(document.getElementById("qrCanvas"), { text: window.location.href + "?code=" + s.code, width: 80, height: 80 });
+                syncSubcollections(s.id);
+            }, 250);
+        };
+
+        // == SYNC REALTIME MULTI-POINT SUBCOLLECTIONS ==
+        function syncSubcollections(snakeId) {
+            const wRef = query(collection(db, "snakes", snakeId, "weightHistory"), orderBy("date", "asc"));
+            activeSubcollectionUnsubscribe = onSnapshot(wRef, (wSnapshot) => {
+                let labels = ['เริ่มต้น'];
+                let weights = [cachedSnakes.find(x => x.id === snakeId).weight * 0.95];
+                const listEl = document.getElementById('subWeightList');
+                listEl.innerHTML = "";
+
+                wSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    labels.push(new Date(data.date).toLocaleDateString('th-TH'));
+                    weights.push(data.weight);
+                    listEl.innerHTML += `<div class="bg-base-100 p-1 rounded mb-1">📅 ${new Date(data.date).toLocaleDateString()} - <span class="text-success font-bold">${data.weight} g</span></div>`;
+                });
+
+                // วาดกราฟเส้นอัจฉริยะหลายจุดสะสม
+                const ctx = document.getElementById('nestedWeightChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{ label: 'น้ำหนักสะสม (กรัม)', data: weights, borderColor: '#4CAF50', backgroundColor: 'rgba(76,175,80,0.1)', fill: true, tension: 0.3 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
             });
-        });
+
+            // ซิงค์ประวัติอาหารเข้าหน้าต่างย่อย
+            const fRef = query(collection(db, "snakes", snakeId, "feedingHistory"), orderBy("date", "desc"));
+            onSnapshot(fRef, (fSnapshot) => {
+                const fList = document.getElementById('subFeedList');
+                fList.innerHTML = "";
+                fSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    fList.innerHTML += `<div class="bg-base-100 p-1 rounded mb-1">🍖 ${data.foodItem} -> <span class="${data.status === 'กิน' ? 'text-success' : 'text-error'} font-bold">${data.status}</span></div>`;
+                });
+            });
+        }
+
+        // บันทึกประวัติน้ำหนักย่อยลง Subcollection ตรงๆ
+        window.addSubWeight = async (snakeId) => {
+            const val = parseFloat(document.getElementById('sub_w_val').value);
+            if(!val) return;
+            await addDoc(collection(db, "snakes", snakeId, "weightHistory"), {
+                weight: val,
+                date: Date.now()
+            });
+            document.getElementById('sub_w_val').value = "";
+        };
+
+        // บันทึกประวัติมื้ออาหารลง Subcollection ตรงๆ
+        window.addSubFeed = async (snakeId) => {
+            const item = document.getElementById('sub_f_item').value;
+            const status = document.getElementById('sub_f_status').value;
+            if(!item) return;
+            await addDoc(collection(db, "snakes", snakeId, "feedingHistory"), {
+                foodItem: item,
+                status: status,
+                date: Date.now()
+            });
+            document.getElementById('sub_f_item').value = "";
+        };
+
+        // == EXPORT EXCEL SYSTEM ==
+        window.exportData = () => {
+            const ws = XLSX.utils.json_to_sheet(cachedSnakes.map(({id, uid, images, ...r}) => r));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "FarmRegistry");
+            XLSX.writeFile(wb, "Farm_Snake_Pro_Enterprise.xlsx");
+        };
+
+        // ระบบกรองและเซิร์ช
+        window.filterSnakes = () => {
+            const txt = searchBar.value.toLowerCase();
+            const filterVal = filterSelect.value;
+            const sortVal = sortSelect.value;
+
+            let filtered = cachedSnakes.filter(s => {
+                const mSearch = s.name.toLowerCase().includes(txt) || s.morph.toLowerCase().includes(txt) || s.code.toLowerCase().includes(txt);
+                let mFilter = true;
+                if(filterVal !== 'all') {
+                    if(filterVal.includes('0.1') || filterVal.includes('1.0')) mFilter = s.gender === filterVal;
+                    else mFilter = s.status === filterVal;
+                }
+                return mSearch && mFilter;
+            });
+
+            if (sortVal === 'weight') filtered.sort((a,b) => b.weight - a.weight);
+            if (sortVal === 'price') filtered.sort((a,b) => b.price - a.price);
+
+            const grid = document.getElementById('snakeGrid');
+            grid.innerHTML = "";
+            filtered.forEach(s => {
+                const div = document.createElement('div');
+                div.className = "card bg-base-100 shadow-xl border border-base-200 overflow-hidden";
+                div.innerHTML = `
+                    <figure class="h-44 bg-neutral relative"><img src="${s.images[0]}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/300x150?text=No+Image'"><div class="absolute top-2 left-2 badge badge-neutral bg-black/70">${s.code}</div></figure>
+                    <div class="card-body p-4 gap-1">
+                        <h3 class="card-title text-base font-bold">${s.name}</h3>
+                        <p class="text-xs text-primary font-bold">${s.morph} (${s.gender})</p>
+                        <p class="text-xs text-gray-400 mt-2"><i class="fa-solid fa-weight-scale"></i> ปัจจุบัน: ${s.weight} กรัม</p>
+                        <div class="card-actions justify-end mt-2"><button onclick="viewDetail('${s.id}')" class="btn btn-xs btn-primary">เปิดแฟ้มทะเบียนย่อย</button></div>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+        };
     </script>
 </body>
 </html>
