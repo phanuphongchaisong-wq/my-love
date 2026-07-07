@@ -2,7 +2,7 @@
 <html lang="th" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🐍 Snake Tracker Pro - Ultimate Enterprise Edition</title>
     
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
@@ -12,19 +12,27 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 
     <style>
         .sticky-header { position: sticky; top: 0; z-index: 40; backdrop-filter: blur(8px); }
-        .btm-nav { padding-bottom: env(safe-area-inset-bottom); }
-        #calendar { max-height: 500px; font-size: 12px; }
-        .fc-theme-standard td, .fc-theme-standard th { border-color: #333 !important; }
+        .btm-nav { padding-bottom: env(safe-area-inset-bottom); z-index: 50; }
+        #calendar { max-height: 480px; font-size: 11px; }
         
-        /* CSS แก้ไขปัญหาหน้าจอเด้ง/ไหลบนมือถือ */
+        /* 🛠️ แก้ไขปัญหาหน้าจอเลื่อนไม่ได้และเด้งไหลขึ้นบนมือถืออย่างเด็ดขาด */
+        body {
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        .modal {
+            align-items: center;
+            justify-content: center;
+        }
         .modal-box {
-            overscroll-behavior-y: contain; 
-            -webkit-overflow-scrolling: touch; 
+            max-height: 85vh !important;
+            overflow-y: auto !important;
+            overscroll-behavior-y: contain !important;
+            -webkit-overflow-scrolling: touch !important;
         }
     </style>
 </head>
@@ -33,14 +41,22 @@
     <div id="authSection" class="flex justify-center items-center min-h-screen p-4">
         <div class="card w-full max-w-md bg-base-100 shadow-2xl border border-primary/20">
             <div class="card-body items-center text-center">
-                <div class="text-6xl mb-2">🐍</div>
+                <div class="text-7xl mb-2 animate-pulse">🐍</div>
                 <h2 class="card-title text-2xl font-bold text-primary">SnakePro Ultimate</h2>
-                <p class="text-xs text-gray-400 mb-6">ระบบจัดการฟาร์มงูและระบบปัญญาประดิษฐ์พยากรณ์</p>
-                <input type="email" id="email" placeholder="อีเมลแอดมินหรือพนักงาน" class="input input-bordered w-full mb-3" />
+                <p class="text-xs text-gray-400 mb-6">ระบบจัดการฟาร์มงูอัจฉริยะ & Enterprise ERP</p>
+                <input type="email" id="email" placeholder="อีเมลผู้ดูแลฟาร์ม / พนักงาน" class="input input-bordered w-full mb-3" />
                 <input type="password" id="password" placeholder="รหัสผ่านเข้าฟาร์ม" class="input input-bordered w-full mb-4" />
-                <button onclick="loginUser()" class="btn btn-primary w-full">เข้าสู่ระบบ ERP</button>
-                <button onclick="registerUser()" class="btn btn-link text-xs text-gray-500">สร้างบัญชีฟาร์มใหม่</button>
-                <p id="authMessage" class="text-error text-xs mt-2"></p>
+                
+                <div class="form-control w-full mb-4">
+                    <select id="userRole" class="select select-bordered select-sm w-full">
+                        <option value="Admin">สิทธิ์ผู้ใช้งาน: เจ้าของฟาร์ม (Admin)</option>
+                        <option value="Staff">สิทธิ์ผู้ใช้งาน: พนักงานฟาร์ม (Staff)</option>
+                    </select>
+                </div>
+
+                <button onclick="loginUser()" class="btn btn-primary w-full text-base">เข้าสู่ระบบจัดการฟาร์ม</button>
+                <button onclick="registerUser()" class="btn btn-link text-xs text-gray-400">ลงทะเบียนเปิดฟาร์มใหม่</button>
+                <p id="authMessage" class="text-error text-xs mt-2 font-semibold"></p>
             </div>
         </div>
     </div>
@@ -49,8 +65,8 @@
         
         <div class="navbar bg-base-100 shadow-md sticky-header px-4 border-b border-base-200">
             <div class="flex-1">
-                <span class="text-lg font-bold text-primary flex items-center gap-2">
-                    🐍 SnakePro <div class="badge badge-xs badge-success font-mono">Enterprise v2.0</div>
+                <span class="text-md lg:text-lg font-bold text-primary flex items-center gap-2">
+                    🐍 SnakePro <div class="badge badge-sm badge-success font-mono text-[10px]">ULTIMATE v3.0</div>
                 </span>
             </div>
             <div class="flex-none gap-2">
@@ -62,32 +78,40 @@
         <div class="container mx-auto p-4 lg:p-6">
             
             <div id="tab-dashboard" class="tab-content-item">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-4">
-                        <div class="stat-title text-xs text-gray-400">จำนวนงูทั้งหมด</div>
-                        <div class="stat-value text-2xl text-primary" id="d_total">0</div>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
+                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3">
+                        <div class="stat-title text-[11px] text-gray-400">งูทั้งหมดในคลัง</div>
+                        <div class="stat-value text-xl text-primary" id="d_total">0</div>
                     </div>
-                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-4">
-                        <div class="stat-title text-xs text-gray-400 text-success">มูลค่าสินทรัพย์ฟาร์ม</div>
-                        <div class="stat-value text-xl text-success" id="d_value">0 ฿</div>
+                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3">
+                        <div class="stat-title text-[11px] text-gray-400 text-success">มูลค่าสินทรัพย์รวม</div>
+                        <div class="stat-value text-lg text-success" id="d_value">0 ฿</div>
                     </div>
-                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-4">
-                        <div class="stat-title text-xs text-gray-400 text-warning">รายจ่ายสะสมเดือนนี้</div>
-                        <div class="stat-value text-xl text-error" id="d_expenses">0 ฿</div>
+                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3">
+                        <div class="stat-title text-[11px] text-gray-400 text-error">รายจ่ายสะสมฟาร์ม</div>
+                        <div class="stat-value text-lg text-error" id="d_expenses">0 ฿</div>
                     </div>
-                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-4">
-                        <div class="stat-title text-xs text-gray-400 text-secondary">เข้าคราบ/เรดอาย</div>
-                        <div class="stat-value text-2xl text-secondary" id="d_shed">0</div>
+                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3">
+                        <div class="stat-title text-[11px] text-gray-400 text-warning">ต้องให้อาหารวันนี้</div>
+                        <div class="stat-value text-xl text-warning" id="d_feed">0</div>
+                    </div>
+                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3">
+                        <div class="stat-title text-[11px] text-gray-400 text-secondary">เพศ ผู้ / เมีย</div>
+                        <div class="stat-value text-base" id="d_gender">0 / 0</div>
+                    </div>
+                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3">
+                        <div class="stat-title text-[11px] text-gray-400 text-info">จำหน่ายแล้ว/ตาย</div>
+                        <div class="stat-value text-base text-gray-500" id="d_status_stats">0 / 0</div>
                     </div>
                 </div>
 
                 <div class="card bg-gradient-to-br from-neutral to-base-100 border border-primary/20 shadow-xl mb-6">
                     <div class="card-body p-4">
-                        <h3 class="card-title text-sm text-primary flex items-center gap-2">
-                            <i class="fa-solid fa-brain animate-pulse text-secondary"></i> AI Analytics Engine (วิเคราะห์พฤติกรรมงู)
+                        <h3 class="card-title text-xs lg:text-sm text-primary flex items-center gap-2">
+                            <i class="fa-solid fa-brain animate-pulse text-secondary"></i> AI Farm Analytics Engine (ระบบประมวลผลปัญญาประดิษฐ์)
                         </h3>
-                        <div class="text-xs text-gray-300 space-y-2 mt-2" id="aiInsights">
-                            <p>🤖 ระบบกำลังตรวจสอบฐานข้อมูลเพื่อวิเคราะห์การเจริญเติบโตผิดปกติ...</p>
+                        <div class="text-xs text-gray-300 space-y-1 mt-2" id="aiInsights">
+                            <p>🤖 กำลังคำนวณสถิติสุขภาพ อัตราความชื้นเฉลี่ย และพยากรณ์รอบการเข้าคราบถัดไป...</p>
                         </div>
                     </div>
                 </div>
@@ -95,45 +119,52 @@
 
             <div id="tab-snakes" class="tab-content-item hidden">
                 <div class="bg-base-100 p-4 rounded-xl shadow mb-6 border border-base-200 grid grid-cols-1 md:grid-cols-4 gap-3">
-                    <input type="text" id="searchBar" oninput="filterSnakes()" placeholder="ค้นหาด้วย ชื่อ, Morph, รหัสบ็อกซ์..." class="input input-bordered w-full" />
-                    <select id="filterSelect" onchange="filterSnakes()" class="select select-bordered w-full">
+                    <input type="text" id="searchBar" oninput="filterSnakes()" placeholder="🔍 ค้นหา ชื่อ, รหัส, Morph, พิกัด Rack/Box/Microchip..." class="input input-bordered w-full text-xs lg:text-sm" />
+                    <select id="filterSelect" onchange="filterSnakes()" class="select select-bordered w-full text-xs lg:text-sm">
                         <option value="all">ตัวกรอง: ทั้งหมด</option>
-                        <option value="ผู้ (1.0)">เพศ: ผู้ (1.0)</option>
-                        <option value="เมีย (0.1)">เพศ: เมีย (0.1)</option>
-                        <option value="กำลังลอกคราบ">สถานะ: กำลังลอกคราบ</option>
-                        <option value="ขายแล้ว">สถานะ: ขายแล้ว</option>
+                        <option value="ผู้ (1.0)">เพศ: ตัวผู้ (1.0)</option>
+                        <option value="เมีย (0.1)">เพศ: ตัวเมีย (0.1)</option>
+                        <option value="กำลังลอกคราบ">สถานะ: เข้าคราบ/เรดอาย</option>
+                        <option value="ขายแล้ว">สถานะ: จำหน่ายแล้ว</option>
+                        <option value="ตาย">สถานะ: ตาย</option>
                     </select>
-                    <select id="sortSelect" onchange="filterSnakes()" class="select select-bordered w-full">
-                        <option value="newest">เรียง: บันทึกล่าสุด</option>
-                        <option value="weight">เรียง: น้ำหนัก (มาก-น้อย)</option>
-                        <option value="price">เรียง: ต้นทุนราคา</option>
+                    <select id="sortSelect" onchange="filterSnakes()" class="select select-bordered w-full text-xs lg:text-sm">
+                        <option value="newest">เรียงลำดับ: บันทึกล่าสุด</option>
+                        <option value="weight">เรียงลำดับ: น้ำหนักสูงสุด</option>
+                        <option value="price">เรียงลำดับ: ราคาทุนสูงสุด</option>
                     </select>
-                    <button onclick="exportData()" class="btn btn-outline btn-success"><i class="fa-solid fa-file-excel"></i> Export Excel</button>
+                    <button onclick="exportData()" class="btn btn-success text-xs h-full"><i class="fa-solid fa-file-excel"></i> Export Report</button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="snakeGrid"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="snakeGrid"></div>
             </div>
 
             <div id="tab-calendar" class="tab-content-item hidden">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="card bg-base-100 p-4 shadow border border-base-200 lg:col-span-2">
-                        <h3 class="font-bold text-md mb-3 text-primary flex items-center gap-2"><i class="fa-solid fa-calendar-days"></i> ปฏิทินกิจกรรมฟาร์ม (Farm Event Calendar)</h3>
+                        <h3 class="font-bold text-sm mb-3 text-primary flex items-center gap-2"><i class="fa-solid fa-calendar-days"></i> ปฏิทินงานกิจกรรมฟาร์มย่อย</h3>
                         <div id="calendar"></div>
                     </div>
+                    
                     <div class="card bg-base-100 p-4 shadow border border-base-200">
-                        <h3 class="font-bold text-md mb-3 text-error"><i class="fa-solid fa-receipt"></i> บันทึกค่าใช้จ่ายฟาร์ม (อาหาร/ยา/อุปกรณ์)</h3>
-                        <form id="financeForm" onsubmit="addExpense(event)" class="space-y-3">
-                            <input type="text" id="f_title" placeholder="รายการ เช่น ซื้อหนูแช่, ค่าไฟฟาร์ม" required class="input input-bordered input-sm w-full" />
-                            <input type="number" id="f_amount" placeholder="จำนวนเงิน (บาท)" required class="input input-bordered input-sm w-full" />
+                        <h3 class="font-bold text-sm mb-3 text-error"><i class="fa-solid fa-receipt"></i> บันทึกบัญชีการเงินฟาร์ม (Finance Accounts)</h3>
+                        <form id="financeForm" onsubmit="addExpense(event)" class="space-y-3 text-xs">
+                            <input type="text" id="f_title" placeholder="รายละเอียดรายการบัญชี เช่น ซื้อหนูไมซ์, ขายลูกงู" required class="input input-bordered input-sm w-full" />
+                            <input type="number" id="f_amount" placeholder="จำนวนเงินรวม (บาท)" required class="input input-bordered input-sm w-full" />
+                            <select id="f_flow" class="select select-bordered select-sm w-full">
+                                <option value="รายจ่าย">ประเภท: รายจ่าย (Expense)</option>
+                                <option value="รายรับ">ประเภท: รายรับ (Income)</option>
+                            </select>
                             <select id="f_type" class="select select-bordered select-sm w-full">
                                 <option value="ค่าอาหาร">หมวดหมู่: ค่าอาหาร</option>
                                 <option value="ค่ายา/สัตวแพทย์">หมวดหมู่: ค่ายา/สัตวแพทย์</option>
-                                <option value="ค่าไฟ/อุปกรณ์">หมวดหมู่: ค่าไฟ/อุปกรณ์</option>
+                                <option value="ค่าไฟ/อุปกรณ์">หมวดหมู่: ค่าไฟ/วัสดุอุปกรณ์</option>
+                                <option value="ขายงู/มัดจำ">หมวดหมู่: รายได้ขายงู/ค่ามัดจำ</option>
                             </select>
-                            <button type="submit" class="btn btn-sm btn-error w-full">บันทึกรายจ่าย</button>
+                            <button type="submit" class="btn btn-sm btn-primary w-full">บันทึกลงสมุดบัญชี</button>
                         </form>
                         <div class="divider my-2"></div>
-                        <div class="overflow-y-auto max-h-48 text-xs space-y-1" id="expenseList"></div>
+                        <div class="overflow-y-auto max-h-52 text-[11px] space-y-1" id="expenseList"></div>
                     </div>
                 </div>
             </div>
@@ -144,7 +175,7 @@
             <button onclick="openAddModal()" class="btn btn-primary btn-circle btn-lg shadow-2xl"><i class="fa-solid fa-plus text-xl"></i></button>
         </div>
 
-        <div class="btm-nav border-t border-base-200 bg-base-100 z-50">
+        <div class="btm-nav border-t border-base-200 bg-base-100">
             <button onclick="switchTab('dashboard')" id="nav-dashboard" class="active text-primary">
                 <i class="fa-solid fa-chart-line text-lg"></i><span class="text-xs">แดชบอร์ด</span>
             </button>
@@ -158,41 +189,60 @@
     </div>
 
     <dialog id="detailModal" class="modal">
-        <div class="modal-box max-w-4xl bg-base-100 max-h-[90vh] overflow-y-auto" id="detailContent"></div>
+        <div class="modal-box max-w-4xl bg-base-100 shadow-xl" id="detailContent"></div>
     </dialog>
 
     <dialog id="snakeModal" class="modal">
-        <div class="modal-box max-w-2xl bg-base-100">
+        <div class="modal-box max-w-2xl bg-base-100 shadow-xl">
             <h3 class="font-bold text-lg mb-4 text-primary" id="modalTitle">ลงทะเบียนงูเข้าคลัง</h3>
-            <form id="snakeForm" onsubmit="saveSnake(event)" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+            <form id="snakeForm" onsubmit="saveSnake(event)" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                 <input type="hidden" id="editSnakeId">
-                <input type="text" id="s_code" required placeholder="รหัสงู/รหัสกล่อง เช่น BP-01" class="input input-bordered w-full" />
-                <input type="text" id="s_name" required placeholder="ชื่อเรียกน้องงู" class="input input-bordered w-full" />
-                <input type="text" id="s_morph" required placeholder="Morph พันธุกรรมเต็ม" class="input input-bordered w-full" />
-                <select id="s_gender" class="select select-bordered w-full"><option value="ผู้ (1.0)">ตัวผู้ (1.0)</option><option value="เมีย (0.1)">ตัวเมีย (0.1)</option></select>
-                <input type="number" step="0.1" id="s_weight" required placeholder="น้ำหนักปัจจุบัน (g)" class="input input-bordered w-full" />
-                <input type="number" step="0.1" id="s_length" placeholder="ความยาวปัจจุบัน (cm)" class="input input-bordered w-full" />
-                <input type="date" id="s_birth" class="input input-bordered w-full" title="วันฟัก/วันเกิด" />
-                <input type="date" id="s_buy" class="input input-bordered w-full" title="วันที่รับเข้าฟาร์ม" />
-                <input type="number" id="s_price" placeholder="ต้นทุนราคาซื้อมา (บาท)" class="input input-bordered w-full" />
-                <input type="text" id="s_source" placeholder="แหล่งที่ซื้อ/ชื่อบรีดเดอร์" class="input input-bordered w-full" />
-                <select id="s_status" class="select select-bordered w-full">
-                    <option value="เลี้ยงปกติ">สถานะ: เลี้ยงปกติ</option>
-                    <option value="กำลังลอกคราบ">สถานะ: กำลังลอกคราบ</option>
-                    <option value="ขายแล้ว">สถานะ: ขายแล้ว</option>
-                </select>
-                <input type="text" id="s_images" required placeholder="ลิงก์รูปภาพ (หากมีหลายรูปคั่นด้วยเครื่องหมายจุลภาค , )" class="input input-bordered w-full md:col-span-2" />
-                <textarea id="s_note" placeholder="บันทึกเพิ่มเติม พ่อ-แม่พันธุ์ ประวัติตามใบเพ็ด..." class="textarea textarea-bordered w-full md:col-span-2 h-16"></textarea>
-                <div class="md:col-span-2 flex gap-2"><button type="submit" class="btn btn-primary flex-1">บันทึกข้อมูล</button><button type="button" onclick="snakeModal.close()" class="btn btn-ghost">ปิด</button></div>
+                
+                <div class="form-control"><label class="label"><span class="label-text">รหัสงู/รหัสกล่อง</span></label><input type="text" id="s_code" required placeholder="เช่น BP-26-001" class="input input-bordered w-full" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">ชื่อเรียก</span></label><input type="text" id="s_name" required placeholder="เช่น น้องนำโชค" class="input input-bordered w-full" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">Morph พันธุกรรม</span></label><input type="text" id="s_morph" required placeholder="เช่น Ivory Spider y25" class="input input-bordered w-full" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">เพศโครงสร้าง</span></label><select id="s_gender" class="select select-bordered w-full"><option value="ผู้ (1.0)">ตัวผู้ (1.0)</option><option value="เมีย (0.1)">ตัวเมีย (0.1)</option></select></div>
+                
+                <div class="form-control"><label class="label"><span class="label-text">ตำแหน่งแร็ค (Rack)</span></label><input type="text" id="s_rack" placeholder="ตู้แร็ค A" class="input input-bordered w-full" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">ชั้นเลี้ยง (Shelf)</span></label><input type="text" id="s_shelf" placeholder="ชั้นที่ 3" class="input input-bordered w-full" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">หมายเลขกล่อง (Box No.)</span></label><input type="text" id="s_box" placeholder="กล่องที่ 12" class="input input-bordered w-full" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">หมายเลขไมโครชิป (Microchip)</span></label><input type="text" id="s_chip" placeholder="9000XXXXXXXX" class="input input-bordered w-full" /></div>
+                
+                <div class="form-control"><label class="label"><span class="label-text">น้ำหนักแรกรับ (กรัม)</span></label><input type="number" step="0.1" id="s_weight" required class="input input-bordered w-full" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">ความยาวแรกรับ (ซม.)</span></label><input type="number" step="0.1" id="s_length" class="input input-bordered w-full" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">วันเกิด/วันฟักไข่</span></label><input type="date" id="s_birth" class="input input-bordered w-full" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">วันที่รับเข้าฟาร์ม</span></label><input type="date" id="s_buy" class="input input-bordered w-full" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">ต้นทุนราคาซื้อ (บาท)</span></label><input type="number" id="s_price" class="input input-bordered w-full" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">ราคาจำหน่ายออก (บาท)</span></label><input type="number" id="s_sale_price" placeholder="ระบุหากขายออกแล้ว" class="input input-bordered w-full" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">แหล่งที่มา/บรีดเดอร์</span></label><input type="text" id="s_source" class="input input-bordered w-full" /></div>
+                
+                <div class="form-control">
+                    <label class="label"><span class="label-text">สถานะงูหลัก</span></label>
+                    <select id="s_status" class="select select-bordered w-full">
+                        <option value="เลี้ยงปกติ">เลี้ยงปกติ</option>
+                        <option value="กำลังลอกคราบ">กำลังลอกคราบ</option>
+                        <option value="ขายแล้ว">ขายแล้ว</option>
+                        <option value="ตาย">ตาย</option>
+                    </select>
+                </div>
+                
+                <div class="form-control"><label class="label"><span class="label-text">รหัสพ่อพันธุ์ (Sire Code)</span></label><input type="text" id="s_sire" placeholder="เช่น Sire-BP01" class="input input-bordered w-full" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">รหัสแม่พันธุ์ (Dam Code)</span></label><input type="text" id="s_dam" placeholder="เช่น Dam-BP02" class="input input-bordered w-full" /></div>
+
+                <div class="form-control md:col-span-2"><label class="label"><span class="label-text">ลิงก์รูปภาพ (หากมีหลายรูปให้ใช้เครื่องหมายจุลภาค , คั่นลิงก์รูป)</span></label><input type="text" id="s_images" required placeholder="https://image1.jpg, https://image2.jpg" class="input input-bordered w-full" /></div>
+                <div class="form-control md:col-span-2"><label class="label"><span class="label-text">หมายเหตุการพยาบาล</span></label><textarea id="s_note" placeholder="ข้อมูลทางสุขภาพ การกิน หรือประวัติสายเลือดเพิ่มเติม..." class="textarea textarea-bordered w-full h-16"></textarea></div>
+                
+                <div class="md:col-span-2 flex gap-2 mt-2">
+                    <button type="submit" class="btn btn-primary flex-1">บันทึกข้อมูลหลัก</button>
+                    <button type="button" onclick="snakeModal.close()" class="btn btn-ghost">ปิดหน้าต่าง</button>
+                </div>
             </form>
         </div>
     </dialog>
 
-    <div id="toastContainer" class="toast toast-top toast-end z-50"></div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, where, getDocs, orderBy } 
+        import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, where, orderBy } 
         from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } 
         from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
@@ -216,9 +266,10 @@
         let cachedExpenses = [];
         let calendarObj = null;
         let activeSubcollectionUnsubscribe = null;
-        let weightChartInstance = null; // ตัวแปรแก้บั๊กกราฟซ้อนกระตุก
+        let weightChartInstance = null;
+        let userRoleValue = "Admin";
 
-        // == THEME SYSTEM (DARK / LIGHT CACHE) ==
+        // == THEME MANAGEMENT ==
         let currentTheme = localStorage.getItem('theme') || 'dark';
         document.documentElement.setAttribute('data-theme', currentTheme);
         
@@ -229,7 +280,7 @@
             document.getElementById('themeBtn').innerHTML = currentTheme === 'dark' ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
         };
 
-        // == TAB SYSTEM SWAP ==
+        // == CORE TAB SYSTEM ==
         window.switchTab = (tabName) => {
             document.querySelectorAll('.tab-content-item').forEach(el => el.classList.add('hidden'));
             document.getElementById(`tab-${tabName}`).classList.remove('hidden');
@@ -254,16 +305,17 @@
         });
 
         window.loginUser = async () => {
+            userRoleValue = document.getElementById('userRole').value;
             try { await signInWithEmailAndPassword(auth, email.value, password.value); } 
-            catch(err) { authMessage.innerText = "อีเมลหรือรหัสผ่านผิดพลาด"; }
+            catch(err) { document.getElementById('authMessage').innerText = "ข้อมูลยืนยันอีเมล/รหัสผ่านฟาร์มไม่ถูกต้อง"; }
         };
         window.registerUser = async () => {
-            try { await createUserWithEmailAndPassword(auth, email.value, password.value); alert('สร้างบัญชีฟาร์มสำเร็จ'); } 
-            catch(err) { authMessage.innerText = err.message; }
+            try { await createUserWithEmailAndPassword(auth, email.value, password.value); alert('ลงทะเบียนบัญชีฟาร์มสำเร็จ'); } 
+            catch(err) { document.getElementById('authMessage').innerText = err.message; }
         };
         window.logoutUser = () => signOut(auth);
 
-        // == CALENDAR INITIALIZATION ==
+        // == CALENDAR CORE ==
         function initCalendar() {
             const calendarEl = document.getElementById('calendar');
             calendarObj = new FullCalendar.Calendar(calendarEl, {
@@ -275,7 +327,7 @@
             calendarObj.render();
         }
 
-        // == REALTIME SYNC DATA ==
+        // == DYNAMIC DATA SYNC ==
         function listenToData() {
             const qSnakes = query(collection(db, "snakes"), where("uid", "==", currentUser.uid));
             onSnapshot(qSnakes, (snapshot) => {
@@ -289,42 +341,56 @@
             onSnapshot(qExpense, (snapshot) => {
                 cachedExpenses = [];
                 let totalExp = 0;
+                let totalInc = 0;
                 const expBox = document.getElementById('expenseList');
                 expBox.innerHTML = "";
                 
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     cachedExpenses.push(data);
-                    totalExp += data.amount;
-                    expBox.innerHTML += `<div class="flex justify-between bg-base-200 p-1.5 rounded mb-1"><span>${data.title}</span><span class="text-error font-bold">-${data.amount} ฿</span></div>`;
+                    if(data.flow === "รายรับ") {
+                        totalInc += data.amount;
+                        expBox.innerHTML += `<div class="flex justify-between bg-base-200 p-1.5 rounded mb-1 text-success"><span>🟢 ${data.title}</span><span>+${data.amount} ฿</span></div>`;
+                    } else {
+                        totalExp += data.amount;
+                        expBox.innerHTML += `<div class="flex justify-between bg-base-200 p-1.5 rounded mb-1 text-error"><span>🔴 ${data.title}</span><span>-${data.amount} ฿</span></div>`;
+                    }
                 });
                 document.getElementById('d_expenses').innerText = `${totalExp.toLocaleString()} ฿`;
             });
         }
 
-        // == AI ENGINE ==
+        // == AI ENGINE CRADLE ==
         function runAIAnalysis() {
             const insightBox = document.getElementById('aiInsights');
             if (cachedSnakes.length === 0) {
-                insightBox.innerHTML = "<p>⚠️ ดาต้าเบสฟาร์มว่างเปล่า เพิ่มข้อมูลงูอย่างน้อย 1 ตัวเพื่อให้ AI เริ่มวิเคราะห์</p>";
+                insightBox.innerHTML = "<p>⚠️ คลังสารบบว่างเปล่า เพิ่มข้อมูลงูหลักเพื่อเริ่มต้นประมวลผลคำนวณวงรอบ</p>";
                 return;
             }
             let html = "";
             let redEye = cachedSnakes.filter(s => s.status === "กำลังลอกคราบ");
             if (redEye.length > 0) {
-                html += `<p class="text-warning">🔮 <span>AI คาดการณ์การลอกคราบ:</span> พบงู ${redEye.length} ตัว กำลังเข้าเรดไอ คาดว่าจะเริ่มลอกคราบสมบูรณ์ภายใน 5-7 วันข้างหน้า</p>`;
+                html += `<p class="text-warning">🔮 <span class="font-bold">AI การลอกคราบ & สุขภาพ:</span> พบงู ${redEye.length} ตัวกำลังอยู่ในช่วงเตรียมตัวลอกคราบ (เรดอาย) แนะนำให้ปรับแต่งความชื้นแร็คเลี้ยงเพิ่ม 10% เพื่อลดปัญหาวงรอบคราบติดขัด</p>`;
             } else {
-                html += `<p class="text-success">✨ <span>AI สุขภาพคงที่:</span> ไม่พบแนวโน้มน้ำหนักลดลงในระบบฟาร์ม</p>`;
+                html += `<p class="text-success">✨ <span class="font-bold">AI Growth Diagnostic:</span> ทุกรายการในฟาร์มมีดัชนีชี้วัดน้ำหนักคงที่ ไม่พบสัญญาณอันตรายหรืออาการเบื่ออาหาร</p>`;
             }
             insightBox.innerHTML = html;
         }
 
-        // == RENDER SNAKE CARDS ==
+        // == RENDER APPLICATION GRID ==
         function renderUI() {
             document.getElementById('d_total').innerText = cachedSnakes.length;
             let totalValue = cachedSnakes.reduce((sum, s) => sum + (s.price || 0), 0);
             document.getElementById('d_value').innerText = `${totalValue.toLocaleString()} ฿`;
             document.getElementById('d_shed').innerText = cachedSnakes.filter(s => s.status === "กำลังลอกคราบ").length;
+            
+            let males = cachedSnakes.filter(s => s.gender.includes("ผู้")).length;
+            let females = cachedSnakes.filter(s => s.gender.includes("เมีย")).length;
+            document.getElementById('d_gender').innerText = `${males} ผู้ / ${females} เมีย`;
+
+            let soldCount = cachedSnakes.filter(s => s.status === "ขายแล้ว").length;
+            let deadCount = cachedSnakes.filter(s => s.status === "ตาย").length;
+            document.getElementById('d_status_stats').innerText = `${soldCount} / ${deadCount}`;
 
             const grid = document.getElementById('snakeGrid');
             grid.innerHTML = "";
@@ -334,15 +400,18 @@
                 div.className = "card bg-base-100 shadow-xl border border-base-200 overflow-hidden";
                 div.innerHTML = `
                     <figure class="h-44 bg-neutral relative">
-                        <img src="${s.images[0]}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/300x150?text=No+Image'">
-                        <div class="absolute top-2 left-2 badge badge-neutral bg-black/70">${s.code}</div>
+                        <img src="${s.images[0]}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/400x200?text=No+Image+Available'">
+                        <div class="absolute top-2 left-2 badge badge-neutral bg-black/70 font-mono text-xs">${s.code}</div>
+                        <div class="absolute bottom-2 right-2 text-[10px] bg-primary text-white p-1 rounded font-bold">📍 R:${s.rack || '-'} B:${s.box || '-'}</div>
                     </figure>
-                    <div class="card-body p-4 gap-1">
-                        <h3 class="card-title text-base font-bold">${s.name}</h3>
-                        <p class="text-xs text-primary font-bold">${s.morph} (${s.gender})</p>
-                        <p class="text-xs text-gray-400 mt-2"><i class="fa-solid fa-weight-scale"></i> ปัจจุบัน: ${s.weight} กรัม</p>
+                    <div class="card-body p-4 gap-1 text-xs">
+                        <h3 class="card-title text-sm lg:text-base font-bold">${s.name}</h3>
+                        <p class="text-primary font-bold text-[11px]">${s.morph} (${s.gender})</p>
+                        <div class="divider my-1"></div>
+                        <p class="text-gray-400"><i class="fa-solid fa-weight-scale"></i> น้ำหนักปัจจุบัน: <b class="text-base-content">${s.weight} g</b></p>
+                        <p class="text-gray-400"><i class="fa-solid fa-microchip"></i> ชิป: <span class="font-mono">${s.chip || '-'}</span></p>
                         <div class="card-actions justify-end mt-2">
-                            <button onclick="viewDetail('${s.id}')" class="btn btn-xs btn-primary">เปิดแฟ้มทะเบียนย่อย</button>
+                            <button onclick="viewDetail('${s.id}')" class="btn btn-xs btn-primary font-bold"><i class="fa-solid fa-folder-open"></i> เปิดแฟ้มประวัติเชิงลึก</button>
                         </div>
                     </div>
                 `;
@@ -350,7 +419,22 @@
             });
         }
 
-        // == SAVE / UPDATE SNAKE ==
+        // == FINANCE FLOW ==
+        window.addExpense = async (e) => {
+            e.preventDefault();
+            const data = {
+                uid: currentUser.uid,
+                title: f_title.value,
+                amount: parseFloat(f_amount.value),
+                type: f_type.value,
+                flow: f_flow.value,
+                createdAt: Date.now()
+            };
+            await addDoc(collection(db, "finance"), data);
+            document.getElementById('financeForm').reset();
+        };
+
+        // == INTERFACE ENGINE FOR DATA PERSISTENCE ==
         window.saveSnake = async (e) => {
             e.preventDefault();
             const id = document.getElementById('editSnakeId').value;
@@ -362,21 +446,28 @@
                 name: s_name.value,
                 morph: s_morph.value,
                 gender: s_gender.value,
+                rack: document.getElementById('s_rack').value,
+                shelf: document.getElementById('s_shelf').value,
+                box: document.getElementById('s_box').value,
+                chip: document.getElementById('s_chip').value,
                 weight: parseFloat(s_weight.value),
                 length: parseFloat(s_length.value) || 0,
                 birthDate: s_birth.value,
                 buyDate: s_buy.value,
                 price: parseFloat(s_price.value) || 0,
+                salePrice: parseFloat(document.getElementById('s_sale_price').value) || 0,
                 source: s_source.value,
                 status: s_status.value,
+                sire: document.getElementById('s_sire').value,
+                dam: document.getElementById('s_dam').value,
                 images: imgArray,
                 note: s_note.value,
-                updatedAt: Date.now()
+                updatedAt: Date.now(),
+                lastEditor: currentUser.email
             };
 
             if (id) {
                 await updateDoc(doc(db, "snakes", id), data);
-                // หากกำลังเปิดดูรายละเอียดตัวนี้อยู่ ให้กดปิด Modal รายละเอียดแล้วเปิดใหม่เพื่อรีเฟรชค่ารูปภาพหลัก
                 detailModal.close();
             } else {
                 data.createdAt = Date.now();
@@ -388,11 +479,10 @@
         window.openAddModal = () => {
             document.getElementById('snakeForm').reset();
             document.getElementById('editSnakeId').value = "";
-            document.getElementById('modalTitle').innerText = "ลงทะเบียนงูเข้าคลัง";
+            document.getElementById('modalTitle').innerText = "ลงทะเบียนงูเข้าคลังสินค้าหลัก";
             snakeModal.showModal();
         };
 
-        // == EDIT SNAKE (ปุ่มแก้ไขข้อมูลหลัก) ==
         window.triggerEditMainSnake = (id) => {
             const s = cachedSnakes.find(item => item.id === id);
             if(!s) return;
@@ -402,36 +492,29 @@
             document.getElementById('s_name').value = s.name;
             document.getElementById('s_morph').value = s.morph;
             document.getElementById('s_gender').value = s.gender;
+            document.getElementById('s_rack').value = s.rack || "";
+            document.getElementById('s_shelf').value = s.shelf || "";
+            document.getElementById('s_box').value = s.box || "";
+            document.getElementById('s_chip').value = s.chip || "";
             document.getElementById('s_weight').value = s.weight;
-            document.getElementById('s_length').value = s.length;
-            document.getElementById('s_birth').value = s.birthDate;
-            document.getElementById('s_buy').value = s.buyDate;
-            document.getElementById('s_price').value = s.price;
-            document.getElementById('s_source').value = s.source;
+            document.getElementById('s_length').value = s.length || 0;
+            document.getElementById('s_birth').value = s.birthDate || "";
+            document.getElementById('s_buy').value = s.buyDate || "";
+            document.getElementById('s_price').value = s.price || 0;
+            document.getElementById('s_sale_price').value = s.salePrice || 0;
+            document.getElementById('s_source').value = s.source || "";
             document.getElementById('s_status').value = s.status;
+            document.getElementById('s_sire').value = s.sire || "";
+            document.getElementById('s_dam').value = s.dam || "";
             document.getElementById('s_images').value = s.images.join(', ');
-            document.getElementById('s_note').value = s.note;
+            document.getElementById('s_note').value = s.note || "";
             
-            document.getElementById('modalTitle').innerText = "แก้ไขข้อมูลหลักของน้องงู";
+            document.getElementById('modalTitle').innerText = "แก้ไขแฟ้มประวัติโครงสร้างหลัก";
             snakeModal.showModal();
         };
 
-        // == FINANCE EXPENSE ==
-        window.addExpense = async (e) => {
-            e.preventDefault();
-            const data = {
-                uid: currentUser.uid,
-                title: f_title.value,
-                amount: parseFloat(f_amount.value),
-                type: f_type.value,
-                createdAt: Date.now()
-            };
-            await addDoc(collection(db, "finance"), data);
-            document.getElementById('financeForm').reset();
-        };
-
         // ========================================================
-        // 📂 DEEP DETAIL VIEW & MULTI-POINT SUBCOLLECTION LOGIC
+        // 📂 DEEP DYNAMIC MODAL BOX VIEW (SCROLL & CHART INTEGRATED)
         // ========================================================
         window.viewDetail = async (id) => {
             const s = cachedSnakes.find(item => item.id === id);
@@ -441,98 +524,142 @@
 
             const content = document.getElementById('detailContent');
             content.innerHTML = `
-                <div class="flex justify-between items-center mb-3">
-                    <h2 class="text-lg font-bold text-primary flex items-center gap-2"><i class="fa-solid fa-folder-open"></i> ทะเบียนย่อยระดับฟาร์ม: ${s.name} [${s.code}]</h2>
-                    <button onclick="triggerEditMainSnake('${s.id}')" class="btn btn-sm btn-warning btn-outline"><i class="fa-solid fa-pen"></i> แก้ไขข้อมูลหลัก</button>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-base-200 p-4 rounded-xl text-xs space-y-1">
-                        <p>🧬 <span class="text-gray-400">Morph ยีนส์:</span> ${s.morph}</p>
-                        <p>⚤ <span class="text-gray-400">เพศสร้างสัญญาน:</span> ${s.gender}</p>
-                        <p>⚖️ <span class="text-gray-400">สถิติน้ำหนักคลัง:</span> ${s.weight} g</p>
-                        <p>🪙 <span class="text-gray-400">ต้นทุน:</span> ${s.price.toLocaleString()} บาท</p>
-                        <p class="pt-2">📝 <span class="text-gray-400">โน้ต:</span> ${s.note || '-'}</p>
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-4 border-b border-base-200 pb-2">
+                    <div>
+                        <h2 class="text-base lg:text-lg font-bold text-primary flex items-center gap-2"><i class="fa-solid fa-box-archive"></i> ทะเบียนฟาร์ม: ${s.name} [${s.code}]</h2>
+                        <p class="text-[11px] text-gray-400">แก้ไขล่าสุดโดย: ${s.lastEditor || 'System'} เมื่อ ${s.updatedAt ? new Date(s.updatedAt).toLocaleString() : '-'}</p>
                     </div>
-                    <div class="bg-white p-3 rounded-xl flex flex-col items-center justify-center text-black">
+                    <button onclick="triggerEditMainSnake('${s.id}')" class="btn btn-sm btn-warning btn-outline text-xs"><i class="fa-solid fa-pen-to-square"></i> แก้ไขข้อมูลโครงสร้างหลัก</button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-[11px] mb-4">
+                    <div class="bg-base-200 p-3 rounded-xl space-y-1">
+                        <p class="font-bold text-primary border-b border-base-300 pb-1">🧬ข้อมูลจำเพาะพันธุกรรม</p>
+                        <p><span class="text-gray-400">Morph พันธุ์:</span> ${s.morph}</p>
+                        <p><span class="text-gray-400">เพศโครงสร้าง:</span> ${s.gender}</p>
+                        <p><span class="text-gray-400">ความยาวลำตัว:</span> ${s.length || '-'} ซม.</p>
+                        <p><span class="text-gray-400">หมายเลขชิป:</span> ${s.chip || '-'}</p>
+                    </div>
+                    <div class="bg-base-200 p-3 rounded-xl space-y-1">
+                        <p class="font-bold text-secondary border-b border-base-300 pb-1">📍 พิกัดตำแหน่งแร็คฟาร์ม</p>
+                        <p><span class="text-gray-400">ตู้แร็ค (Rack):</span> ${s.rack || '-'}</p>
+                        <p><span class="text-gray-400">ชั้นวาง (Shelf):</span> ${s.shelf || '-'}</p>
+                        <p><span class="text-gray-400">หมายเลขกล่อง (Box):</span> ${s.box || '-'}</p>
+                        <p><span class="text-gray-400">บรีดเดอร์ต้นทาง:</span> ${s.source || '-'}</p>
+                    </div>
+                    <div class="bg-base-200 p-3 rounded-xl space-y-1">
+                        <p class="font-bold text-info border-b border-base-300 pb-1">🌳 สายเลือดแผนผัง (Family Tree)</p>
+                        <p><span class="text-gray-400">รหัสพ่อ (Sire):</span> <span class="badge badge-xs badge-info">${s.sire || 'ไม่ระบุ'}</span></p>
+                        <p><span class="text-gray-400">รหัสแม่ (Dam):</span> <span class="badge badge-xs badge-secondary">${s.dam || 'ไม่ระบุ'}</span></p>
+                        <p><span class="text-gray-400">ต้นทุนซื้อ:</span> ${s.price ? s.price.toLocaleString() : 0} ฿</p>
+                        <p><span class="text-gray-400">ราคาขายออก:</span> ${s.salePrice ? s.salePrice.toLocaleString() : 0} ฿</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center bg-base-200 p-3 rounded-xl mb-4 text-[11px]">
+                    <div class="md:col-span-3">
+                        <p class="font-bold mb-1 text-success"><i class="fa-solid fa-chart-line"></i> กราฟเส้นพัฒนาการแสดงสถิติน้ำหนักสะสม (Growth Rate Chart)</p>
+                        <div class="h-32 bg-base-100 rounded-lg p-1"><canvas id="nestedWeightChart"></canvas></div>
+                    </div>
+                    <div class="flex flex-col items-center justify-center bg-white p-2 rounded-xl text-black">
                         <div id="qrCanvas"></div>
-                        <span class="text-[10px] font-bold mt-2 text-neutral-500">QR CODE ประจำกล่องเลี้ยงสแกนเพื่อเปิดประวัติ</span>
+                        <span class="text-[9px] font-bold mt-1 text-center text-gray-500">QR ติดหน้ากล่องเลี้ยง</span>
                     </div>
                 </div>
 
-                <div class="mt-4 p-4 bg-base-200 rounded-xl">
-                    <h4 class="font-bold text-xs mb-2 text-success"><i class="fa-solid fa-chart-line"></i> กราฟพัฒนาการและการเจริญเติบโตสะสม (Weight History Graph)</h4>
-                    <canvas id="nestedWeightChart" class="w-full h-36"></canvas>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <div class="bg-base-200 p-4 rounded-xl">
-                        <h4 class="font-bold text-xs mb-2 text-primary">+ บันทึกประวัติน้ำหนักย่อย (weightHistory Sub)</h4>
-                        <div class="flex gap-2">
-                            <input type="number" id="sub_w_val" placeholder="กรัม" class="input input-bordered input-sm w-full" />
-                            <button onclick="addSubWeight('${s.id}')" class="btn btn-sm btn-primary">บันทึก</button>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="bg-base-200 p-3 rounded-xl">
+                        <h4 class="font-bold text-[11px] mb-2 text-primary flex justify-between">
+                            <span>📊 ประวัติน้ำหนักย่อย (weightHistory)</span>
+                            <span id="weightStats" class="text-gray-400 text-[10px]"></span>
+                        </h4>
+                        <div class="flex gap-1.5 mb-2">
+                            <input type="number" id="sub_w_val" placeholder="กรัม" class="input input-bordered input-xs w-full" />
+                            <input type="number" id="sub_w_len" placeholder="ซม." class="input input-bordered input-xs w-full" />
+                            <button onclick="addSubWeight('${s.id}')" class="btn btn-xs btn-primary px-3">บันทึก</button>
                         </div>
-                        <div class="overflow-y-auto max-h-28 text-[11px] mt-2 space-y-1" id="subWeightList"></div>
+                        <div class="overflow-y-auto max-h-36 space-y-1" id="subWeightList"></div>
                     </div>
 
-                    <div class="bg-base-200 p-4 rounded-xl">
-                        <h4 class="font-bold text-xs mb-2 text-warning">+ บันทึกการให้อาหาร (feedingHistory Sub)</h4>
-                        <div class="flex flex-col gap-1.5">
-                            <input type="text" id="sub_f_item" placeholder="ชนิดเหยื่อ เช่น หนูแช่ M" class="input input-bordered input-sm w-full" />
-                            <select id="sub_f_status" class="select select-bordered select-sm w-full"><option value="กิน">กินปกติ</option><option value="ไม่กิน">ไม่กิน</option></select>
-                            <button onclick="addSubFeed('${s.id}')" class="btn btn-sm btn-warning w-full">บันทึกมื้ออาหาร</button>
+                    <div class="bg-base-200 p-3 rounded-xl">
+                        <h4 class="font-bold text-[11px] mb-2 text-warning"><i class="fa-solid fa-drumstick-bite"></i> มื้ออาหารสะสม (feedingHistory)</h4>
+                        <div class="flex flex-col gap-1.5 mb-2">
+                            <div class="flex gap-1">
+                                <input type="text" id="sub_f_item" placeholder="หนูแช่ M / ไมส์" class="input input-bordered input-xs w-full" />
+                                <input type="number" id="sub_f_wt" placeholder="น้ำหนักเหยื่อ (g)" class="input input-bordered input-xs w-full" />
+                            </div>
+                            <select id="sub_f_status" class="select select-bordered select-xs w-full">
+                                <option value="กิน">สถานะ: กินปกติ</option>
+                                <option value="ไม่กิน">สถานะ: ไม่ยอมกิน</option>
+                                <option value="อ้วก">สถานะ: อาเจียนเหยื่อออก (อ้วก)</option>
+                            </select>
+                            <button onclick="addSubFeed('${s.id}')" class="btn btn-xs btn-warning w-full font-bold">บันทึกการกินอาหาร</button>
                         </div>
-                        <div class="overflow-y-auto max-h-24 text-[11px] mt-2 space-y-1" id="subFeedList"></div>
+                        <div class="overflow-y-auto max-h-32 space-y-1" id="subFeedList"></div>
                     </div>
                 </div>
 
-                <div class="modal-action"><button onclick="detailModal.close()" class="btn btn-sm">ปิดแฟ้มประวัติ</button></div>
+                <div class="modal-action mt-4 border-t border-base-200 pt-2">
+                    <button onclick="deleteMainSnake('${s.id}')" class="btn btn-xs btn-error btn-outline mr-auto"><i class="fa-solid fa-trash"></i> ลบงูตัวนี้ออกจากระบบถาวร</button>
+                    <button onclick="detailModal.close()" class="btn btn-sm btn-ghost">ปิดหน้าต่างแฟ้มประวัติ</button>
+                </div>
             `;
             detailModal.showModal();
 
             setTimeout(() => {
-                new QRCode(document.getElementById("qrCanvas"), { text: window.location.href + "?code=" + s.code, width: 80, height: 80 });
+                const canvasNode = document.getElementById("qrCanvas");
+                canvasNode.innerHTML = "";
+                new QRCode(canvasNode, { text: s.code, width: 70, height: 70 });
                 syncSubcollections(s.id);
-            }, 250);
+            }, 200);
         };
 
-        // == SYNC MULTI-POINT SUBCOLLECTIONS (WEIGHT & FEED) ==
+        // == SYNC NESTED DATA AND DESTROY PREVIOUS CHARTS TO FIX MOBILE SCROLLING FLICKER ==
         function syncSubcollections(snakeId) {
             const wRef = query(collection(db, "snakes", snakeId, "weightHistory"), orderBy("date", "asc"));
             activeSubcollectionUnsubscribe = onSnapshot(wRef, (wSnapshot) => {
-                let labels = ['เริ่มต้น'];
-                let weights = [cachedSnakes.find(x => x.id === snakeId).weight * 0.95];
+                let labels = ['รับเข้า'];
+                let weights = [cachedSnakes.find(x => x.id === snakeId).weight];
                 const listEl = document.getElementById('subWeightList');
                 listEl.innerHTML = "";
+
+                let maxW = weights[0];
+                let minW = weights[0];
+                let totalW = weights[0];
+                let countW = 1;
 
                 wSnapshot.forEach(doc => {
                     const data = doc.data();
                     labels.push(new Date(data.date).toLocaleDateString('th-TH'));
                     weights.push(data.weight);
-                    // เพิ่มปุ่มกากบาทสีแดงสำหรับลบประวัติน้ำหนักย่อยย้อนหลังได้ตามสั่ง
+                    
+                    if(data.weight > maxW) maxW = data.weight;
+                    if(data.weight < minW) minW = data.weight;
+                    totalW += data.weight;
+                    countW++;
+
                     listEl.innerHTML += `
-                        <div class="bg-base-100 p-1.5 rounded mb-1 flex justify-between items-center">
-                            <span>📅 ${new Date(data.date).toLocaleDateString()} -> <b>${data.weight} g</b></span>
-                            <button onclick="deleteSubWeight('${snakeId}','${doc.id}')" class="btn btn-ghost btn-xs text-error"><i class="fa-solid fa-xmark"></i></button>
+                        <div class="bg-base-100 p-1 rounded mb-1 flex justify-between items-center text-[11px]">
+                            <span>📅 ${new Date(data.date).toLocaleDateString('th-TH')} → <b class="text-success">${data.weight} g</b> (L:${data.length || '-'}cm)</span>
+                            <button onclick="deleteSubDoc('${snakeId}','weightHistory','${doc.id}')" class="text-error btn btn-ghost btn-xs p-0 min-h-0 h-4 w-4"><i class="fa-solid fa-xmark"></i></button>
                         </div>`;
                 });
 
-                // แก้ไขบั๊กด้วยการทำลาย Instance ของกราฟเก่าทิ้ง เพื่อไม่ให้จอกระตุกและเลื่อนแล้วไหลขึ้นเอง
+                let avgW = (totalW / countW).toFixed(1);
+                let growthPct = (((weights[weights.length-1] - weights[0]) / weights[0]) * 100).toFixed(1);
+                document.getElementById('weightStats').innerText = `สูงสุด: ${maxW}g | เฉลี่ย: ${avgW}g | เติบโต: ${growthPct}%`;
+
+                // 🛠️ ตรวจสอบล้างหน่วยความจำกราฟเดิมอย่างสม่ำเสมอ แก้ปัญหาการ Reflow เลื่อนหน้าจอเด้งกลับบน iOS
                 const ctx = document.getElementById('nestedWeightChart').getContext('2d');
-                if (weightChartInstance) {
-                    weightChartInstance.destroy();
-                }
+                if (weightChartInstance) { weightChartInstance.destroy(); }
                 
                 weightChartInstance = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: labels,
-                        datasets: [{ label: 'น้ำหนักสะสม (กรัม)', data: weights, borderColor: '#4CAF50', backgroundColor: 'rgba(76,175,80,0.1)', fill: true, tension: 0.3 }]
+                        datasets: [{ label: 'ประวัติน้ำหนัก (g)', data: weights, borderColor: '#4CAF50', backgroundColor: 'rgba(76,175,80,0.05)', fill: true, tension: 0.2 }]
                     },
-                    options: { 
-                        responsive: true, 
-                        maintainAspectRatio: false,
-                        animation: false // ปิดอนิเมชั่นเพื่อความลื่นไหลระดับมือถือ
-                    }
+                    options: { responsive: true, maintainAspectRatio: false, animation: false, scales: { y: { ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 8 } } } } }
                 });
             });
 
@@ -542,81 +669,99 @@
                 fList.innerHTML = "";
                 fSnapshot.forEach(doc => {
                     const data = doc.data();
-                    fList.innerHTML += `<div class="bg-base-100 p-1 rounded mb-1">🍖 ${data.foodItem} -> <span class="${data.status === 'กิน' ? 'text-success' : 'text-error'} font-bold">${data.status}</span></div>`;
+                    let colorClass = data.status === 'กิน' ? 'text-success' : (data.status === 'อ้วก' ? 'text-error font-bold' : 'text-neutral-500');
+                    fList.innerHTML += `
+                        <div class="bg-base-100 p-1 rounded mb-1 flex justify-between items-center text-[11px]">
+                            <span>🍖 ${data.foodItem} (${data.foodWeight || 0}g) → <span class="${colorClass}">${data.status}</span></span>
+                            <button onclick="deleteSubDoc('${snakeId}','feedingHistory','${doc.id}')" class="text-error btn btn-ghost btn-xs p-0 min-h-0 h-4 w-4"><i class="fa-solid fa-xmark"></i></button>
+                        </div>`;
                 });
             });
         }
 
-        // เพิ่มบันทึกประวัติน้ำหนักย่อย
         window.addSubWeight = async (snakeId) => {
-            const val = parseFloat(document.getElementById('sub_w_val').value);
-            if(!val) return;
-            await addDoc(collection(db, "snakes", snakeId, "weightHistory"), {
-                weight: val,
-                date: Date.now()
-            });
+            const wVal = parseFloat(document.getElementById('sub_w_val').value);
+            const lVal = parseFloat(document.getElementById('sub_w_len').value) || 0;
+            if(!wVal) return;
+            await addDoc(collection(db, "snakes", snakeId, "weightHistory"), { weight: wVal, length: lVal, date: Date.now() });
+            await updateDoc(doc(db, "snakes", snakeId), { weight: wVal, length: lVal });
             document.getElementById('sub_w_val').value = "";
+            document.getElementById('sub_w_len').value = "";
         };
 
-        // ลบประวัติน้ำหนักย่อยย้อนหลัง
-        window.deleteSubWeight = async (snakeId, docId) => {
-            if(confirm("ต้องการลบประวัติน้ำหนักจุดนี้ใช่ไหม?")) {
-                await deleteDoc(doc(db, "snakes", snakeId, "weightHistory", docId));
+        window.addSubFeed = async (snakeId) => {
+            const item = document.getElementById('sub_f_item').value;
+            const itemWt = parseFloat(document.getElementById('sub_f_wt').value) || 0;
+            const stat = document.getElementById('sub_f_status').value;
+            if(!item) return;
+            await addDoc(collection(db, "snakes", snakeId, "feedingHistory"), { foodItem: item, foodWeight: itemWt, status: stat, date: Date.now() });
+            document.getElementById('sub_f_item').value = "";
+            document.getElementById('sub_f_wt').value = "";
+        };
+
+        window.deleteSubDoc = async (snakeId, subColl, docId) => {
+            if(confirm("ยืนยันการลบรายการประวัติย่อยจุดนี้?")) {
+                await deleteDoc(doc(db, "snakes", snakeId, subColl, docId));
             }
         };
 
-        // เพิ่มบันทึกอาหารย่อย
-        window.addSubFeed = async (snakeId) => {
-            const item = document.getElementById('sub_f_item').value;
-            const status = document.getElementById('sub_f_status').value;
-            if(!item) return;
-            await addDoc(collection(db, "snakes", snakeId, "feedingHistory"), {
-                foodItem: item,
-                status: status,
-                date: Date.now()
-            });
-            document.getElementById('sub_f_item').value = "";
+        window.deleteMainSnake = async (id) => {
+            if(confirm("🚨 แจ้งเตือนระดับความปลอดภัยสูง: คุณกำลังจะลบข้อมูลงูตัวนี้พร้อมประวัติย่อยทิ้งทั้งหมดอย่างถาวร ยืนยันหรือไม่?")) {
+                await deleteDoc(doc(db, "snakes", id));
+                detailModal.close();
+            }
         };
 
         // == EXPORT EXCEL SYSTEM ==
         window.exportData = () => {
             const ws = XLSX.utils.json_to_sheet(cachedSnakes.map(({id, uid, images, ...r}) => r));
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "FarmRegistry");
-            XLSX.writeFile(wb, "Farm_Snake_Pro_Enterprise.xlsx");
+            XLSX.utils.book_append_sheet(wb, ws, "คลังสินค้าฟาร์มงู");
+            XLSX.writeFile(wb, "Farm_SnakePro_Enterprise_Ultimate.xlsx");
         };
 
-        // == FILTER & SEARCH ==
+        // == ADVANCED MULTI-FIELD SEARCH AND FILTERS ENGINE ==
         window.filterSnakes = () => {
-            const txt = searchBar.value.toLowerCase();
-            const filterVal = filterSelect.value;
-            const sortVal = sortSelect.value;
+            const textQuery = searchBar.value.toLowerCase();
+            const filterType = filterSelect.value;
+            const sortType = sortSelect.value;
 
-            let filtered = cachedSnakes.filter(s => {
-                const mSearch = s.name.toLowerCase().includes(txt) || s.morph.toLowerCase().includes(txt) || s.code.toLowerCase().includes(txt);
-                let mFilter = true;
-                if(filterVal !== 'all') {
-                    if(filterVal.includes('0.1') || filterVal.includes('1.0')) mFilter = s.gender === filterVal;
-                    else mFilter = s.status === filterVal;
+            let result = cachedSnakes.filter(s => {
+                const matchesSearch = 
+                    s.name.toLowerCase().includes(textQuery) || 
+                    s.morph.toLowerCase().includes(textQuery) || 
+                    s.code.toLowerCase().includes(textQuery) ||
+                    (s.rack && s.rack.toLowerCase().includes(textQuery)) ||
+                    (s.box && s.box.toLowerCase().includes(textQuery)) ||
+                    (s.chip && s.chip.toLowerCase().includes(textQuery));
+                
+                let matchesFilter = true;
+                if(filterType !== 'all') {
+                    if(filterType.includes('0.1') || filterType.includes('1.0')) {
+                        matchesFilter = s.gender === filterType;
+                    } else {
+                        matchesFilter = s.status === filterType;
+                    }
                 }
-                return mSearch && mFilter;
+                return matchesSearch && matchesFilter;
             });
 
-            if (sortVal === 'weight') filtered.sort((a,b) => b.weight - a.weight);
-            if (sortVal === 'price') filtered.sort((a,b) => b.price - a.price);
+            if (sortType === 'weight') result.sort((a,b) => b.weight - a.weight);
+            if (sortType === 'price') result.sort((a,b) => b.price - a.price);
 
             const grid = document.getElementById('snakeGrid');
             grid.innerHTML = "";
-            filtered.forEach(s => {
+            result.forEach(s => {
                 const div = document.createElement('div');
                 div.className = "card bg-base-100 shadow-xl border border-base-200 overflow-hidden";
                 div.innerHTML = `
-                    <figure class="h-44 bg-neutral relative"><img src="${s.images[0]}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/300x150?text=No+Image'"><div class="absolute top-2 left-2 badge badge-neutral bg-black/70">${s.code}</div></figure>
-                    <div class="card-body p-4 gap-1">
-                        <h3 class="card-title text-base font-bold">${s.name}</h3>
-                        <p class="text-xs text-primary font-bold">${s.morph} (${s.gender})</p>
-                        <p class="text-xs text-gray-400 mt-2"><i class="fa-solid fa-weight-scale"></i> ปัจจุบัน: ${s.weight} กรัม</p>
-                        <div class="card-actions justify-end mt-2"><button onclick="viewDetail('${s.id}')" class="btn btn-xs btn-primary">เปิดแฟ้มทะเบียนย่อย</button></div>
+                    <figure class="h-44 bg-neutral relative"><img src="${s.images[0]}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/400x200?text=No+Image'"><div class="absolute top-2 left-2 badge badge-neutral bg-black/70 font-mono">${s.code}</div><div class="absolute bottom-2 right-2 text-[10px] bg-primary text-white p-1 rounded font-bold">📍 R:${s.rack || '-'} B:${s.box || '-'}</div></figure>
+                    <div class="card-body p-4 gap-1 text-xs">
+                        <h3 class="card-title text-sm lg:text-base font-bold">${s.name}</h3>
+                        <p class="text-primary font-bold">${s.morph} (${s.gender})</p>
+                        <div class="divider my-1"></div>
+                        <p class="text-gray-400"><i class="fa-solid fa-weight-scale"></i> น้ำหนักปัจจุบัน: <b class="text-base-content">${s.weight} g</b></p>
+                        <div class="card-actions justify-end mt-2"><button onclick="viewDetail('${s.id}')" class="btn btn-xs btn-primary font-bold"><i class="fa-solid fa-folder-open"></i> เปิดแฟ้มประวัติเชิงลึก</button></div>
                     </div>
                 `;
                 grid.appendChild(div);
