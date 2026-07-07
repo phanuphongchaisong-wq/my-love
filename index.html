@@ -20,6 +20,12 @@
         .btm-nav { padding-bottom: env(safe-area-inset-bottom); }
         #calendar { max-height: 500px; font-size: 12px; }
         .fc-theme-standard td, .fc-theme-standard th { border-color: #333 !important; }
+        
+        /* CSS แก้ไขปัญหาหน้าจอเด้ง/ไหลบนมือถือ */
+        .modal-box {
+            overscroll-behavior-y: contain; 
+            -webkit-overflow-scrolling: touch; 
+        }
     </style>
 </head>
 <body class="bg-base-300 text-base-content min-h-screen pb-28 transition-colors duration-300">
@@ -210,6 +216,7 @@
         let cachedExpenses = [];
         let calendarObj = null;
         let activeSubcollectionUnsubscribe = null;
+        let weightChartInstance = null; // ตัวแปรแก้บั๊กกราฟซ้อนกระตุก
 
         // == THEME SYSTEM (DARK / LIGHT CACHE) ==
         let currentTheme = localStorage.getItem('theme') || 'dark';
@@ -270,7 +277,6 @@
 
         // == REALTIME SYNC DATA ==
         function listenToData() {
-            // ดึงข้อมูลงูหลัก
             const qSnakes = query(collection(db, "snakes"), where("uid", "==", currentUser.uid));
             onSnapshot(qSnakes, (snapshot) => {
                 cachedSnakes = [];
@@ -279,7 +285,6 @@
                 runAIAnalysis();
             });
 
-            // ดึงข้อมูลรายจ่ายฟาร์มสะสม
             const qExpense = query(collection(db, "finance"), where("uid", "==", currentUser.uid));
             onSnapshot(qExpense, (snapshot) => {
                 cachedExpenses = [];
@@ -291,25 +296,25 @@
                     const data = doc.data();
                     cachedExpenses.push(data);
                     totalExp += data.amount;
-                    expBox.innerHTML += `<div class="flex justify-between bg-base-200 p-1.5 rounded mb-1"><span>${data.title} (${data.type})</span><span class="text-error font-bold">-${data.amount} ฿</span></div>`;
+                    expBox.innerHTML += `<div class="flex justify-between bg-base-200 p-1.5 rounded mb-1"><span>${data.title}</span><span class="text-error font-bold">-${data.amount} ฿</span></div>`;
                 });
                 document.getElementById('d_expenses').innerText = `${totalExp.toLocaleString()} ฿`;
             });
         }
 
-        // == AI RULE ENGINE ACCORDING TO TODO SPEC ==
+        // == AI ENGINE ==
         function runAIAnalysis() {
             const insightBox = document.getElementById('aiInsights');
             if (cachedSnakes.length === 0) {
-                insightBox.innerHTML = "<p>⚠️ ดาต้าเบสฟาร์มว่างเปล่า เพิ่มข้อมูลงูอย่างน้อย 1 ตัวเพื่อให้ AI เริ่มต้นคำนวณรอบกินคราบและวิเคราะห์สุขภาพน้องงู</p>";
+                insightBox.innerHTML = "<p>⚠️ ดาต้าเบสฟาร์มว่างเปล่า เพิ่มข้อมูลงูอย่างน้อย 1 ตัวเพื่อให้ AI เริ่มวิเคราะห์</p>";
                 return;
             }
             let html = "";
             let redEye = cachedSnakes.filter(s => s.status === "กำลังลอกคราบ");
             if (redEye.length > 0) {
-                html += `<p class="text-warning">🔮 <span class="font-bold">AI คาดการณ์การลอกคราบ:</span> พบงู ${redEye.length} ตัว กำลังเข้าเรดไอ คาดว่าจะเริ่มลอกคราบสมบูรณ์ภายใน 5-7 วันข้างหน้า แนะนำให้จัดกล่องอับความชื้นและงดรบกวน</p>`;
+                html += `<p class="text-warning">🔮 <span>AI คาดการณ์การลอกคราบ:</span> พบงู ${redEye.length} ตัว กำลังเข้าเรดไอ คาดว่าจะเริ่มลอกคราบสมบูรณ์ภายใน 5-7 วันข้างหน้า</p>`;
             } else {
-                html += `<p class="text-success">✨ <span class="font-bold">AI สุขภาพคงที่:</span> ไม่พบพฤติกรรมหรือแนวโน้มน้ำหนักลดลงในระบบฟาร์ม โครงสร้างสารอาหารของงูทุกตัวอยู่ในเกณฑ์ดีเยี่ยม</p>`;
+                html += `<p class="text-success">✨ <span>AI สุขภาพคงที่:</span> ไม่พบแนวโน้มน้ำหนักลดลงในระบบฟาร์ม</p>`;
             }
             insightBox.innerHTML = html;
         }
@@ -345,7 +350,7 @@
             });
         }
 
-        // == SAVE SNAKE MAIN DATA ==
+        // == SAVE / UPDATE SNAKE ==
         window.saveSnake = async (e) => {
             e.preventDefault();
             const id = document.getElementById('editSnakeId').value;
@@ -371,6 +376,8 @@
 
             if (id) {
                 await updateDoc(doc(db, "snakes", id), data);
+                // หากกำลังเปิดดูรายละเอียดตัวนี้อยู่ ให้กดปิด Modal รายละเอียดแล้วเปิดใหม่เพื่อรีเฟรชค่ารูปภาพหลัก
+                detailModal.close();
             } else {
                 data.createdAt = Date.now();
                 await addDoc(collection(db, "snakes"), data);
@@ -385,7 +392,31 @@
             snakeModal.showModal();
         };
 
-        // == ADD GENERAL EXPENSE ==
+        // == EDIT SNAKE (ปุ่มแก้ไขข้อมูลหลัก) ==
+        window.triggerEditMainSnake = (id) => {
+            const s = cachedSnakes.find(item => item.id === id);
+            if(!s) return;
+            
+            document.getElementById('editSnakeId').value = s.id;
+            document.getElementById('s_code').value = s.code;
+            document.getElementById('s_name').value = s.name;
+            document.getElementById('s_morph').value = s.morph;
+            document.getElementById('s_gender').value = s.gender;
+            document.getElementById('s_weight').value = s.weight;
+            document.getElementById('s_length').value = s.length;
+            document.getElementById('s_birth').value = s.birthDate;
+            document.getElementById('s_buy').value = s.buyDate;
+            document.getElementById('s_price').value = s.price;
+            document.getElementById('s_source').value = s.source;
+            document.getElementById('s_status').value = s.status;
+            document.getElementById('s_images').value = s.images.join(', ');
+            document.getElementById('s_note').value = s.note;
+            
+            document.getElementById('modalTitle').innerText = "แก้ไขข้อมูลหลักของน้องงู";
+            snakeModal.showModal();
+        };
+
+        // == FINANCE EXPENSE ==
         window.addExpense = async (e) => {
             e.preventDefault();
             const data = {
@@ -399,17 +430,21 @@
             document.getElementById('financeForm').reset();
         };
 
-        // == SUBCOLLECTIONS LOGIC: DEEP NESTED REGISTRATION (WEIGHT & FEED) ==
+        // ========================================================
+        // 📂 DEEP DETAIL VIEW & MULTI-POINT SUBCOLLECTION LOGIC
+        // ========================================================
         window.viewDetail = async (id) => {
             const s = cachedSnakes.find(item => item.id === id);
             if(!s) return;
 
-            // เคลียร์ Listener เก่าถ้าเปิดตัวอื่นซ้ำ
             if(activeSubcollectionUnsubscribe) activeSubcollectionUnsubscribe();
 
             const content = document.getElementById('detailContent');
             content.innerHTML = `
-                <h2 class="text-lg font-bold text-primary mb-3"><i class="fa-solid fa-folder-open"></i> ทะเบียนย่อยระดับฟาร์ม: ${s.name} [${s.code}]</h2>
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-lg font-bold text-primary flex items-center gap-2"><i class="fa-solid fa-folder-open"></i> ทะเบียนย่อยระดับฟาร์ม: ${s.name} [${s.code}]</h2>
+                    <button onclick="triggerEditMainSnake('${s.id}')" class="btn btn-sm btn-warning btn-outline"><i class="fa-solid fa-pen"></i> แก้ไขข้อมูลหลัก</button>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="bg-base-200 p-4 rounded-xl text-xs space-y-1">
                         <p>🧬 <span class="text-gray-400">Morph ยีนส์:</span> ${s.morph}</p>
@@ -443,7 +478,7 @@
                         <h4 class="font-bold text-xs mb-2 text-warning">+ บันทึกการให้อาหาร (feedingHistory Sub)</h4>
                         <div class="flex flex-col gap-1.5">
                             <input type="text" id="sub_f_item" placeholder="ชนิดเหยื่อ เช่น หนูแช่ M" class="input input-bordered input-sm w-full" />
-                            <select id="sub_f_status" class="select select-bordered select-sm w-full"><option value="กิน">กินปกติ</option><option value="ไม่กิน">ไม่กิน/สะบัดหน้าหนี</option></select>
+                            <select id="sub_f_status" class="select select-bordered select-sm w-full"><option value="กิน">กินปกติ</option><option value="ไม่กิน">ไม่กิน</option></select>
                             <button onclick="addSubFeed('${s.id}')" class="btn btn-sm btn-warning w-full">บันทึกมื้ออาหาร</button>
                         </div>
                         <div class="overflow-y-auto max-h-24 text-[11px] mt-2 space-y-1" id="subFeedList"></div>
@@ -454,14 +489,13 @@
             `;
             detailModal.showModal();
 
-            // ทำคิวอาร์โค้ดสแกนหน้ากล่อง
             setTimeout(() => {
                 new QRCode(document.getElementById("qrCanvas"), { text: window.location.href + "?code=" + s.code, width: 80, height: 80 });
                 syncSubcollections(s.id);
             }, 250);
         };
 
-        // == SYNC REALTIME MULTI-POINT SUBCOLLECTIONS ==
+        // == SYNC MULTI-POINT SUBCOLLECTIONS (WEIGHT & FEED) ==
         function syncSubcollections(snakeId) {
             const wRef = query(collection(db, "snakes", snakeId, "weightHistory"), orderBy("date", "asc"));
             activeSubcollectionUnsubscribe = onSnapshot(wRef, (wSnapshot) => {
@@ -474,22 +508,34 @@
                     const data = doc.data();
                     labels.push(new Date(data.date).toLocaleDateString('th-TH'));
                     weights.push(data.weight);
-                    listEl.innerHTML += `<div class="bg-base-100 p-1 rounded mb-1">📅 ${new Date(data.date).toLocaleDateString()} - <span class="text-success font-bold">${data.weight} g</span></div>`;
+                    // เพิ่มปุ่มกากบาทสีแดงสำหรับลบประวัติน้ำหนักย่อยย้อนหลังได้ตามสั่ง
+                    listEl.innerHTML += `
+                        <div class="bg-base-100 p-1.5 rounded mb-1 flex justify-between items-center">
+                            <span>📅 ${new Date(data.date).toLocaleDateString()} -> <b>${data.weight} g</b></span>
+                            <button onclick="deleteSubWeight('${snakeId}','${doc.id}')" class="btn btn-ghost btn-xs text-error"><i class="fa-solid fa-xmark"></i></button>
+                        </div>`;
                 });
 
-                // วาดกราฟเส้นอัจฉริยะหลายจุดสะสม
+                // แก้ไขบั๊กด้วยการทำลาย Instance ของกราฟเก่าทิ้ง เพื่อไม่ให้จอกระตุกและเลื่อนแล้วไหลขึ้นเอง
                 const ctx = document.getElementById('nestedWeightChart').getContext('2d');
-                new Chart(ctx, {
+                if (weightChartInstance) {
+                    weightChartInstance.destroy();
+                }
+                
+                weightChartInstance = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: labels,
                         datasets: [{ label: 'น้ำหนักสะสม (กรัม)', data: weights, borderColor: '#4CAF50', backgroundColor: 'rgba(76,175,80,0.1)', fill: true, tension: 0.3 }]
                     },
-                    options: { responsive: true, maintainAspectRatio: false }
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        animation: false // ปิดอนิเมชั่นเพื่อความลื่นไหลระดับมือถือ
+                    }
                 });
             });
 
-            // ซิงค์ประวัติอาหารเข้าหน้าต่างย่อย
             const fRef = query(collection(db, "snakes", snakeId, "feedingHistory"), orderBy("date", "desc"));
             onSnapshot(fRef, (fSnapshot) => {
                 const fList = document.getElementById('subFeedList');
@@ -501,7 +547,7 @@
             });
         }
 
-        // บันทึกประวัติน้ำหนักย่อยลง Subcollection ตรงๆ
+        // เพิ่มบันทึกประวัติน้ำหนักย่อย
         window.addSubWeight = async (snakeId) => {
             const val = parseFloat(document.getElementById('sub_w_val').value);
             if(!val) return;
@@ -512,7 +558,14 @@
             document.getElementById('sub_w_val').value = "";
         };
 
-        // บันทึกประวัติมื้ออาหารลง Subcollection ตรงๆ
+        // ลบประวัติน้ำหนักย่อยย้อนหลัง
+        window.deleteSubWeight = async (snakeId, docId) => {
+            if(confirm("ต้องการลบประวัติน้ำหนักจุดนี้ใช่ไหม?")) {
+                await deleteDoc(doc(db, "snakes", snakeId, "weightHistory", docId));
+            }
+        };
+
+        // เพิ่มบันทึกอาหารย่อย
         window.addSubFeed = async (snakeId) => {
             const item = document.getElementById('sub_f_item').value;
             const status = document.getElementById('sub_f_status').value;
@@ -533,7 +586,7 @@
             XLSX.writeFile(wb, "Farm_Snake_Pro_Enterprise.xlsx");
         };
 
-        // ระบบกรองและเซิร์ช
+        // == FILTER & SEARCH ==
         window.filterSnakes = () => {
             const txt = searchBar.value.toLowerCase();
             const filterVal = filterSelect.value;
