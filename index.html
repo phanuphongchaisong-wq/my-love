@@ -78,7 +78,7 @@
         <div class="container mx-auto p-4 lg:p-6">
             
             <div id="tab-dashboard" class="tab-content-item">
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
                     <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3">
                         <div class="stat-title text-[11px] text-gray-400">งูในความดูแลทั้งหมด</div>
                         <div class="stat-value text-xl text-primary" id="d_total">0</div>
@@ -96,12 +96,20 @@
                         <div class="stat-value text-xl text-info" id="d_weight">0</div>
                     </div>
                     <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3">
+                        <div class="stat-title text-[11px] text-emerald-400">🥚 ไข่กำลังฟัก</div>
+                        <div class="stat-value text-xl text-emerald-400" id="d_eggs">0</div>
+                    </div>
+                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3">
                         <div class="stat-title text-[11px] text-error">ต้องรับยารักษา</div>
                         <div class="stat-value text-xl text-error" id="d_med">0</div>
                     </div>
                     <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3">
-                        <div class="stat-title text-[11px] text-emerald-400">🥚 ไข่กำลังฟัก</div>
-                        <div class="stat-value text-xl text-emerald-400" id="d_eggs">0</div>
+                        <div class="stat-title text-[11px] text-error font-bold">💸 รายจ่ายสะสม</div>
+                        <div class="stat-value text-lg text-error" id="d_expenses">0 ฿</div>
+                    </div>
+                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3">
+                        <div class="stat-title text-[11px] text-success font-bold">📦 สต็อกอาหารรวม</div>
+                        <div class="stat-value text-xl text-success" id="d_stock_total">0</div>
                     </div>
                 </div>
 
@@ -144,6 +152,43 @@
                 </div>
             </div>
 
+            <div id="tab-finance" class="tab-content-item hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="card bg-base-100 p-4 shadow border border-base-200">
+                        <h3 class="font-bold text-sm mb-3 text-primary flex items-center gap-2"><i class="fa-solid fa-box-open"></i> ระบบสต็อกเหยื่อ/อาหาร</h3>
+                        <div class="flex gap-2 mb-3">
+                            <input type="text" id="fs_name" placeholder="ชื่ออาหาร เช่น หนูแช่ M" class="input input-bordered input-sm w-full" />
+                            <input type="number" id="fs_qty" placeholder="จำนวนตัว" class="input input-bordered input-sm w-24" />
+                            <button onclick="addFoodStock()" class="btn btn-sm btn-primary">เพิ่มเข้า</button>
+                        </div>
+                        <div class="divider my-1"></div>
+                        <div class="overflow-y-auto max-h-64 space-y-2 text-xs" id="foodStockList">
+                            </div>
+                        <p class="text-[10px] text-gray-500 mt-2">*หมายเหตุ: สต็อกจะถูกหักอัตโนมัติ 1 ตัว เมื่อบันทึกสถานะการให้อาหารว่า 'กินปกติ'</p>
+                    </div>
+
+                    <div class="card bg-base-100 p-4 shadow border border-base-200">
+                        <h3 class="font-bold text-sm mb-3 text-error flex items-center gap-2"><i class="fa-solid fa-receipt"></i> บันทึกบัญชีรายจ่าย</h3>
+                        <form onsubmit="addExpense(event)" class="space-y-2 mb-3">
+                            <input type="text" id="fx_title" placeholder="รายละเอียดรายการ เช่น ซื้อหนูแพ็ค, ค่าไฟ" required class="input input-bordered input-sm w-full" />
+                            <div class="flex gap-2">
+                                <input type="number" id="fx_amount" placeholder="ยอดเงิน (บาท)" required class="input input-bordered input-sm w-full" />
+                                <select id="fx_category" class="select select-bordered select-sm w-full">
+                                    <option value="ค่าอาหาร">หมวดหมู่: ค่าอาหาร</option>
+                                    <option value="ค่าอุปกรณ์">หมวดหมู่: ค่าอุปกรณ์</option>
+                                    <option value="ค่ายา/รักษา">หมวดหมู่: ค่ายา/รักษา</option>
+                                    <option value="อื่นๆ">หมวดหมู่: อื่นๆ</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-error w-full font-bold">บันทึกบิลรายจ่าย</button>
+                        </form>
+                        <div class="divider my-1"></div>
+                        <div class="overflow-y-auto max-h-56 space-y-1 text-xs" id="expenseList">
+                            </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <div class="fixed bottom-24 right-6 z-40">
@@ -152,16 +197,21 @@
 
         <div class="btm-nav border-t border-base-200 bg-base-100">
             <button onclick="switchTab('dashboard')" id="nav-dashboard" class="active text-primary">
-                <i class="fa-solid fa-chart-line text-lg"></i><span class="text-xs">แดชบอร์ด</span>
+                <i class="fa-solid fa-chart-line text-lg"></i><span class="text-[10px]">แดชบอร์ด</span>
             </button>
             <button onclick="switchTab('snakes')" id="nav-snakes">
-                <i class="fa-solid fa-snake text-lg"></i><span class="text-xs">รายการงู</span>
+                <i class="fa-solid fa-snake text-lg"></i><span class="text-[10px]">รายการงู</span>
             </button>
             <button onclick="switchTab('calendar')" id="nav-calendar">
-                <i class="fa-solid fa-calendar-week text-lg"></i><span class="text-xs">ปฏิทินงาน</span>
+                <i class="fa-solid fa-calendar-week text-lg"></i><span class="text-[10px]">ปฏิทิน</span>
+            </button>
+            <button onclick="switchTab('finance')" id="nav-finance">
+                <i class="fa-solid fa-wallet text-lg"></i><span class="text-[10px]">บัญชี/สต็อก</span>
             </button>
         </div>
     </div>
+
+    <datalist id="foodDatalist"></datalist>
 
     <dialog id="detailModal" class="modal">
         <div class="modal-box max-w-4xl bg-base-100 shadow-2xl rounded-2xl p-4 lg:p-6" id="detailContent"></div>
@@ -236,11 +286,11 @@
         let currentUser = null;
         let cachedSnakes = [];
         let cachedExpenses = [];
+        let cachedFoodStock = []; // ตัวแปรเก็บข้อมูลสต็อก
         let calendarObj = null;
         let activeSubcollectionUnsubscribe = null;
-        let weightChartInstance = null; // ป้องกันการสร้างกราฟทับซ้อนต้นเหตุของบั๊กจอเด้ง
+        let weightChartInstance = null;
 
-        // == การจัดการระบบ THEME MEMORY ==
         let currentTheme = localStorage.getItem('theme') || 'dark';
         document.documentElement.setAttribute('data-theme', currentTheme);
         
@@ -251,7 +301,6 @@
             document.getElementById('themeBtn').innerHTML = currentTheme === 'dark' ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
         };
 
-        // == สลับการแสดงผลหน้าเพจหลัก (MAIN NAV SYSTEM) ==
         window.switchTab = (tabName) => {
             document.querySelectorAll('.tab-content-item').forEach(el => el.classList.add('hidden'));
             document.getElementById(`tab-${tabName}`).classList.remove('hidden');
@@ -260,7 +309,6 @@
             if(tabName === 'calendar' && calendarObj) { calendarObj.render(); }
         };
 
-        // == ตรวจสอบสถานะความปลอดภัยผู้ใช้งาน (AUTH STATE) ==
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
@@ -285,7 +333,6 @@
         };
         window.logoutUser = () => signOut(auth);
 
-        // == เริ่มต้นระบบปฏิทินงานภายในฟาร์ม ==
         function initCalendar() {
             const calendarEl = document.getElementById('calendar');
             calendarObj = new FullCalendar.Calendar(calendarEl, {
@@ -297,8 +344,9 @@
             calendarObj.render();
         }
 
-        // == ซิงค์เชื่อมต่อฐานข้อมูลระดับบัญชีผู้ใช้จริง (REALTIME CLOUD SYNC) ==
+        // == ซิงค์ข้อมูล Realtime (งู, รายจ่าย, สต็อก) ==
         function listenToData() {
+            // 1. ดึงข้อมูลงู
             const qSnakes = query(collection(db, "snakes"), where("uid", "==", currentUser.uid));
             onSnapshot(qSnakes, (snapshot) => {
                 cachedSnakes = [];
@@ -307,6 +355,7 @@
                 runAIAnalysis();
             });
 
+            // 2. ดึงข้อมูลบัญชีรายจ่าย
             const qExpense = query(collection(db, "finance"), where("uid", "==", currentUser.uid));
             onSnapshot(qExpense, (snapshot) => {
                 cachedExpenses = [];
@@ -316,16 +365,110 @@
                 
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    cachedExpenses.push(data);
+                    cachedExpenses.push({id: doc.id, ...data});
                     totalExp += data.amount;
-                    if(expBox) expBox.innerHTML += `<div class="flex justify-between bg-base-200 p-1.5 rounded mb-1"><span>${data.title}</span><span class="text-error font-bold">-${data.amount} ฿</span></div>`;
+                    if(expBox) {
+                        expBox.innerHTML += `
+                        <div class="flex justify-between items-center bg-base-200 p-1.5 rounded mb-1">
+                            <span>📋 ${data.title} <span class="text-gray-500 text-[10px]">(${data.category})</span></span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-error font-bold">-${data.amount} ฿</span>
+                                <button onclick="deleteExpense('${doc.id}')" class="text-gray-400 hover:text-error">✕</button>
+                            </div>
+                        </div>`;
+                    }
                 });
                 const dExpEl = document.getElementById('d_expenses');
                 if(dExpEl) dExpEl.innerText = `${totalExp.toLocaleString()} ฿`;
             });
+
+            // 3. ดึงข้อมูลสต็อกอาหาร
+            const qStock = query(collection(db, "foodStock"), where("uid", "==", currentUser.uid));
+            onSnapshot(qStock, (snapshot) => {
+                cachedFoodStock = [];
+                let totalStock = 0;
+                const stockBox = document.getElementById('foodStockList');
+                const dataList = document.getElementById('foodDatalist');
+                if(stockBox) stockBox.innerHTML = "";
+                if(dataList) dataList.innerHTML = "";
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    cachedFoodStock.push({id: doc.id, ...data});
+                    totalStock += data.quantity;
+                    
+                    if(stockBox) {
+                        let color = data.quantity > 5 ? 'text-success' : 'text-warning';
+                        stockBox.innerHTML += `
+                        <div class="flex justify-between items-center bg-base-200 p-2 rounded mb-1">
+                            <span class="font-bold">${data.name}</span>
+                            <div class="flex items-center gap-2">
+                                <button onclick="updateStockQty('${doc.id}', ${data.quantity}, -1)" class="btn btn-xs btn-circle btn-outline">-</button>
+                                <span class="${color} font-bold w-6 text-center">${data.quantity}</span>
+                                <button onclick="updateStockQty('${doc.id}', ${data.quantity}, 1)" class="btn btn-xs btn-circle btn-outline">+</button>
+                                <button onclick="deleteFoodStock('${doc.id}')" class="text-gray-400 hover:text-error ml-2">✕</button>
+                            </div>
+                        </div>`;
+                    }
+                    if(dataList) {
+                        dataList.innerHTML += `<option value="${data.name}">`;
+                    }
+                });
+                const dStockEl = document.getElementById('d_stock_total');
+                if(dStockEl) dStockEl.innerText = totalStock;
+            });
         }
 
-        // == ENGINE วิเคราะห์สุขภาพของปัญญาประดิษฐ์ (AI LOGIC) ==
+        // == ฟังก์ชันระบบบัญชี & สต็อกอาหาร ==
+        window.addFoodStock = async () => {
+            const name = document.getElementById('fs_name').value.trim();
+            const qty = parseInt(document.getElementById('fs_qty').value);
+            if(!name || isNaN(qty)) return;
+
+            const existing = cachedFoodStock.find(f => f.name.toLowerCase() === name.toLowerCase());
+            if(existing) {
+                await updateDoc(doc(db, "foodStock", existing.id), { quantity: existing.quantity + qty });
+            } else {
+                await addDoc(collection(db, "foodStock"), {
+                    uid: currentUser.uid,
+                    name: name,
+                    quantity: qty,
+                    updatedAt: Date.now()
+                });
+            }
+            document.getElementById('fs_name').value = "";
+            document.getElementById('fs_qty').value = "";
+        };
+
+        window.updateStockQty = async (id, currentQty, diff) => {
+            const newQty = currentQty + diff;
+            if(newQty < 0) return;
+            await updateDoc(doc(db, "foodStock", id), { quantity: newQty, updatedAt: Date.now() });
+        };
+
+        window.deleteFoodStock = async (id) => {
+            if(confirm("ลบรายการสต็อกนี้?")) await deleteDoc(doc(db, "foodStock", id));
+        };
+
+        window.addExpense = async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('fx_title').value;
+            const amount = parseFloat(document.getElementById('fx_amount').value);
+            const category = document.getElementById('fx_category').value;
+            if(!title || isNaN(amount)) return;
+
+            await addDoc(collection(db, "finance"), {
+                uid: currentUser.uid,
+                title, amount, category, createdAt: Date.now()
+            });
+            document.getElementById('fx_title').value = "";
+            document.getElementById('fx_amount').value = "";
+        };
+
+        window.deleteExpense = async (id) => {
+            if(confirm("ลบรายจ่ายนี้?")) await deleteDoc(doc(db, "finance", id));
+        };
+
         function runAIAnalysis() {
             const insightBox = document.getElementById('aiInsights');
             if (cachedSnakes.length === 0) {
@@ -339,14 +482,19 @@
             } else {
                 html += `<p class="text-success">✨ <span class="font-bold">AI Keeper Diagnostic:</span> ดัชนีความเจริญเติบโตปกติ ไม่พบประวัติการอ้วกหรือปฏิเสธเหยื่อเกิน 3 มื้อติดต่อกัน</p>`;
             }
+            
+            // เตือนสต็อกอาหาร
+            let lowStock = cachedFoodStock.filter(f => f.quantity > 0 && f.quantity <= 5);
+            if(lowStock.length > 0) {
+                html += `<p class="text-error mt-1">📦 <span class="font-bold">AI Stock Alert:</span> อาหารใกล้หมดสต็อก ได้แก่ ${lowStock.map(f=>f.name).join(', ')}</p>`;
+            }
+
             insightBox.innerHTML = html;
         }
 
-        // == เรนเดอร์การ์ดข้อมูลลงหน้ารายการ (UI RENDER ENGINE) ==
         function renderUI() {
             document.getElementById('d_total').innerText = cachedSnakes.length;
             let totalValue = cachedSnakes.reduce((sum, s) => sum + (s.price || 0), 0);
-            document.getElementById('d_value').innerText = `${totalValue.toLocaleString()} ฿`;
             document.getElementById('d_shed').innerText = cachedSnakes.filter(s => s.status === "กำลังลอกคราบ").length;
             document.getElementById('d_feed').innerText = cachedSnakes.filter(s => s.status === "เลี้ยงปกติ").length;
 
@@ -368,7 +516,7 @@
                         <div class="divider my-1"></div>
                         <p class="text-gray-400"><i class="fa-solid fa-weight-scale"></i> น้ำหนักปัจจุบัน: <b class="text-base-content">${s.weight} g</b></p>
                         <div class="card-actions justify-end mt-2">
-                            <button onclick="viewDetail('${s.id}')" class="btn btn-xs btn-primary font-bold"><i class="fa-solid fa-folder-open"></i> เปิดแฟ้มประวัติเชิงลึก</button>
+                            <button onclick="viewDetail('${s.id}')" class="btn btn-xs btn-primary font-bold"><i class="fa-solid fa-folder-open"></i> เปิดแฟ้มประวัติ</button>
                         </div>
                     </div>
                 `;
@@ -376,7 +524,6 @@
             });
         }
 
-        // == เซฟหรือแก้ไขข้อมูลหลักโครงสร้างงูลง CLOUD ==
         window.saveSnake = async (e) => {
             e.preventDefault();
             const id = document.getElementById('editSnakeId').value;
@@ -405,7 +552,7 @@
 
             if (id) {
                 await updateDoc(doc(db, "snakes", id), data);
-                detailModal.close(); // ปิด Modal หลังแก้ไขเสร็จ
+                detailModal.close(); 
             } else {
                 data.createdAt = Date.now();
                 await addDoc(collection(db, "snakes"), data);
@@ -420,16 +567,13 @@
             snakeModal.showModal();
         };
 
-        // ฟังก์ชันช่วยสลับหน้าแท็บประวัติย่อยภายในตัวงู โดยไม่ทำให้หน้าจอเด้งเลื่อนขึ้น
         window.switchDetailTab = (tabId) => {
             document.querySelectorAll('.sub-tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.detail-tab-btn').forEach(el => el.classList.remove('tab-active', 'text-primary'));
-            
             document.getElementById(`sub-tab-${tabId}`).classList.remove('hidden');
             document.getElementById(`btn-tab-${tabId}`).classList.add('tab-active', 'text-primary');
         };
 
-        // เปิดแบบฟอร์มแก้ไขประวัติโครงสร้างแกนหลักจากหน้ารายละเอียดเชิงลึก
         window.triggerEditFromDetail = (id) => {
             const s = cachedSnakes.find(item => item.id === id);
             if(!s) return;
@@ -456,14 +600,10 @@
             snakeModal.showModal();
         };
 
-        // ========================================================
-        // 📂 แฟ้มแท็บข้อมูลทะเบียนประวัติเชิงลึก (SUBCOLLECTIONS REALTIME DIALOG)
-        // ========================================================
         window.viewDetail = async (id) => {
             const s = cachedSnakes.find(item => item.id === id);
             if(!s) return;
 
-            // เคลียร์ทิ้งหน่วยการเชื่อมต่อเก่าเพื่อเสถียรภาพพื้นที่จัดเก็บ
             if(activeSubcollectionUnsubscribe) activeSubcollectionUnsubscribe();
 
             const content = document.getElementById('detailContent');
@@ -500,10 +640,10 @@
 
                 <div id="sub-tab-feed" class="sub-tab-content hidden text-xs">
                     <div class="bg-base-200 p-3 rounded-xl mb-3 grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
-                        <div><label class="label-text block mb-1">ชนิดอาหาร/เหยื่อ</label><input type="text" id="sub_f_item" placeholder="หนูแช่ M / ไมส์" class="input input-bordered input-xs w-full shadow-inner" /></div>
+                        <div><label class="label-text block mb-1">ชนิดอาหาร/เหยื่อ</label><input type="text" id="sub_f_item" list="foodDatalist" placeholder="พิมพ์หรือเลือกจากสต็อก" class="input input-bordered input-xs w-full shadow-inner" /></div>
                         <div><label class="label-text block mb-1">น้ำหนักเหยื่อ (g)</label><input type="number" id="sub_f_wt" placeholder="กรัม" class="input input-bordered input-xs w-full shadow-inner" /></div>
                         <div><label class="label-text block mb-1">ผลการกิน</label>
-                            <select id="sub_f_status" class="select select-bordered select-xs w-full"><option value="กิน">กินปกติ</option><option value="ไม่กิน">ปฏิเสธมื้ออาหาร (ไม่กิน)</option><option value="อ้วก">ขย้อนเหยื่อออก (อ้วก)</option></select>
+                            <select id="sub_f_status" class="select select-bordered select-xs w-full"><option value="กิน">กินปกติ (จะถูกตัดสต็อก)</option><option value="ไม่กิน">ปฏิเสธมื้ออาหาร (ไม่กิน)</option><option value="อ้วก">ขย้อนเหยื่อออก (อ้วก)</option></select>
                         </div>
                         <button onclick="addSubFeed('${s.id}')" class="btn btn-xs btn-warning w-full font-bold col-span-1 md:col-span-3">+ บันทึกข้อมูลอาหารย่อย</button>
                     </div>
@@ -566,15 +706,11 @@
             `;
             detailModal.showModal();
 
-            // เรนเดอร์แผนผังรหัสคิวอาร์ด้านในและเริ่มซิงค์ฐานข้อมูลประวัติย่อย
             setTimeout(() => {
                 syncSubcollections(s.id);
             }, 100);
         };
 
-        // ========================================================
-        // 🔄 กลไกซิงค์และวาดกราฟเส้นอัจฉริยะแก้ปัญหาจอเด้ง (SUB-RESOURCES SYNC)
-        // ========================================================
         function syncSubcollections(snakeId) {
             const wRef = query(collection(db, "snakes", snakeId, "weightHistory"), orderBy("date", "asc"));
             activeSubcollectionUnsubscribe = onSnapshot(wRef, (wSnapshot) => {
@@ -608,7 +744,6 @@
                 const wStatsEl = document.getElementById('weightStats');
                 if(wStatsEl) wStatsEl.innerHTML = `🔼 สูงสุด: ${maxW}g<br>📉 ต่ำสุด: ${minW}g<br>⚖️ เฉลี่ย: ${avgW}g<br>📈 โตขึ้น: +${growthPct}%`;
 
-                // 🛠️ กลไกตัดวงจรรูปแบบการ Reflow ป้องกันหน้าจอมือถือไหลขึ้นบนเอง
                 const chartNode = document.getElementById('nestedWeightChart');
                 if(chartNode){
                     const ctx = chartNode.getContext('2d');
@@ -624,7 +759,6 @@
                 }
             });
 
-            // ซิงค์ตารางมื้ออาหารสะสม
             const fRef = query(collection(db, "snakes", snakeId, "feedingHistory"), orderBy("date", "desc"));
             onSnapshot(fRef, (fSnapshot) => {
                 const fList = document.getElementById('subFeedList');
@@ -642,7 +776,6 @@
                 }
             });
 
-            // ซิงค์ตารางบันทึกลอกคราบย่อย
             const sRef = query(collection(db, "snakes", snakeId, "shedHistory"), orderBy("date", "desc"));
             onSnapshot(sRef, (sSnapshot) => {
                 const sList = document.getElementById('subShedList');
@@ -659,7 +792,6 @@
                 }
             });
 
-            // ซิงค์ตารางบันทึกอึ/ขับถ่ายย่อย
             const pRef = query(collection(db, "snakes", snakeId, "poopHistory"), orderBy("date", "desc"));
             onSnapshot(pRef, (pSnapshot) => {
                 const pList = document.getElementById('subPoopList');
@@ -676,7 +808,6 @@
                 }
             });
 
-            // ซิงค์ตารางบันทึกการพยาบาลทางการแพทย์
             const mRef = query(collection(db, "snakes", snakeId, "medicalHistory"), orderBy("date", "desc"));
             onSnapshot(mRef, (mSnapshot) => {
                 const mList = document.getElementById('subMedList');
@@ -694,7 +825,6 @@
             });
         }
 
-        // == ฟังก์ชันเพิ่มเติมข้อมูลย่อยลง SUBCOLLECTIONS ==
         window.addSubWeight = async (snakeId) => {
             const wVal = parseFloat(document.getElementById('sub_w_val').value);
             if(!wVal) return;
@@ -704,10 +834,19 @@
         };
 
         window.addSubFeed = async (snakeId) => {
-            const item = document.getElementById('sub_f_item').value;
+            const item = document.getElementById('sub_f_item').value.trim();
             const itemWt = parseFloat(document.getElementById('sub_f_wt').value) || 0;
             const stat = document.getElementById('sub_f_status').value;
             if(!item) return;
+
+            // ตรวจสอบและตัดสต็อกอาหารอัตโนมัติหาก "กินปกติ"
+            if(stat === 'กิน') {
+                const stockItem = cachedFoodStock.find(f => f.name.toLowerCase() === item.toLowerCase());
+                if(stockItem && stockItem.quantity > 0) {
+                    await updateDoc(doc(db, "foodStock", stockItem.id), { quantity: stockItem.quantity - 1, updatedAt: Date.now() });
+                }
+            }
+
             await addDoc(collection(db, "snakes", snakeId, "feedingHistory"), { foodItem: item, foodWeight: itemWt, status: stat, date: Date.now() });
             document.getElementById('sub_f_item').value = "";
             document.getElementById('sub_f_wt').value = "";
@@ -751,7 +890,6 @@
             }
         };
 
-        // == ENGINE ค้นหาและคัดกรองข้อมูลระดับ MULTI-FIELD ==
         window.filterSnakes = () => {
             const textQuery = searchBar.value.toLowerCase();
             const filterType = filterSelect.value;
