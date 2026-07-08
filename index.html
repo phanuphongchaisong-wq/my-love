@@ -26,7 +26,8 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        /* 🛠️ ระบบแยกการแสดงผล Modal ระหว่าง PC กับ มือถือ */
+        /* 🛠️ แก้ไขสถาปัตยกรรม UI ล็อกเลเยอร์ให้กดปุ่มแก้ไขและเลื่อนหน้าจอได้อย่างอิสระ */
+        .modal { z-index: 1000 !important; }
         @media (max-width: 1024px) {
             .modal {
                 align-items: flex-start !important;
@@ -52,8 +53,6 @@
             height: 180px;
             width: 100%;
         }
-
-        /* Scrollbar สวยๆ สำหรับตารางประวัติ */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #3abff8; border-radius: 10px; }
     </style>
@@ -264,8 +263,7 @@
     <datalist id="foodDatalist"></datalist>
 
     <dialog id="detailModal" class="modal bg-black/60 backdrop-blur-sm">
-        <div class="modal-box max-w-6xl w-11/12 bg-base-100 shadow-2xl rounded-3xl p-5 lg:p-8" id="detailContent">
-            </div>
+        <div class="modal-box max-w-6xl w-11/12 bg-base-100 shadow-2xl rounded-3xl p-5 lg:p-8" id="detailContent"></div>
     </dialog>
 
     <dialog id="snakeModal" class="modal bg-black/60 backdrop-blur-sm">
@@ -287,14 +285,14 @@
                 <div class="form-control bg-warning/10 p-2 rounded-xl border border-warning/30"><label class="label pt-0"><span class="label-text text-warning font-bold">กำหนดวันให้อาหารถัดไป</span></label><input type="date" id="s_next_feed" class="input input-bordered input-sm w-full border-warning" /></div>
                 <div class="form-control bg-info/10 p-2 rounded-xl border border-info/30"><label class="label pt-0"><span class="label-text text-info font-bold">กำหนดวันชั่ง นน. ถัดไป</span></label><input type="date" id="s_next_weight" class="input input-bordered input-sm w-full border-info" /></div>
 
-                <div class="form-control"><label class="label"><span class="label-text font-bold">ความยาวลำตัวเริ่มต้น (ซม.)</span></label><input type="number" step="0.1" id="s_length" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
-                <div class="form-control"><label class="label"><span class="label-text font-bold">วันเกิด / วันฟักออกจากไข่</span></label><input type="date" id="s_birth" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
-                <div class="form-control"><label class="label"><span class="label-text font-bold">วันที่รับงูเข้าบ้าน</span></label><input type="date" id="s_buy" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
-                <div class="form-control"><label class="label"><span class="label-text font-bold">ราคาซื้อเริ่มต้น (บาท)</span></label><input type="number" id="s_price" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
-                <div class="form-control"><label class="label"><span class="label-text font-bold">แหล่งที่มา / ผู้เพาะพันธุ์</span></label><input type="text" id="s_source" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">ความยาวลำตัวเริ่มต้น (ซม.)</span></label><input type="number" step="0.1" id="s_length" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">วันเกิด / วันฟักออกจากไข่</span></label><input type="date" id="s_birth" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">วันที่รับงูเข้าบ้าน</span></label><input type="date" id="s_buy" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">ราคาซื้อเริ่มต้น (บาท)</span></label><input type="number" id="s_price" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
+                <div class="form-control"><label class="label"><span class="label-text">แหล่งที่มา / ผู้เพาะพันธุ์</span></label><input type="text" id="s_source" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
                 
                 <div class="form-control">
-                    <label class="label"><span class="label-text font-bold">สถานะปัจจุบัน</span></label>
+                    <label class="label"><span class="label-text">สถานะปัจจุบัน</span></label>
                     <select id="s_status" class="select select-bordered w-full bg-base-200 focus:bg-base-100 text-primary font-bold">
                         <option value="เลี้ยงปกติ">เลี้ยงปกติ</option>
                         <option value="กำลังลอกคราบ">กำลังลอกคราบ</option>
@@ -303,8 +301,8 @@
                     </select>
                 </div>
 
-                <div class="form-control md:col-span-2"><label class="label"><span class="label-text font-bold">ลิงก์คลังรูปภาพ (คั่นด้วย , )</span></label><input type="text" id="s_images" placeholder="วางลิงก์รูปภาพที่นี่..." class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
-                <div class="form-control md:col-span-2"><label class="label"><span class="label-text font-bold">หมายเหตุรายละเอียดตำหนิ/ข้อมูลเพิ่มเติม</span></label><textarea id="s_note" placeholder="รายละเอียดประวัติเพิ่มเติม..." class="textarea textarea-bordered w-full h-20 bg-base-200 focus:bg-base-100"></textarea></div>
+                <div class="form-control md:col-span-2"><label class="label"><span class="label-text">ลิงก์คลังรูปภาพ (คั่นด้วย , )</span></label><input type="text" id="s_images" placeholder="วางลิงก์รูปภาพที่นี่..." class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
+                <div class="form-control md:col-span-2"><label class="label"><span class="label-text">หมายเหตุรายละเอียดตำหนิ/ข้อมูลเพิ่มเติม</span></label><textarea id="s_note" placeholder="รายละเอียดประวัติเพิ่มเติม..." class="textarea textarea-bordered w-full h-20 bg-base-200 focus:bg-base-100"></textarea></div>
                 
                 <div class="md:col-span-2 flex gap-3 mt-4">
                     <button type="submit" class="btn btn-primary flex-1 font-bold text-lg rounded-xl shadow-lg">บันทึกข้อมูล</button>
@@ -359,12 +357,10 @@
             document.querySelectorAll('.tab-content-item').forEach(el => el.classList.add('hidden'));
             document.getElementById(`tab-${tabName}`).classList.remove('hidden');
             
-            // อัปเดต Mobile Nav
             document.querySelectorAll('.btm-nav button').forEach(el => el.classList.remove('active', 'text-primary'));
             const mobNav = document.getElementById(`nav-${tabName}`);
             if(mobNav) mobNav.classList.add('active', 'text-primary');
 
-            // อัปเดต Desktop Nav
             document.querySelectorAll('.navbar-center button').forEach(el => {
                 el.classList.remove('btn-primary', 'shadow');
                 el.classList.add('btn-ghost');
@@ -464,6 +460,17 @@
 
                 renderUI();
                 runAIAnalysis();
+
+                // 🔄 ตรวจสอบระบบแสกน QR Code ลิงก์ตรงแบบอัตโนมัติเมื่อข้อมูลซิงค์เสร็จสิ้น
+                const urlParams = new URLSearchParams(window.location.search);
+                const scanCode = urlParams.get('code');
+                if (scanCode) {
+                    const targetSnake = cachedSnakes.find(s => s.code === scanCode);
+                    if (targetSnake) {
+                        window.history.replaceState({}, document.title, window.location.pathname); // ล้างค่า Parameter บน URL ไม่ให้เปิดซ้ำซ้อน
+                        viewDetail(targetSnake.id);
+                    }
+                }
 
                 const quickSelect = document.getElementById('quick_sched_snake');
                 if(quickSelect) {
@@ -632,7 +639,6 @@
         window.saveSnake = async (e) => {
             e.preventDefault();
             const id = document.getElementById('editSnakeId').value;
-            // ป้องกัน array มีค่า string ว่างๆ
             const rawImages = document.getElementById('s_images').value.split(',').map(url => url.trim());
             const imgArray = rawImages.filter(url => url !== "");
             
@@ -661,7 +667,6 @@
 
             if (id) {
                 await updateDoc(doc(db, "snakes", id), data);
-                detailModal.close(); 
             } else {
                 data.createdAt = Date.now();
                 await addDoc(collection(db, "snakes"), data);
@@ -676,27 +681,19 @@
             snakeModal.showModal();
         };
 
-        // 🔄 ระบบการเปลี่ยนแท็บภายใน Modal ที่เขียนขึ้นใหม่ ป้องกันการทำงานทับซ้อน (Bug Free)
         window.switchDetailTab = (btnEl, tabId) => {
             const container = document.getElementById('detailContent');
-            
-            // 1. ซ่อนเนื้อหาแท็บทั้งหมด
             container.querySelectorAll('.sub-tab-content').forEach(el => el.classList.add('hidden'));
-            
-            // 2. ล้างสถานะปุ่มสีทั้งหมดกลับเป็นสีเทา
             container.querySelectorAll('.detail-tab-btn').forEach(el => {
                 el.classList.remove('tab-active', 'bg-primary', 'text-white', 'shadow-md');
                 el.classList.add('hover:bg-base-300', 'text-gray-400');
             });
-
-            // 3. แสดงเนื้อหาเป้าหมาย
             container.querySelector('#' + tabId).classList.remove('hidden');
-            
-            // 4. ไฮไลต์ปุ่มที่ถูกคลิกเป็นสีหลัก
             btnEl.classList.remove('hover:bg-base-300', 'text-gray-400');
             btnEl.classList.add('tab-active', 'bg-primary', 'text-white', 'shadow-md');
         };
 
+        // 🛠️ แก้ไขบั๊กปุ่มแก้ไขกดไม่ได้ โดยการปิดหน้าต่างประวัติก่อนเปิดหน้าต่างฟอร์ม ป้องกันอาการเลเยอร์ซ้อนทับชนกัน
         window.triggerEditFromDetail = (id) => {
             const s = cachedSnakes.find(item => item.id === id);
             if(!s) return;
@@ -724,6 +721,8 @@
             document.getElementById('s_note').value = s.note || "";
             
             document.getElementById('modalTitle').innerHTML = "<i class='fa-solid fa-pen-to-square'></i> แก้ไขข้อมูลโครงสร้างหลัก";
+            
+            detailModal.close(); // 💡 เคลียร์เลเยอร์เก่าออกระบบ ป้องกันปุ่มฟอร์มโดนล็อกบล็อกสัญญาณคลิก
             snakeModal.showModal();
         };
 
@@ -733,7 +732,6 @@
 
             if(activeSubcollectionUnsubscribe) activeSubcollectionUnsubscribe();
 
-            // คัดกรองภาพก่อนเรนเดอร์ เพื่อป้องกันบั๊กภาพไม่ขึ้น
             let validImages = (s.images || []).filter(img => img.trim() !== '');
             if(validImages.length === 0) validImages = ['https://placehold.co/400x300/2a323c/a6adbb?text=No+Image'];
 
@@ -743,11 +741,10 @@
                     <h2 class="text-lg lg:text-2xl font-bold text-primary flex items-center gap-2">
                         <i class="fa-solid fa-address-card"></i> ${s.name} <span class="badge badge-lg badge-neutral font-mono text-xs ml-1 shadow">${s.code}</span>
                     </h2>
-                    <button onclick="detailModal.close()" class="btn btn-sm btn-ghost btn-circle text-lg bg-base-200 hover:bg-error hover:text-white transition-colors">✕</button>
+                    <button onclick="detailModal.close()" class="btn btn-sm btn-circle text-lg bg-base-200 hover:bg-error hover:text-white transition-colors">✕</button>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    
                     <div class="lg:col-span-4 flex flex-col gap-4">
                         <div class="carousel w-full rounded-2xl shadow-lg border border-base-200 bg-neutral overflow-hidden">
                             ${validImages.map((img, i) => `
@@ -760,7 +757,7 @@
                         <div class="bg-base-200 p-4 rounded-2xl shadow-sm border border-base-300 text-sm space-y-2">
                             <div class="flex justify-between items-center mb-2 pb-2 border-b border-base-300">
                                 <span class="font-bold text-primary"><i class="fa-solid fa-circle-info"></i> ข้อมูลพื้นฐาน</span>
-                                <button onclick="triggerEditFromDetail('${s.id}')" class="btn btn-xs btn-warning btn-outline rounded-lg"><i class="fa-solid fa-pen"></i> แก้ไข</button>
+                                <button onclick="triggerEditFromDetail('${s.id}')" class="btn btn-xs btn-warning rounded-lg shadow-sm font-bold text-black"><i class="fa-solid fa-pen"></i> แก้ไข</button>
                             </div>
                             <p class="flex justify-between"><span class="text-gray-400">ยีนส์ (Morph):</span> <span class="font-bold text-right ml-2">${s.morph}</span></p>
                             <p class="flex justify-between"><span class="text-gray-400">เพศโครงสร้าง:</span> <span class="font-bold">${s.gender}</span></p>
@@ -772,7 +769,7 @@
 
                         <div class="bg-white p-3 rounded-2xl flex flex-col items-center justify-center text-black shadow-sm border border-gray-200">
                             <div id="qrCanvas"></div>
-                            <span class="text-[10px] font-bold mt-2 text-neutral-500 bg-gray-100 px-3 py-1 rounded-full"><i class="fa-solid fa-qrcode"></i> แสกนดูประวัติหน้ากล่อง</span>
+                            <span class="text-[10px] font-bold mt-2 text-neutral-500 bg-gray-100 px-3 py-1 rounded-full"><i class="fa-solid fa-qrcode"></i> สแกนดูประวัติหน้ากล่องเลี้ยง</span>
                         </div>
                         
                         <button onclick="deleteMainSnake('${s.id}')" class="btn btn-sm btn-error btn-outline w-full rounded-xl"><i class="fa-solid fa-trash"></i> ลบข้อมูลถาวร</button>
@@ -788,7 +785,6 @@
                         </div>
 
                         <div class="flex-1 bg-base-200 rounded-2xl p-4 lg:p-5 shadow-sm border border-base-300 min-h-[300px]">
-                            
                             <div id="sub-tab-feed" class="sub-tab-content h-full flex flex-col text-sm">
                                 <div class="bg-base-100 p-4 rounded-2xl mb-4 grid grid-cols-1 md:grid-cols-3 gap-3 items-end shadow-sm border border-base-200">
                                     <div><label class="label-text block mb-1 font-bold text-xs text-gray-400">ชนิดอาหาร (จากสต็อก)</label><input type="text" id="sub_f_item" list="foodDatalist" placeholder="เลือกชนิดอาหาร..." class="input input-bordered input-sm w-full shadow-inner" /></div>
@@ -805,7 +801,7 @@
                                         <button onclick="updateNextDate('${s.id}', 'nextFeedDate', 'btn_next_feed')" class="btn btn-sm btn-warning rounded-xl">ตั้งนัด</button>
                                     </div>
                                 </div>
-                                <div class="overflow-y-auto flex-1 space-y-2 custom-scrollbar pr-2" id="subFeedList"></div>
+                                <div class="overflow-y-auto max-h-48 space-y-2 custom-scrollbar pr-2" id="subFeedList"></div>
                             </div>
 
                             <div id="sub-tab-weight" class="sub-tab-content hidden h-full flex flex-col text-sm">
@@ -829,7 +825,7 @@
                                         <button onclick="updateNextDate('${s.id}', 'nextWeightDate', 'btn_next_weight')" class="btn btn-sm btn-info rounded-xl">ตั้งนัด</button>
                                     </div>
                                 </div>
-                                <div class="overflow-y-auto flex-1 space-y-2 custom-scrollbar pr-2" id="subWeightList"></div>
+                                <div class="overflow-y-auto max-h-36 space-y-2 custom-scrollbar pr-2" id="subWeightList"></div>
                             </div>
 
                             <div id="sub-tab-shed" class="sub-tab-content hidden h-full flex flex-col text-sm">
@@ -843,7 +839,7 @@
                                     </div>
                                     <button onclick="addSubShed('${s.id}')" class="btn btn-sm btn-secondary font-bold rounded-xl mt-1"><i class="fa-solid fa-plus"></i> บันทึกประวัติคราบ</button>
                                 </div>
-                                <div class="overflow-y-auto flex-1 space-y-2 custom-scrollbar pr-2" id="subShedList"></div>
+                                <div class="overflow-y-auto max-h-48 space-y-2 custom-scrollbar pr-2" id="subShedList"></div>
                             </div>
 
                             <div id="sub-tab-poop" class="sub-tab-content hidden h-full flex flex-col text-sm">
@@ -853,21 +849,20 @@
                                     </div>
                                     <button onclick="addSubPoop('${s.id}')" class="btn btn-sm btn-neutral font-bold px-6 rounded-xl"><i class="fa-solid fa-poop"></i> บันทึก</button>
                                 </div>
-                                <div class="overflow-y-auto flex-1 space-y-2 custom-scrollbar pr-2" id="subPoopList"></div>
+                                <div class="overflow-y-auto max-h-48 space-y-2 custom-scrollbar pr-2" id="subPoopList"></div>
                             </div>
 
                             <div id="sub-tab-med" class="sub-tab-content hidden h-full flex flex-col text-sm">
                                 <div class="bg-base-100 p-4 rounded-2xl mb-4 flex flex-col gap-3 shadow-sm border border-base-200">
-                                    <div><label class="label-text text-xs text-gray-400 font-bold mb-1 block">อาการป่วยเบื้องต้น</label><input type="text" id="sub_m_symptom" placeholder="เช่น หายใจมีเสียงดัง / มีน้ำมูก" class="input input-bordered input-sm w-full" /></div>
+                                    <div><label class="label-text text-xs text-gray-400 font-bold mb-1 block">อาการป่วยเบื้องต้น</label><input type="text" id="sub_m_symptom" placeholder="เช่น หายใจมีเสียงดัง / มีน้ำมูก" class="input input-bordered input-sm w-full shadow-inner" /></div>
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <div><label class="label-text text-xs text-gray-400 font-bold mb-1 block">ชื่อยา / วัคซีน</label><input type="text" id="sub_m_drug" placeholder="เช่น ยาถ่ายพยาธิ" class="input input-bordered input-sm w-full" /></div>
-                                        <div><label class="label-text text-xs text-gray-400 font-bold mb-1 block">ค่ารักษาคลินิก (฿)</label><input type="number" id="sub_m_cost" placeholder="เช่น 500" class="input input-bordered input-sm w-full" /></div>
+                                        <div><label class="label-text text-xs text-gray-400 font-bold mb-1 block">ชื่อยา / วัคซีน</label><input type="text" id="sub_m_drug" placeholder="เช่น ยาถ่ายพยาธิ" class="input input-bordered input-sm w-full shadow-inner" /></div>
+                                        <div><label class="label-text text-xs text-gray-400 font-bold mb-1 block">ค่ารักษาคลินิก (฿)</label><input type="number" id="sub_m_cost" placeholder="เช่น 500" class="input input-bordered input-sm w-full shadow-inner" /></div>
                                     </div>
                                     <button onclick="addSubMedical('${s.id}')" class="btn btn-sm btn-error text-white font-bold rounded-xl mt-1"><i class="fa-solid fa-briefcase-medical"></i> บันทึกการพยาบาล</button>
                                 </div>
-                                <div class="overflow-y-auto flex-1 space-y-2 custom-scrollbar pr-2" id="subMedList"></div>
+                                <div class="overflow-y-auto max-h-48 space-y-2 custom-scrollbar pr-2" id="subMedList"></div>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -877,7 +872,16 @@
             setTimeout(() => {
                 const canvasNode = document.getElementById("qrCanvas");
                 canvasNode.innerHTML = "";
-                new QRCode(canvasNode, { text: s.code, width: 90, height: 90, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
+                // 🛠️ ปรับระบบ QR Code เก็บเป็น Deep Link ลิงก์ตรงของระบบเว็บ สแกนแล้วเปิดหน้า Detail ได้ทันทีจากกล้องมือถือ
+                const currentUrlWithoutParams = window.location.origin + window.location.pathname;
+                new QRCode(canvasNode, { 
+                    text: currentUrlWithoutParams + "?code=" + s.code, 
+                    width: 90, 
+                    height: 90, 
+                    colorDark : "#000000", 
+                    colorLight : "#ffffff", 
+                    correctLevel : QRCode.CorrectLevel.H 
+                });
                 syncSubcollections(s.id);
             }, 100);
         };
@@ -923,7 +927,7 @@
                         type: 'line',
                         data: {
                             labels: labels,
-                            datasets: [{ label: 'น้ำหนัก (g)', data: weights, borderColor: '#3abff8', backgroundColor: 'rgba(58,191,248,0.1)', fill: true, tension: 0.3, pointBackgroundColor: '#fff', pointBorderColor: '#3abff8', pointRadius: 4 }]
+                            datasets: [{ label: 'ประวัติน้ำหนัก (g)', data: weights, borderColor: '#3abff8', backgroundColor: 'rgba(58,191,248,0.1)', fill: true, tension: 0.2, pointBackgroundColor: '#fff', pointBorderColor: '#3abff8', pointRadius: 4 }]
                         },
                         options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } } }
                     });
@@ -995,70 +999,6 @@
                 }
             });
         }
-
-        window.addSubWeight = async (snakeId) => {
-            const wVal = parseFloat(document.getElementById('sub_w_val').value);
-            if(!wVal) return;
-            await addDoc(collection(db, "snakes", snakeId, "weightHistory"), { weight: wVal, date: Date.now() });
-            await updateDoc(doc(db, "snakes", snakeId), { weight: wVal });
-            document.getElementById('sub_w_val').value = "";
-        };
-
-        window.addSubFeed = async (snakeId) => {
-            const item = document.getElementById('sub_f_item').value.trim();
-            const itemWt = parseFloat(document.getElementById('sub_f_wt').value) || 0;
-            const stat = document.getElementById('sub_f_status').value;
-            if(!item) return;
-
-            if(stat === 'กิน') {
-                const stockItem = cachedFoodStock.find(f => f.name.toLowerCase() === item.toLowerCase());
-                if(stockItem && stockItem.quantity > 0) {
-                    await updateDoc(doc(db, "foodStock", stockItem.id), { quantity: stockItem.quantity - 1, updatedAt: Date.now() });
-                }
-            }
-
-            await addDoc(collection(db, "snakes", snakeId, "feedingHistory"), { foodItem: item, foodWeight: itemWt, status: stat, date: Date.now() });
-            document.getElementById('sub_f_item').value = "";
-            document.getElementById('sub_f_wt').value = "";
-        };
-
-        window.addSubShed = async (snakeId) => {
-            const blue = document.getElementById('sub_sh_blue').value;
-            const shed = document.getElementById('sub_sh_shed').value;
-            const stat = document.getElementById('sub_sh_status').value;
-            await addDoc(collection(db, "snakes", snakeId, "shedHistory"), { blueDate: blue, shedDate: shed, status: stat, date: Date.now() });
-            document.getElementById('sub_sh_blue').value = "";
-            document.getElementById('sub_sh_shed').value = "";
-        };
-
-        window.addSubPoop = async (snakeId) => {
-            const stat = document.getElementById('sub_p_status').value;
-            await addDoc(collection(db, "snakes", snakeId, "poopHistory"), { status: stat, date: Date.now() });
-        };
-
-        window.addSubMedical = async (snakeId) => {
-            const sym = document.getElementById('sub_m_symptom').value;
-            const drg = document.getElementById('sub_m_drug').value;
-            const cst = parseFloat(document.getElementById('sub_m_cost').value) || 0;
-            if(!sym) return;
-            await addDoc(collection(db, "snakes", snakeId, "medicalHistory"), { symptom: sym, drug: drg, cost: cst, date: Date.now() });
-            document.getElementById('sub_m_symptom').value = "";
-            document.getElementById('sub_m_drug').value = "";
-            document.getElementById('sub_m_cost').value = "";
-        };
-
-        window.deleteSubDoc = async (snakeId, subColl, docId) => {
-            if(confirm("ยืนยันการลบรายการประวัติย่อยจุดนี้?")) {
-                await deleteDoc(doc(db, "snakes", snakeId, subColl, docId));
-            }
-        };
-
-        window.deleteMainSnake = async (id) => {
-            if(confirm("🚨 ยืนยันการลบข้อมููลงูตัวนี้พร้อมล้างแฟ้มทะเบียนประวัติย่อยทั้งหมดออกจากคลังถาวร?")) {
-                await deleteDoc(doc(db, "snakes", id));
-                detailModal.close();
-            }
-        };
 
         window.filterSnakes = () => {
             const textQuery = searchBar.value.toLowerCase();
