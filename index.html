@@ -13,7 +13,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/locales-all.global.min.js"></script> <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/locales-all.global.min.js"></script>
+
+    <link rel="manifest" href="manifest.json">
 
     <style>
         .sticky-header { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(8px); }
@@ -282,7 +284,7 @@
                 <div class="form-control"><label class="label"><span class="label-text font-bold">เพศโครงสร้าง</span></label><select id="s_gender" class="select select-bordered w-full bg-base-200 focus:bg-base-100"><option value="ผู้ (1.0)">ตัวผู้ (1.0)</option><option value="เมีย (0.1)">ตัวเมีย (0.1)</option><option value="ไม่ระบุ">ไม่ระบุเพศ</option></select></div>
                 
                 <div class="form-control"><label class="label"><span class="label-text font-bold">ตู้แร็คเลี้ยง (Rack)</span></label><input type="text" id="s_rack" placeholder="เช่น Rack A" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
-                <div class="form-control"><label class="label"><span class="label-text font-bold">ชั้นวางแร็ค (Shelf)</span></label><input type="text" id="s_shelf" placeholder="เช่น ชั้นที่ 4" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
+                <div class="form-control"><label class="label"><span class="label-text font-bold">ชั้นวางแร็ค (Shelf)</span></label><input type="text" id="s_shelf" placeholder="ชั้นที่ 4" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
                 <div class="form-control"><label class="label"><span class="label-text font-bold">หมายเลขกล่อง (Box)</span></label><input type="text" id="s_box" placeholder="Box 12" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
                 <div class="form-control"><label class="label"><span class="label-text font-bold">น้ำหนักแรกรับ (กรัม)</span></label><input type="number" step="0.1" id="s_weight" required class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
                 
@@ -321,7 +323,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, where, getDocs, orderBy } 
+        import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, where, orderBy, getDocs } 
         from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } 
         from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
@@ -347,7 +349,6 @@
         let calendarObj = null;
         let weightChartInstance = null;
 
-        // 💡 อาร์เรย์อาวุธสำหรับจัดเก็บตัวแปร Unsubscribe ของกลุ่ม Realtime Snapshot ป้องกัน Memory Leak (ข้อ 9)
         let activeSubcollectionListeners = [];
 
         function clearSubcollectionListeners() {
@@ -464,7 +465,6 @@
             await window.updateNextDate(snakeId, fieldName, inputId);
         };
 
-        // == Export Excel (ข้อ 17) ==
         window.exportData = () => {
             try {
                 const ws = XLSX.utils.json_to_sheet(cachedSnakes.map(({id, uid, images, ...r}) => r));
@@ -496,13 +496,11 @@
                     }
                 });
 
-                // เรียงลำดับ createdAt ใน Local ป้องกัน Error Index บน Firebase
                 cachedSnakes.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
 
                 renderUI();
                 runAIAnalysis();
 
-                // 🔄 โครงข่ายสแกนแกะ Deep Link คิวอาร์ประจำกล่องเลี้ยง (ข้อ 11)
                 const urlParams = new URLSearchParams(window.location.search);
                 const scanCode = urlParams.get('code');
                 if (scanCode) {
@@ -658,7 +656,6 @@
             insightBox.innerHTML = html;
         }
 
-        // ปรับปรุงเงื่อนไข Dashboard ให้อ้างอิงวันที่ตรงเป๊ะ (ข้อ 5, 6, 8)
         function renderUI() {
             document.getElementById('d_total').innerText = cachedSnakes.length;
             
@@ -760,6 +757,7 @@
             btnEl.classList.add('tab-active', 'bg-primary', 'text-white', 'shadow-md');
         };
 
+        // 🛠️ แก้ไขกระบวนการดึงข้อมูลใส่ฟอร์ม Edit ของแท็บย่อยให้สมบูรณ์ (ข้อ 1)
         window.triggerEditFromDetail = (id) => {
             const s = cachedSnakes.find(item => item.id === id);
             if(!s) return;
@@ -790,7 +788,7 @@
             document.getElementById('modalTitle').innerHTML = "<i class='fa-solid fa-pen-to-square'></i> แก้ไขข้อมูลโครงสร้างหลัก";
             
             detailModal.close(); 
-            snakeModal.showModal();
+            setTimeout(() => { snakeModal.showModal(); }, 150); // เพิ่ม Delay ป้องกันเลเยอร์ HTML ซ้อนทับบนมือถือ
         };
 
         window.viewDetail = async (id) => {
@@ -954,9 +952,7 @@
             }, 100);
         };
 
-        // ================= ฟังก์ชันเชื่อมต่อ Subcollections ทั้ง 5 หมวด (ข้อ 2 และ 9) =================
         function syncSubcollections(snakeId) {
-            // 1. Sync ประวัติน้ำหนัก
             const wRef = query(collection(db, "snakes", snakeId, "weightHistory"), orderBy("date", "asc"));
             const unsubW = onSnapshot(wRef, (wSnapshot) => {
                 let labels = ['รับเข้า'];
@@ -1005,7 +1001,6 @@
             });
             activeSubcollectionListeners.push(unsubW);
 
-            // 2. Sync ประวัติอาหาร
             const fRef = query(collection(db, "snakes", snakeId, "feedingHistory"), orderBy("date", "desc"));
             const unsubF = onSnapshot(fRef, (fSnapshot) => {
                 const fList = document.getElementById('subFeedList');
@@ -1024,7 +1019,6 @@
             });
             activeSubcollectionListeners.push(unsubF);
 
-            // 3. Sync ประวัติคราบ
             const sRef = query(collection(db, "snakes", snakeId, "shedHistory"), orderBy("date", "desc"));
             const unsubS = onSnapshot(sRef, (sSnapshot) => {
                 const sList = document.getElementById('subShedList');
@@ -1042,7 +1036,6 @@
             });
             activeSubcollectionListeners.push(unsubS);
 
-            // 4. Sync ประวัติขับถ่าย
             const pRef = query(collection(db, "snakes", snakeId, "poopHistory"), orderBy("date", "desc"));
             const unsubP = onSnapshot(pRef, (pSnapshot) => {
                 const pList = document.getElementById('subPoopList');
@@ -1060,7 +1053,6 @@
             });
             activeSubcollectionListeners.push(unsubP);
 
-            // 5. Sync ประวัติรักษาโรค
             const mRef = query(collection(db, "snakes", snakeId, "medicalHistory"), orderBy("date", "desc"));
             const unsubM = onSnapshot(mRef, (mSnapshot) => {
                 const mList = document.getElementById('subMedList');
