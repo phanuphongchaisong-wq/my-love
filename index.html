@@ -11,10 +11,9 @@
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/locales-all.global.min.js"></script>
-
-    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/locales-all.global.min.js"></script> <link rel="manifest" href="manifest.json">
 
     <style>
         .sticky-header { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(8px); }
@@ -47,11 +46,7 @@
             }
         }
         
-        .chart-container {
-            position: relative;
-            height: 180px;
-            width: 100%;
-        }
+        .chart-container { position: relative; height: 180px; width: 100%; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #3abff8; border-radius: 10px; }
     </style>
@@ -78,7 +73,7 @@
         <div class="navbar bg-base-100 shadow-md sticky-header px-4 border-b border-base-200">
             <div class="navbar-start w-full lg:w-1/3">
                 <span class="text-base lg:text-lg font-bold text-primary flex items-center gap-2">
-                    🐍 Snake Keeper <div class="badge badge-sm badge-outline font-mono text-[10px] hidden sm:inline-flex">Personal v3.2</div>
+                    🐍 Snake Keeper <div class="badge badge-sm badge-outline font-mono text-[10px] hidden sm:inline-flex">Personal v3.5</div>
                 </span>
             </div>
             
@@ -115,12 +110,14 @@
                         <div class="stat-title text-[11px] text-info">ต้องชั่งน้ำหนัก</div>
                         <div class="stat-value text-xl text-info" id="d_weight">0</div>
                     </div>
-                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3 hover:-translate-y-1 transition-transform">
+                    
+                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3 hover:-translate-y-1 transition-transform hidden" id="d_eggs_container">
                         <div class="stat-title text-[11px] text-emerald-400">🥚 ไข่กำลังฟัก</div>
                         <div class="stat-value text-xl text-emerald-400" id="d_eggs">0</div>
                     </div>
+                    
                     <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3 hover:-translate-y-1 transition-transform">
-                        <div class="stat-title text-[11px] text-error">ต้องรับยารักษา</div>
+                        <div class="stat-title text-[11px] text-error">💊 ต้องรับยารักษา</div>
                         <div class="stat-value text-xl text-error" id="d_med">0</div>
                     </div>
                     <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3 hover:-translate-y-1 transition-transform">
@@ -160,6 +157,7 @@
                         <option value="weight">เรียงลำดับ: น้ำหนัก (มาก - น้อย)</option>
                         <option value="code">เรียงลำดับ: เรียงตามรหัสงู</option>
                     </select>
+                    <button onclick="exportData()" class="btn btn-outline btn-success btn-sm w-full"><i class="fa-solid fa-file-excel"></i> ส่งออกข้อมูล Excel</button>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6" id="snakeGrid"></div>
@@ -167,7 +165,6 @@
 
             <div id="tab-calendar" class="tab-content-item hidden">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
                     <div class="card bg-base-100 p-5 shadow border border-base-200 lg:col-span-1 h-fit">
                         <h3 class="font-bold text-base mb-4 text-warning flex items-center gap-2"><i class="fa-solid fa-bolt"></i> แผงตั้งนัดหมายด่วน</h3>
                         
@@ -186,11 +183,19 @@
                             </div>
                         </div>
 
-                        <div class="form-control bg-info/10 p-3 rounded-xl border border-info/30">
+                        <div class="form-control mb-3 bg-info/10 p-3 rounded-xl border border-info/30">
                             <label class="label pt-0"><span class="label-text text-info font-bold text-xs"><i class="fa-solid fa-weight-scale"></i> นัดชั่งน้ำหนัก:</span></label>
                             <div class="flex gap-2">
                                 <input type="date" id="quick_weight_date" class="input input-bordered input-sm w-full shadow-inner" />
                                 <button onclick="saveQuickSchedule('nextWeightDate', 'quick_weight_date')" class="btn btn-sm btn-info">บันทึก</button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-control bg-error/10 p-3 rounded-xl border border-error/30">
+                            <label class="label pt-0"><span class="label-text text-error font-bold text-xs"><i class="fa-solid fa-pills"></i> นัดให้ยา/รักษา:</span></label>
+                            <div class="flex gap-2">
+                                <input type="date" id="quick_med_date" class="input input-bordered input-sm w-full shadow-inner" />
+                                <button onclick="saveQuickSchedule('nextMedDate', 'quick_med_date')" class="btn btn-sm btn-error text-white">บันทึก</button>
                             </div>
                         </div>
                     </div>
@@ -277,13 +282,14 @@
                 <div class="form-control"><label class="label"><span class="label-text font-bold">เพศโครงสร้าง</span></label><select id="s_gender" class="select select-bordered w-full bg-base-200 focus:bg-base-100"><option value="ผู้ (1.0)">ตัวผู้ (1.0)</option><option value="เมีย (0.1)">ตัวเมีย (0.1)</option><option value="ไม่ระบุ">ไม่ระบุเพศ</option></select></div>
                 
                 <div class="form-control"><label class="label"><span class="label-text font-bold">ตู้แร็คเลี้ยง (Rack)</span></label><input type="text" id="s_rack" placeholder="เช่น Rack A" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
-                <div class="form-control"><label class="label"><span class="label-text font-bold">ชั้นวางแร็ค (Shelf)</span></label><input type="text" id="s_shelf" placeholder="ชั้นที่ 4" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
+                <div class="form-control"><label class="label"><span class="label-text font-bold">ชั้นวางแร็ค (Shelf)</span></label><input type="text" id="s_shelf" placeholder="เช่น ชั้นที่ 4" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
                 <div class="form-control"><label class="label"><span class="label-text font-bold">หมายเลขกล่อง (Box)</span></label><input type="text" id="s_box" placeholder="Box 12" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
                 <div class="form-control"><label class="label"><span class="label-text font-bold">น้ำหนักแรกรับ (กรัม)</span></label><input type="number" step="0.1" id="s_weight" required class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
                 
                 <div class="form-control bg-warning/10 p-2 rounded-xl border border-warning/30"><label class="label pt-0"><span class="label-text text-warning font-bold">กำหนดวันให้อาหารถัดไป</span></label><input type="date" id="s_next_feed" class="input input-bordered input-sm w-full border-warning bg-base-100" /></div>
                 <div class="form-control bg-info/10 p-2 rounded-xl border border-info/30"><label class="label pt-0"><span class="label-text text-info font-bold">กำหนดวันชั่ง นน. ถัดไป</span></label><input type="date" id="s_next_weight" class="input input-bordered input-sm w-full border-info bg-base-100" /></div>
-
+                <div class="form-control bg-error/10 p-2 rounded-xl border border-error/30"><label class="label pt-0"><span class="label-text text-error font-bold">กำหนดวันให้ยา/รักษาถัดไป</span></label><input type="date" id="s_next_med" class="input input-bordered input-sm w-full border-error bg-base-100" /></div>
+                
                 <div class="form-control"><label class="label"><span class="label-text">ความยาวลำตัวเริ่มต้น (ซม.)</span></label><input type="number" step="0.1" id="s_length" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
                 <div class="form-control"><label class="label"><span class="label-text">วันเกิด / วันฟักออกจากไข่</span></label><input type="date" id="s_birth" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
                 <div class="form-control"><label class="label"><span class="label-text">วันที่รับงูเข้าบ้าน</span></label><input type="date" id="s_buy" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
@@ -315,7 +321,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, where, orderBy, getDocs } 
+        import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, where, getDocs, orderBy } 
         from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } 
         from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
@@ -341,6 +347,7 @@
         let calendarObj = null;
         let weightChartInstance = null;
 
+        // 💡 อาร์เรย์อาวุธสำหรับจัดเก็บตัวแปร Unsubscribe ของกลุ่ม Realtime Snapshot ป้องกัน Memory Leak (ข้อ 9)
         let activeSubcollectionListeners = [];
 
         function clearSubcollectionListeners() {
@@ -433,9 +440,9 @@
         }
 
         window.updateNextDate = async (snakeId, fieldName, inputId) => {
-            const dateVal = document.getElementById(inputId).value;
-            if(!dateVal) return;
             try {
+                const dateVal = document.getElementById(inputId).value;
+                if(!dateVal) return;
                 await updateDoc(doc(db, "snakes", snakeId), { [fieldName]: dateVal });
                 triggerToast("📅 บันทึกประวัติตารางวันดูแลถัดไปลงปฏิทินสำเร็จ");
             } catch(e) { console.error(e); triggerToast("เกิดข้อผิดพลาดในการตั้งนัดหมาย", "error"); }
@@ -447,6 +454,7 @@
             if(s) {
                 document.getElementById('quick_feed_date').value = s.nextFeedDate || "";
                 document.getElementById('quick_weight_date').value = s.nextWeightDate || "";
+                document.getElementById('quick_med_date').value = s.nextMedDate || "";
             }
         };
 
@@ -454,6 +462,17 @@
             const snakeId = document.getElementById('quick_sched_snake').value;
             if (!snakeId) { alert("กรุณาเลือกน้องงูที่ต้องการตั้งเวลาจาก Dropdown ก่อนครับ!"); return; }
             await window.updateNextDate(snakeId, fieldName, inputId);
+        };
+
+        // == Export Excel (ข้อ 17) ==
+        window.exportData = () => {
+            try {
+                const ws = XLSX.utils.json_to_sheet(cachedSnakes.map(({id, uid, images, ...r}) => r));
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "SnakesData");
+                XLSX.writeFile(wb, "SnakeKeeper_Export.xlsx");
+                triggerToast("📊 ส่งออกไฟล์ Excel สำเร็จ");
+            } catch(e) { triggerToast("Error Export Excel", "error"); }
         };
 
         function listenToData() {
@@ -472,11 +491,18 @@
                     if(data.nextWeightDate) {
                         calendarEvents.push({ title: '⚖️ ชั่ง นน: ' + (data.name||""), start: data.nextWeightDate, color: '#3abff8', allDay: true });
                     }
+                    if(data.nextMedDate) {
+                        calendarEvents.push({ title: '💊 ให้ยา: ' + (data.name||""), start: data.nextMedDate, color: '#f87272', allDay: true });
+                    }
                 });
+
+                // เรียงลำดับ createdAt ใน Local ป้องกัน Error Index บน Firebase
+                cachedSnakes.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
 
                 renderUI();
                 runAIAnalysis();
 
+                // 🔄 โครงข่ายสแกนแกะ Deep Link คิวอาร์ประจำกล่องเลี้ยง (ข้อ 11)
                 const urlParams = new URLSearchParams(window.location.search);
                 const scanCode = urlParams.get('code');
                 if (scanCode) {
@@ -621,9 +647,9 @@
             let html = "";
             let redEye = cachedSnakes.filter(s => s.status === "กำลังลอกคราบ");
             if (redEye.length > 0) {
-                html += `<p class="text-warning">🔮 <span class="font-bold">AI คาดการณ์การลอกคราบ:</span> ตรวจพบว่างูจำนวน ${redEye.length} ตัวกำลังอยู่ในสภาวะเตรียมการลอกผิวหนัง (เข้าตาฟ้า) แนะนำให้เพิ่มวัสดุอับความชื้นภายในกล่องแร็คเลี้ยงทันที</p>`;
+                html += `<p class="text-warning">🔮 <span class="font-bold">AI แจ้งเตือนคราบ:</span> พบงู ${redEye.length} ตัวกำลังอยู่ในสภาวะเตรียมการลอกผิวหนัง (เข้าตาฟ้า) แนะนำให้เพิ่มความชื้นกล่องเลี้ยง 10-15%</p>`;
             } else {
-                html += `<p class="text-success">✨ <span class="font-bold">AI Keeper Diagnostic:</span> ดัชนีความเจริญเติบโตปกติ ไม่พบประวัติการอ้วกหรือปฏิเสธเหยื่อเกิน 3 มื้อติดต่อกัน</p>`;
+                html += `<p class="text-success">✨ <span class="font-bold">AI Keeper Diagnostic:</span> ดัชนีความเจริญเติบโตปกติ ไม่พบประวัติการอ้วกหรือปฏิเสธเหยื่อผิดปกติ อัตราการเติบโตอยู่ในเกณฑ์มาตรฐาน</p>`;
             }
             let lowStock = cachedFoodStock.filter(f => f.quantity > 0 && f.quantity <= 5);
             if(lowStock.length > 0) {
@@ -632,18 +658,17 @@
             insightBox.innerHTML = html;
         }
 
+        // ปรับปรุงเงื่อนไข Dashboard ให้อ้างอิงวันที่ตรงเป๊ะ (ข้อ 5, 6, 8)
         function renderUI() {
             document.getElementById('d_total').innerText = cachedSnakes.length;
             
-            const todayStr = new Date().toISOString().split('T')[0];
+            const d = new Date();
+            const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            
             document.getElementById('d_feed').innerText = cachedSnakes.filter(s => s.nextFeedDate == todayStr).length;
             document.getElementById('d_weight').innerText = cachedSnakes.filter(s => s.nextWeightDate == todayStr).length;
+            document.getElementById('d_med').innerText = cachedSnakes.filter(s => s.nextMedDate == todayStr).length;
             document.getElementById('d_shed').innerText = cachedSnakes.filter(s => s.status === "กำลังลอกคราบ").length;
-
-            const eggWidget = document.getElementById('d_eggs');
-            if (eggWidget && eggWidget.parentElement) {
-                eggWidget.parentElement.classList.add('hidden');
-            }
 
             const grid = document.getElementById('snakeGrid');
             grid.innerHTML = "";
@@ -698,6 +723,7 @@
                     status: s_status.value,
                     nextFeedDate: document.getElementById('s_next_feed').value || "",    
                     nextWeightDate: document.getElementById('s_next_weight').value || "", 
+                    nextMedDate: document.getElementById('s_next_med').value || "", 
                     images: imgArray,
                     note: s_note.value,
                     updatedAt: Date.now()
@@ -756,6 +782,8 @@
             
             document.getElementById('s_next_feed').value = s.nextFeedDate || "";
             document.getElementById('s_next_weight').value = s.nextWeightDate || "";
+            document.getElementById('s_next_med').value = s.nextMedDate || "";
+
             document.getElementById('s_images').value = (s.images || []).join(', ');
             document.getElementById('s_note').value = s.note || "";
             
@@ -788,13 +816,13 @@
                         <div class="carousel w-full rounded-2xl shadow-lg border border-base-200 bg-neutral overflow-hidden">
                             ${validImages.map((img, i) => `
                                 <div id="slide${i}" class="carousel-item relative w-full h-48 lg:h-56">
-                                    <img src="${img}" class="w-full object-cover cursor-zoom-in" onclick="if(this.src.includes('Image+Error')){alert('URL รูปภาพเสียหาย ไม่สามารถเปิดได้');}else{window.open('${img}','_blank')}" onerror="this.onerror=null;this.src='https://placehold.co/400x300/2a323c/a6adbb?text=Image+Error'" />
+                                    <img src="${img}" class="w-full object-cover cursor-zoom-in hover:scale-105 transition-transform" onclick="if(this.src.includes('Image+Error')){alert('URL รูปภาพเสีย');}else{window.open('${img}','_blank')}" onerror="this.onerror=null;this.src='https://placehold.co/400x300/2a323c/a6adbb?text=Image+Error'" />
                                 </div>
                             `).join('')}
                         </div>
                         
                         <div class="bg-base-200 p-4 rounded-2xl shadow-sm border border-base-300 text-sm space-y-2">
-                            <div class="flex justify-between items-center mb-2 pb-2 border-b border-b-base-300">
+                            <div class="flex justify-between items-center mb-2 pb-2 border-b border-base-300">
                                 <span class="font-bold text-primary"><i class="fa-solid fa-circle-info"></i> ข้อมูลพื้นฐาน</span>
                                 <button onclick="triggerEditFromDetail('${s.id}')" class="btn btn-xs btn-warning rounded-lg shadow-sm font-bold text-black"><i class="fa-solid fa-pen"></i> แก้ไข</button>
                             </div>
@@ -815,7 +843,7 @@
                     </div>
 
                     <div class="lg:col-span-8 flex flex-col">
-                        <div class="tabs tabs-boxed bg-base-200 p-1.5 rounded-xl flex flex-nowrap overflow-x-auto gap-1 mb-4 shadow-sm">
+                        <div class="tabs tabs-boxed bg-base-200 p-1.5 rounded-xl flex flex-nowrap overflow-x-auto gap-1 mb-4 shadow-sm custom-scrollbar">
                             <button onclick="switchDetailTab(this, 'sub-tab-feed')" class="detail-tab-btn tab flex-1 min-w-[70px] tab-active bg-primary text-white shadow-md font-bold rounded-lg transition-all">🍖 อาหาร</button>
                             <button onclick="switchDetailTab(this, 'sub-tab-weight')" class="detail-tab-btn tab flex-1 min-w-[70px] text-gray-400 font-bold rounded-lg transition-all hover:bg-base-300">⚖️ น้ำหนัก</button>
                             <button onclick="switchDetailTab(this, 'sub-tab-shed')" class="detail-tab-btn tab flex-1 min-w-[70px] text-gray-400 font-bold rounded-lg transition-all hover:bg-base-300">🐍 คราบ</button>
@@ -901,6 +929,13 @@
                                     </div>
                                     <button onclick="addSubMedical('${s.id}')" class="btn btn-sm btn-error text-white font-bold rounded-xl mt-1"><i class="fa-solid fa-briefcase-medical"></i> บันทึกการพยาบาล</button>
                                 </div>
+                                <div class="bg-error/10 border border-error/30 p-3 rounded-2xl mb-4 flex flex-col sm:flex-row gap-3 items-center shadow-sm">
+                                    <span class="font-bold text-error text-xs flex-1"><i class="fa-solid fa-bell"></i> ปฏิทินนัดให้ยา/รักษา ถัดไป:</span>
+                                    <div class="flex gap-2 w-full sm:w-auto">
+                                        <input type="date" id="btn_next_med" value="${s.nextMedDate || ''}" class="input input-bordered input-sm w-full sm:w-36 bg-base-100" />
+                                        <button onclick="updateNextDate('${s.id}', 'nextMedDate', 'btn_next_med')" class="btn btn-sm btn-error text-white rounded-xl">ตั้งนัด</button>
+                                    </div>
+                                </div>
                                 <div class="overflow-y-auto flex-1 space-y-2 custom-scrollbar pr-2" id="subMedList"></div>
                             </div>
 
@@ -914,19 +949,14 @@
                 const canvasNode = document.getElementById("qrCanvas");
                 canvasNode.innerHTML = "";
                 const currentUrlWithoutParams = window.location.origin + window.location.pathname;
-                new QRCode(canvasNode, { 
-                    text: currentUrlWithoutParams + "?code=" + s.code, 
-                    width: 90, 
-                    height: 90, 
-                    colorDark : "#000000", 
-                    colorLight : "#ffffff", 
-                    correctLevel : QRCode.CorrectLevel.H 
-                });
+                new QRCode(canvasNode, { text: currentUrlWithoutParams + "?code=" + (s.code||""), width: 90, height: 90, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
                 syncSubcollections(s.id);
             }, 100);
         };
 
+        // ================= ฟังก์ชันเชื่อมต่อ Subcollections ทั้ง 5 หมวด (ข้อ 2 และ 9) =================
         function syncSubcollections(snakeId) {
+            // 1. Sync ประวัติน้ำหนัก
             const wRef = query(collection(db, "snakes", snakeId, "weightHistory"), orderBy("date", "asc"));
             const unsubW = onSnapshot(wRef, (wSnapshot) => {
                 let labels = ['รับเข้า'];
@@ -975,6 +1005,7 @@
             });
             activeSubcollectionListeners.push(unsubW);
 
+            // 2. Sync ประวัติอาหาร
             const fRef = query(collection(db, "snakes", snakeId, "feedingHistory"), orderBy("date", "desc"));
             const unsubF = onSnapshot(fRef, (fSnapshot) => {
                 const fList = document.getElementById('subFeedList');
@@ -982,7 +1013,7 @@
                     fList.innerHTML = "";
                     fSnapshot.forEach(doc => {
                         const data = doc.data();
-                        let colorClass = data.status === 'กิน' ? 'text-success' : (data.status === 'อ้วก' ? 'text-error font-bold' : 'text-warning');
+                        let colorClass = data.status === 'กิน' ? 'text-success' : (data.status === 'อ้วก' ? 'text-error' : 'text-warning');
                         fList.innerHTML += `
                             <div class="bg-base-100 p-2.5 rounded-xl mb-2 flex justify-between items-center text-xs shadow-sm border border-base-200">
                                 <div><i class="fa-regular fa-calendar text-gray-400 mr-1"></i> ${new Date(data.date).toLocaleDateString('th-TH')}<br><span class="text-gray-400 ml-4">เหยื่อ: <span class="text-base-content font-bold">${data.foodItem || ''} (${data.foodWeight || 0}g)</span></span> <i class="fa-solid fa-arrow-right text-gray-500 mx-1 text-[10px]"></i> <span class="${colorClass} font-bold bg-base-200 px-2 py-0.5 rounded">${data.status || ''}</span></div>
@@ -993,6 +1024,7 @@
             });
             activeSubcollectionListeners.push(unsubF);
 
+            // 3. Sync ประวัติคราบ
             const sRef = query(collection(db, "snakes", snakeId, "shedHistory"), orderBy("date", "desc"));
             const unsubS = onSnapshot(sRef, (sSnapshot) => {
                 const sList = document.getElementById('subShedList');
@@ -1010,6 +1042,7 @@
             });
             activeSubcollectionListeners.push(unsubS);
 
+            // 4. Sync ประวัติขับถ่าย
             const pRef = query(collection(db, "snakes", snakeId, "poopHistory"), orderBy("date", "desc"));
             const unsubP = onSnapshot(pRef, (pSnapshot) => {
                 const pList = document.getElementById('subPoopList');
@@ -1027,6 +1060,7 @@
             });
             activeSubcollectionListeners.push(unsubP);
 
+            // 5. Sync ประวัติรักษาโรค
             const mRef = query(collection(db, "snakes", snakeId, "medicalHistory"), orderBy("date", "desc"));
             const unsubM = onSnapshot(mRef, (mSnapshot) => {
                 const mList = document.getElementById('subMedList');
@@ -1036,7 +1070,7 @@
                         const data = doc.data();
                         mList.innerHTML += `
                             <div class="bg-base-100 p-2.5 rounded-xl mb-2 flex justify-between items-center text-xs shadow-sm border border-base-200">
-                                <div><i class="fa-solid fa-stethoscope text-error mr-1"></i> อาการ: <span class="font-bold text-error">${data.symptom || ''}</span><br><span class="text-gray-400 ml-4">ตัวยา: ${data.drug || ''}</span> <span class="text-gray-500 ml-2">(${(data.cost || 0)} ฿)</span></div>
+                                <div><i class="fa-solid fa-stethoscope text-error mr-1"></i> อาการ: <span class="font-bold text-error">${data.symptom || ''}</span><br><span class="text-gray-400 ml-4">ยา: ${data.drug || ''}</span> <span class="text-gray-500 ml-2">(${(data.cost || 0)} ฿)</span></div>
                                 <button onclick="deleteSubDoc('${snakeId}','medicalHistory','${doc.id}')" class="text-gray-400 hover:text-error bg-base-200 hover:bg-base-300 rounded px-2 py-1 transition-colors h-fit"><i class="fa-solid fa-trash-can"></i></button>
                             </div>`;
                     });
@@ -1050,7 +1084,7 @@
                 const wVal = parseFloat(document.getElementById('sub_w_val').value);
                 if(!wVal || isNaN(wVal)) return;
                 await addDoc(collection(db, "snakes", snakeId, "weightHistory"), { weight: wVal, date: Date.now() });
-                await updateDoc(doc(db, "snakes", snakeId), { weight: wVal });
+                await updateDoc(doc(db, "snakes", snakeId), { weight: wVal }); // อัปเดตแฟ้มหลักตามข้อ 2
                 document.getElementById('sub_w_val').value = "";
                 triggerToast("⚖️ บันทึกประวัติน้ำหนักเรียบร้อย");
             } catch(e) { triggerToast("เกิดข้อผิดพลาดในการบันทึกน้ำหนัก", "error"); }
@@ -1063,6 +1097,7 @@
                 const stat = document.getElementById('sub_f_status').value;
                 if(!item) return;
 
+                // หักสต็อกเหยื่ออัตโนมัติ 1 ตัวเมื่อบันทึกการกินตามกฎ (ข้อ 2)
                 if(stat === 'กิน') {
                     const stockItem = cachedFoodStock.find(f => (f.name||"").toLowerCase() === item.toLowerCase());
                     if(stockItem && stockItem.quantity > 0) {
@@ -1104,6 +1139,7 @@
                 if(!sym) return;
 
                 await addDoc(collection(db, "snakes", snakeId, "medicalHistory"), { symptom: sym, drug: drg, cost: cst, date: Date.now() });
+                // บันทึกรายจ่ายส่งตรงเข้า Finance ฟาร์มอัตโนมัติ (ข้อ 2)
                 if(cst > 0) {
                     await addDoc(collection(db, "finance"), { uid: currentUser.uid, title: `ค่ายารักษางู (${sym})`, amount: cst, category: "ค่ายา/รักษา", createdAt: Date.now() });
                 }
@@ -1126,6 +1162,7 @@
         window.deleteMainSnake = async (id) => {
             try {
                 if(confirm("🚨 ยืนยันการลบข้อมูลพร้อมล้างประวัติย่อยทั้งหมดออกจากสารบบถาวร?")) {
+                    // วนลูปล้างข้อมูลระดับ Subcollection ทั้งหมดเพื่อป้องกันขยะในระบบฐานข้อมูล (ข้อ 2)
                     const subCollections = ["weightHistory", "feedingHistory", "shedHistory", "poopHistory", "medicalHistory"];
                     for (const sub of subCollections) {
                         const snap = await getDocs(collection(db, "snakes", id, sub));
@@ -1139,6 +1176,7 @@
         };
 
         window.filterSnakes = () => {
+            // ป้องกัน Error สำหรับข้อมูลเก่าด้วยการครอบ String fallback (ข้อ 10)
             const textQuery = searchBar.value.toLowerCase();
             const filterType = filterSelect.value;
             const sortType = sortSelect.value;
@@ -1156,6 +1194,7 @@
                 return matchesSearch && matchesFilter;
             });
 
+            // ปรับปรุงเรียงลำดับเวลาให้ทำงานได้จริงสำหรับข้อเพิ่มล่าสุด (ข้อ 4)
             if (sortType === 'newest') result.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
             if (sortType === 'weight') result.sort((a,b) => (b.weight || 0) - (a.weight || 0));
             if (sortType === 'code') result.sort((a,b) => (a.code || "").localeCompare(b.code || ""));
