@@ -556,8 +556,10 @@
                 cachedFoodStock = [];
                 let totalStock = 0;
                 const stockBox = document.getElementById('foodStockList');
-                const dataList = document.getElementById('foodDatalist');
                 if(stockBox) stockBox.innerHTML = "";
+
+                // อัปเดต datalist ให้เลือกในหน้าฟาร์ม/ข้อมูล
+                const dataList = document.getElementById('foodDatalist');
                 if(dataList) dataList.innerHTML = "";
 
                 snapshot.forEach(doc => {
@@ -578,10 +580,28 @@
                             </div>
                         </div>`;
                     }
-                    if(dataList) { dataList.innerHTML += `<option value="${data.name || ''}">`; }
+
+                    if(dataList) {
+                        dataList.innerHTML += `<option value="${data.name || ''}">`;
+                    }
                 });
                 const dStockEl = document.getElementById('d_stock_total');
                 if(dStockEl) dStockEl.innerText = totalStock;
+
+                // Update UI Dropdown หากมีการเปิด Modal อยู่แล้ว
+                updateFoodStockDropdowns();
+            });
+        }
+
+        function updateFoodStockDropdowns() {
+            const dropdowns = document.querySelectorAll('.dynamic-food-stock');
+            dropdowns.forEach(dd => {
+                const currentVal = dd.value;
+                dd.innerHTML = '<option value="" disabled selected>-- เลือกเหยื่อ --</option>';
+                cachedFoodStock.filter(f => f.quantity > 0).forEach(f => {
+                    dd.innerHTML += `<option value="${f.name}">${f.name} (คงเหลือ: ${f.quantity})</option>`;
+                });
+                if(currentVal) dd.value = currentVal;
             });
         }
 
@@ -757,7 +777,6 @@
             btnEl.classList.add('tab-active', 'bg-primary', 'text-white', 'shadow-md');
         };
 
-        // 🛠️ แก้ไขกระบวนการดึงข้อมูลใส่ฟอร์ม Edit ของแท็บย่อยให้สมบูรณ์ (ข้อ 1)
         window.triggerEditFromDetail = (id) => {
             const s = cachedSnakes.find(item => item.id === id);
             if(!s) return;
@@ -788,7 +807,7 @@
             document.getElementById('modalTitle').innerHTML = "<i class='fa-solid fa-pen-to-square'></i> แก้ไขข้อมูลโครงสร้างหลัก";
             
             detailModal.close(); 
-            setTimeout(() => { snakeModal.showModal(); }, 150); // เพิ่ม Delay ป้องกันเลเยอร์ HTML ซ้อนทับบนมือถือ
+            setTimeout(() => { snakeModal.showModal(); }, 150); 
         };
 
         window.viewDetail = async (id) => {
@@ -853,7 +872,11 @@
                             
                             <div id="sub-tab-feed" class="sub-tab-content h-full flex flex-col text-sm">
                                 <div class="bg-base-100 p-4 rounded-2xl mb-4 grid grid-cols-1 md:grid-cols-3 gap-3 items-end shadow-sm border border-base-200">
-                                    <div><label class="label-text block mb-1 font-bold text-xs text-gray-400">ชนิดอาหาร (จากสต็อก)</label><input type="text" id="sub_f_item" list="foodDatalist" placeholder="เลือกชนิดอาหาร..." class="input input-bordered input-sm w-full shadow-inner" /></div>
+                                    <div><label class="label-text block mb-1 font-bold text-xs text-gray-400">เลือกชนิดอาหารในสต็อก</label>
+                                        <select id="sub_f_item" class="dynamic-food-stock select select-bordered select-sm w-full shadow-inner">
+                                            <option value="" disabled selected>-- เลือกเหยื่อ --</option>
+                                        </select>
+                                    </div>
                                     <div><label class="label-text block mb-1 font-bold text-xs text-gray-400">น้ำหนัก (g)</label><input type="number" id="sub_f_wt" placeholder="กรัม" class="input input-bordered input-sm w-full shadow-inner" /></div>
                                     <div><label class="label-text block mb-1 font-bold text-xs text-gray-400">ผลการกิน</label>
                                         <select id="sub_f_status" class="select select-bordered select-sm w-full"><option value="กิน">กินปกติ (ตัดสต็อก)</option><option value="ไม่กิน">ปฏิเสธมื้ออาหาร</option><option value="อ้วก">อาเจียนออก (อ้วก)</option></select>
@@ -944,6 +967,7 @@
             detailModal.showModal();
 
             setTimeout(() => {
+                updateFoodStockDropdowns(); // ดึงสต็อกมาใส่ Dropdown ทันทีตอนเปิด
                 const canvasNode = document.getElementById("qrCanvas");
                 canvasNode.innerHTML = "";
                 const currentUrlWithoutParams = window.location.origin + window.location.pathname;
@@ -1089,13 +1113,13 @@
                 const stat = document.getElementById('sub_f_status').value;
                 if(!item) return;
 
-                // หักสต็อกเหยื่ออัตโนมัติ 1 ตัวเมื่อบันทึกการกินตามกฎ (ข้อ 2)
                 if(stat === 'กิน') {
                     const stockItem = cachedFoodStock.find(f => (f.name||"").toLowerCase() === item.toLowerCase());
                     if(stockItem && stockItem.quantity > 0) {
                         await updateDoc(doc(db, "foodStock", stockItem.id), { quantity: stockItem.quantity - 1, updatedAt: Date.now() });
                     }
                 }
+
                 await addDoc(collection(db, "snakes", snakeId, "feedingHistory"), { foodItem: item, foodWeight: itemWt, status: stat, date: Date.now() });
                 document.getElementById('sub_f_item').value = "";
                 document.getElementById('sub_f_wt').value = "";
@@ -1154,7 +1178,6 @@
         window.deleteMainSnake = async (id) => {
             try {
                 if(confirm("🚨 ยืนยันการลบข้อมูลพร้อมล้างประวัติย่อยทั้งหมดออกจากสารบบถาวร?")) {
-                    // วนลูปล้างข้อมูลระดับ Subcollection ทั้งหมดเพื่อป้องกันขยะในระบบฐานข้อมูล (ข้อ 2)
                     const subCollections = ["weightHistory", "feedingHistory", "shedHistory", "poopHistory", "medicalHistory"];
                     for (const sub of subCollections) {
                         const snap = await getDocs(collection(db, "snakes", id, sub));
@@ -1168,7 +1191,6 @@
         };
 
         window.filterSnakes = () => {
-            // ป้องกัน Error สำหรับข้อมูลเก่าด้วยการครอบ String fallback (ข้อ 10)
             const textQuery = searchBar.value.toLowerCase();
             const filterType = filterSelect.value;
             const sortType = sortSelect.value;
@@ -1186,7 +1208,6 @@
                 return matchesSearch && matchesFilter;
             });
 
-            // ปรับปรุงเรียงลำดับเวลาให้ทำงานได้จริงสำหรับข้อเพิ่มล่าสุด (ข้อ 4)
             if (sortType === 'newest') result.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
             if (sortType === 'weight') result.sort((a,b) => (b.weight || 0) - (a.weight || 0));
             if (sortType === 'code') result.sort((a,b) => (a.code || "").localeCompare(b.code || ""));
