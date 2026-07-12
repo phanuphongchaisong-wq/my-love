@@ -18,228 +18,345 @@
     <link rel="manifest" href="manifest.json">
 
     <style>
-        .sticky-header { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(8px); }
-        .btm-nav { padding-bottom: env(safe-area-inset-bottom); z-index: 45; }
-        #calendar { max-height: 500px; font-size: 11px; }
+        /* ===== UI/UX Enhancements ===== */
+        :root {
+            --primary-glow: rgba(58, 191, 248, 0.3);
+            --bg-glass: rgba(30, 35, 42, 0.8);
+            --border-glass: rgba(255, 255, 255, 0.05);
+        }
+        
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #e5e7eb; }
+        
+        .sticky-header { 
+            position: sticky; top: 0; z-index: 50; 
+            background: var(--bg-glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-glass);
+        }
+        
+        .btm-nav { padding-bottom: env(safe-area-inset-bottom); z-index: 45; background: var(--bg-glass); backdrop-filter: blur(12px); border-top: 1px solid var(--border-glass); }
+        
+        #calendar { max-height: 500px; font-size: 12px; }
+        .fc-theme-standard td, .fc-theme-standard th { border-color: var(--border-glass) !important; }
+        .fc .fc-button-primary { background-color: #3abff8 !important; border-color: #3abff8 !important; }
+        
+        html, body { overflow-x: hidden; -webkit-overflow-scrolling: touch; }
 
-        html, body {
-            overflow-x: hidden;
-            -webkit-overflow-scrolling: touch;
+        .modal { z-index: 1000 !important; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); }
+        
+        .modal-box {
+            background: #1e232a; border: 1px solid var(--border-glass);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: 1.5rem;
         }
 
-        .modal { z-index: 1000 !important; }
         @media (max-width: 1024px) {
-            .modal {
-                align-items: flex-start !important;
-                padding-top: 2vh;
-                overflow-y: auto !important;
-            }
-            .modal-box {
-                max-height: none !important;
-                margin-bottom: 90px;
-                overscroll-behavior: contain !important;
-                -webkit-overflow-scrolling: touch !important;
+            .modal { align-items: flex-end !important; padding-top: 0; overflow-y: hidden !important; }
+            .modal-box { 
+                max-height: 90vh !important; margin-bottom: 0; 
+                border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+                overflow-y: auto !important; overscroll-behavior: contain !important; -webkit-overflow-scrolling: touch !important;
+                padding-bottom: env(safe-area-inset-bottom);
             }
         }
         @media (min-width: 1025px) {
-            .modal-box {
-                max-height: 88vh !important;
-                overflow-y: auto !important;
-            }
+            .modal-box { max-height: 85vh !important; overflow-y: auto !important; }
         }
         
         .chart-container { position: relative; height: 180px; width: 100%; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #3abff8; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #0ea5e9; }
+
+        .stat-card {
+            background: linear-gradient(145deg, #1e232a 0%, #15191e 100%);
+            border: 1px solid var(--border-glass);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); border-color: rgba(58, 191, 248, 0.3); }
+
+        .snake-card {
+            background: #1e232a; border: 1px solid var(--border-glass);
+            transition: all 0.3s ease;
+        }
+        .snake-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-color: rgba(58, 191, 248, 0.4);
+        }
+
+        .input, .select, .textarea { background-color: #15191e; border-color: var(--border-glass); transition: all 0.2s ease; }
+        .input:focus, .select:focus, .textarea:focus { border-color: #3abff8; box-shadow: 0 0 0 2px var(--primary-glow); }
+
+        .tab-btn {
+            background: transparent; color: #9ca3af; border: 1px solid transparent; transition: all 0.2s ease;
+        }
+        .tab-btn.tab-active {
+            background: rgba(58, 191, 248, 0.1); color: #3abff8; border-color: rgba(58, 191, 248, 0.3);
+        }
+        .tab-btn:hover:not(.tab-active) { background: rgba(255, 255, 255, 0.05); }
+
+        /* Custom List Item styling */
+        .list-item-glass {
+            background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid var(--border-glass);
+            transition: all 0.2s ease;
+        }
+        .list-item-glass:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
     </style>
 </head>
-<body class="bg-base-300 text-base-content min-h-screen pb-28 lg:pb-10 transition-colors duration-300">
+<body class="bg-[#121212] text-base-content min-h-screen pb-28 lg:pb-10 transition-colors duration-300">
 
-    <div id="authSection" class="flex justify-center items-center min-h-screen p-4">
-        <div class="card w-full max-w-md bg-base-100 shadow-2xl border border-primary/20">
-            <div class="card-body items-center text-center">
-                <div class="text-7xl mb-2">🐍</div>
-                <h2 class="card-title text-2xl font-bold text-primary">Snake Keeper</h2>
-                <p class="text-xs text-gray-400 mb-6">ระบบบันทึกและพยากรณ์ข้อมูลการเลี้ยงงูส่วนบุคคล</p>
-                <input type="email" id="email" placeholder="อีเมลล็อกอินส่วนตัวของคุณ" class="input input-bordered w-full mb-3 shadow-inner" />
-                <input type="password" id="password" placeholder="รหัสผ่านเข้าใช้งานระบบ" class="input input-bordered w-full mb-4 shadow-inner" />
-                <button onclick="loginUser()" class="btn btn-primary w-full text-base font-bold shadow-lg">เข้าสู่ระบบส่วนตัว</button>
-                <button onclick="registerUser()" class="btn btn-link text-xs text-gray-500">ลงทะเบียนเริ่มต้นใช้งานครั้งแรก</button>
-                <p id="authMessage" class="text-error text-xs mt-2 font-medium"></p>
+    <div id="authSection" class="flex justify-center items-center min-h-screen p-4 bg-gradient-to-br from-[#121212] to-[#1a1a2e]">
+        <div class="card w-full max-w-md bg-[#1e232a]/90 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] border border-primary/20 rounded-3xl">
+            <div class="card-body items-center text-center p-8">
+                <div class="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mb-4 shadow-[0_0_20px_var(--primary-glow)]">
+                    <span class="text-5xl">🐍</span>
+                </div>
+                <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary mb-1">Snake Keeper</h2>
+                <p class="text-xs text-gray-400 mb-8 font-medium tracking-wide">SMART FARM DASHBOARD</p>
+                
+                <div class="w-full space-y-4">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500"><i class="fa-solid fa-envelope"></i></div>
+                        <input type="email" id="email" placeholder="อีเมลล็อกอิน" class="input input-bordered w-full pl-10 bg-[#15191e] rounded-xl focus:border-primary" />
+                    </div>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500"><i class="fa-solid fa-lock"></i></div>
+                        <input type="password" id="password" placeholder="รหัสผ่าน" class="input input-bordered w-full pl-10 bg-[#15191e] rounded-xl focus:border-primary" />
+                    </div>
+                    <button onclick="loginUser()" class="btn btn-primary w-full text-base font-bold rounded-xl shadow-[0_4px_14px_var(--primary-glow)] hover:shadow-[0_6px_20px_var(--primary-glow)] transition-all">เข้าสู่ระบบ</button>
+                </div>
+                
+                <div class="divider my-4 text-xs text-gray-600">หรือ</div>
+                <button onclick="registerUser()" class="btn btn-outline btn-sm rounded-xl text-gray-400 hover:text-white">ลงทะเบียนใช้งานครั้งแรก</button>
+                <p id="authMessage" class="text-error text-xs mt-4 font-medium h-4"></p>
             </div>
         </div>
     </div>
 
     <div id="appSection" class="hidden">
         
-        <div class="navbar bg-base-100 shadow-md sticky-header px-4 border-b border-base-200">
+        <div class="navbar sticky-header px-4 lg:px-8">
             <div class="navbar-start w-full lg:w-1/3">
-                <span class="text-base lg:text-lg font-bold text-primary flex items-center gap-2">
-                    🐍 Snake Keeper <div class="badge badge-sm badge-outline font-mono text-[10px] hidden sm:inline-flex">Personal v3.5</div>
+                <span class="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary flex items-center gap-2">
+                    <i class="fa-solid fa-snake text-primary"></i> Snake Keeper
                 </span>
             </div>
             
             <div class="navbar-center hidden lg:flex gap-2">
-                <button onclick="switchTab('dashboard')" id="desk-nav-dashboard" class="btn btn-primary btn-sm rounded-full px-6 shadow">แดชบอร์ด</button>
-                <button onclick="switchTab('snakes')" id="desk-nav-snakes" class="btn btn-ghost btn-sm rounded-full px-6">รายการงู</button>
-                <button onclick="switchTab('calendar')" id="desk-nav-calendar" class="btn btn-ghost btn-sm rounded-full px-6">ปฏิทินนัดหมาย</button>
-                <button onclick="switchTab('finance')" id="desk-nav-finance" class="btn btn-ghost btn-sm rounded-full px-6">บัญชี & สต็อกอาหาร</button>
+                <button onclick="switchTab('dashboard')" id="desk-nav-dashboard" class="btn btn-primary btn-sm rounded-full px-6 font-bold shadow-[0_0_10px_var(--primary-glow)]"><i class="fa-solid fa-chart-pie mr-1"></i> แดชบอร์ด</button>
+                <button onclick="switchTab('snakes')" id="desk-nav-snakes" class="btn btn-ghost btn-sm rounded-full px-6 text-gray-300 hover:text-white"><i class="fa-solid fa-list mr-1"></i> รายการงู</button>
+                <button onclick="switchTab('calendar')" id="desk-nav-calendar" class="btn btn-ghost btn-sm rounded-full px-6 text-gray-300 hover:text-white"><i class="fa-regular fa-calendar mr-1"></i> ปฏิทิน</button>
+                <button onclick="switchTab('finance')" id="desk-nav-finance" class="btn btn-ghost btn-sm rounded-full px-6 text-gray-300 hover:text-white"><i class="fa-solid fa-wallet mr-1"></i> คลัง/บัญชี</button>
             </div>
 
-            <div class="navbar-end w-auto lg:w-1/3 gap-2 ml-auto">
-                <button onclick="toggleTheme()" class="btn btn-sm btn-ghost btn-circle" id="themeBtn"><i class="fa-solid fa-moon text-lg"></i></button>
-                <button onclick="logoutUser()" class="btn btn-sm btn-error btn-outline"><i class="fa-solid fa-power-off"></i></button>
+            <div class="navbar-end w-auto lg:w-1/3 gap-3 ml-auto">
+                <div class="badge badge-sm badge-outline font-mono text-[10px] text-gray-400 border-gray-600 hidden sm:inline-flex">v3.5 PRO</div>
+                <button onclick="logoutUser()" class="btn btn-sm btn-circle btn-ghost text-error hover:bg-error hover:text-white transition-colors" title="ออกจากระบบ"><i class="fa-solid fa-power-off"></i></button>
             </div>
         </div>
 
-        <div class="container mx-auto max-w-7xl p-4 lg:p-6">
+        <div class="container mx-auto max-w-7xl p-4 lg:p-6 space-y-6">
             
-            <div id="tab-dashboard" class="tab-content-item">
-                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3 hover:-translate-y-1 transition-transform">
-                        <div class="stat-title text-[11px] text-gray-400">งูทั้งหมด</div>
-                        <div class="stat-value text-xl text-primary" id="d_total">0</div>
-                    </div>
-                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3 hover:-translate-y-1 transition-transform">
-                        <div class="stat-title text-[11px] text-warning font-semibold">🍖 ให้อาหารวันนี้</div>
-                        <div class="stat-value text-xl text-warning" id="d_feed">0</div>
-                    </div>
-                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3 hover:-translate-y-1 transition-transform">
-                        <div class="stat-title text-[11px] text-secondary font-semibold">🌌 ลอกคราบ</div>
-                        <div class="stat-value text-xl text-secondary" id="d_shed">0</div>
-                    </div>
-                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3 hover:-translate-y-1 transition-transform">
-                        <div class="stat-title text-[11px] text-info">ต้องชั่งน้ำหนัก</div>
-                        <div class="stat-value text-xl text-info" id="d_weight">0</div>
-                    </div>
-                    
-                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3 hover:-translate-y-1 transition-transform hidden" id="d_eggs_container">
-                        <div class="stat-title text-[11px] text-emerald-400">🥚 ไข่กำลังฟัก</div>
-                        <div class="stat-value text-xl text-emerald-400" id="d_eggs">0</div>
-                    </div>
-                    
-                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3 hover:-translate-y-1 transition-transform">
-                        <div class="stat-title text-[11px] text-error">💊 ต้องรับยารักษา</div>
-                        <div class="stat-value text-xl text-error" id="d_med">0</div>
-                    </div>
-                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3 hover:-translate-y-1 transition-transform">
-                        <div class="stat-title text-[11px] text-error font-bold">💸 รายจ่ายสะสม</div>
-                        <div class="stat-value text-lg text-error" id="d_expenses">0 ฿</div>
-                    </div>
-                    <div class="stat bg-base-100 rounded-xl shadow border border-base-200 p-3 hover:-translate-y-1 transition-transform">
-                        <div class="stat-title text-[11px] text-success font-bold">📦 สต็อกอาหาร</div>
-                        <div class="stat-value text-xl text-success" id="d_stock_total">0</div>
+            <div id="tab-dashboard" class="tab-content-item animate-fade-in">
+                <div class="card bg-gradient-to-r from-[#1e232a] to-[#1a202c] border border-secondary/30 shadow-[0_0_20px_rgba(217,38,169,0.1)] mb-6 rounded-2xl overflow-hidden relative">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-secondary"></div>
+                    <div class="card-body p-5">
+                        <h3 class="card-title text-sm lg:text-base text-secondary flex items-center gap-2 mb-2">
+                            <i class="fa-solid fa-microchip animate-pulse"></i> AI Keeper Intelligence
+                        </h3>
+                        <div class="text-sm text-gray-300 space-y-2" id="aiInsights">
+                            <p class="flex items-center gap-2 text-gray-400"><i class="fa-solid fa-circle-notch fa-spin"></i> กำลังวิเคราะห์ข้อมูลฟาร์ม...</p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="card bg-gradient-to-br from-neutral to-base-100 border border-primary/20 shadow-xl mb-6">
-                    <div class="card-body p-4 lg:p-6">
-                        <h3 class="card-title text-sm lg:text-base text-primary flex items-center gap-2">
-                            <i class="fa-solid fa-brain animate-pulse text-secondary"></i> AI Keeper Engine (วิเคราะห์พฤติกรรมงูอัตโนมัติ)
-                        </h3>
-                        <div class="text-xs lg:text-sm text-gray-300 space-y-1.5 mt-2" id="aiInsights">
-                            <p>🤖 ระบบกำลังประมวลผลตารางมื้ออาหารล่าสุด สถิติน้ำหนักสะสม และสัญญานเตือนสุขภาพ...</p>
-                        </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-6">
+                    <div class="stat-card p-4 rounded-2xl flex flex-col justify-center items-center text-center">
+                        <div class="text-gray-400 mb-1"><i class="fa-solid fa-cubes text-lg"></i></div>
+                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">งูทั้งหมด</div>
+                        <div class="text-2xl font-black text-primary" id="d_total">0</div>
+                    </div>
+                    <div class="stat-card p-4 rounded-2xl flex flex-col justify-center items-center text-center relative overflow-hidden">
+                        <div class="absolute -right-4 -bottom-4 text-warning/10 text-6xl"><i class="fa-solid fa-drumstick-bite"></i></div>
+                        <div class="text-warning mb-1"><i class="fa-solid fa-utensils text-lg"></i></div>
+                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">ป้อนอาหารวันนี้</div>
+                        <div class="text-2xl font-black text-warning" id="d_feed">0</div>
+                    </div>
+                    <div class="stat-card p-4 rounded-2xl flex flex-col justify-center items-center text-center relative overflow-hidden">
+                        <div class="absolute -right-2 -bottom-4 text-secondary/10 text-6xl"><i class="fa-solid fa-shirt"></i></div>
+                        <div class="text-secondary mb-1"><i class="fa-solid fa-eye text-lg"></i></div>
+                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">เข้าคราบ/ลอกคราบ</div>
+                        <div class="text-2xl font-black text-secondary" id="d_shed">0</div>
+                    </div>
+                    <div class="stat-card p-4 rounded-2xl flex flex-col justify-center items-center text-center relative overflow-hidden">
+                        <div class="absolute -right-3 -bottom-4 text-info/10 text-6xl"><i class="fa-solid fa-scale-balanced"></i></div>
+                        <div class="text-info mb-1"><i class="fa-solid fa-weight-scale text-lg"></i></div>
+                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">ชั่งน้ำหนักวันนี้</div>
+                        <div class="text-2xl font-black text-info" id="d_weight">0</div>
+                    </div>
+                    
+                    <div class="stat-card p-4 rounded-2xl flex flex-col justify-center items-center text-center hidden" id="d_eggs_container">
+                        <div class="text-emerald-400 mb-1"><i class="fa-solid fa-egg text-lg"></i></div>
+                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">ไข่รอฟัก</div>
+                        <div class="text-2xl font-black text-emerald-400" id="d_eggs">0</div>
+                    </div>
+                    
+                    <div class="stat-card p-4 rounded-2xl flex flex-col justify-center items-center text-center relative overflow-hidden">
+                        <div class="absolute -right-3 -bottom-4 text-error/10 text-6xl"><i class="fa-solid fa-suitcase-medical"></i></div>
+                        <div class="text-error mb-1"><i class="fa-solid fa-pills text-lg"></i></div>
+                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">ต้องรับยา</div>
+                        <div class="text-2xl font-black text-error" id="d_med">0</div>
+                    </div>
+                    <div class="stat-card p-4 rounded-2xl flex flex-col justify-center items-center text-center relative overflow-hidden">
+                         <div class="absolute -right-3 -bottom-4 text-error/10 text-6xl"><i class="fa-solid fa-receipt"></i></div>
+                        <div class="text-error/80 mb-1"><i class="fa-solid fa-money-bill-wave text-lg"></i></div>
+                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">รายจ่ายฟาร์ม</div>
+                        <div class="text-lg font-black text-error/80" id="d_expenses">0 ฿</div>
+                    </div>
+                    <div class="stat-card p-4 rounded-2xl flex flex-col justify-center items-center text-center relative overflow-hidden">
+                        <div class="absolute -right-2 -bottom-2 text-success/10 text-6xl"><i class="fa-solid fa-boxes-stacked"></i></div>
+                        <div class="text-success mb-1"><i class="fa-solid fa-box-open text-lg"></i></div>
+                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">สต็อกอาหาร</div>
+                        <div class="text-2xl font-black text-success" id="d_stock_total">0</div>
                     </div>
                 </div>
             </div>
 
-            <div id="tab-snakes" class="tab-content-item hidden">
-                <div class="bg-base-100 p-4 rounded-xl shadow mb-6 border border-base-200 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    <input type="text" id="searchBar" oninput="window.filterSnakes()" placeholder="🔍 ค้นหาด้วย ชื่อ, รหัส, Morph, หรือพิกัด..." class="input input-bordered w-full text-xs lg:text-sm shadow-inner lg:col-span-2" />
-                    <select id="filterSelect" onchange="window.filterSnakes()" class="select select-bordered w-full text-xs lg:text-sm">
-                        <option value="all">กรองสถานะ: ทั้งหมด</option>
-                        <option value="เลี้ยงปกติ">สถานะ: เลี้ยงปกติ</option>
-                        <option value="กำลังลอกคราบ">สถานะ: เข้าคราบ/เรดอาย</option>
-                        <option value="ขายแล้ว">สถานะ: จำหน่ายออกแล้ว</option>
-                        <option value="ตาย">สถานะ: ตาย</option>
-                    </select>
-                    <select id="sortSelect" onchange="window.filterSnakes()" class="select select-bordered w-full text-xs lg:text-sm">
-                        <option value="newest">เรียงลำดับ: เพิ่มสมาชิกล่าสุด</option>
-                        <option value="weight">เรียงลำดับ: น้ำหนัก (มาก - น้อย)</option>
-                        <option value="code">เรียงลำดับ: เรียงตามรหัสงู</option>
-                    </select>
-                    <button onclick="window.exportData()" class="btn btn-outline btn-success btn-sm w-full"><i class="fa-solid fa-file-excel"></i> ส่งออกข้อมูล Excel</button>
+            <div id="tab-snakes" class="tab-content-item hidden animate-fade-in">
+                
+                <div class="bg-[#1e232a] p-3 rounded-2xl shadow-lg mb-6 border border-base-200/50 flex flex-col md:flex-row gap-3 items-center">
+                    <div class="relative w-full md:w-1/2 lg:w-1/3">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500"><i class="fa-solid fa-magnifying-glass"></i></div>
+                        <input type="text" id="searchBar" oninput="window.filterSnakes()" placeholder="ค้นหา ชื่อ, รหัส, Morph, พิกัด..." class="input input-bordered w-full pl-10 bg-[#15191e] rounded-xl text-sm" />
+                    </div>
+                    
+                    <div class="flex w-full md:w-auto gap-2 flex-1 justify-end">
+                        <select id="filterSelect" onchange="window.filterSnakes()" class="select select-bordered bg-[#15191e] rounded-xl text-sm w-full md:w-auto">
+                            <option value="all">สถานะ: ทั้งหมด</option>
+                            <option value="เลี้ยงปกติ">สถานะ: เลี้ยงปกติ</option>
+                            <option value="กำลังลอกคราบ">สถานะ: ลอกคราบ</option>
+                            <option value="ขายแล้ว">สถานะ: ขายแล้ว</option>
+                            <option value="ตาย">สถานะ: ตาย</option>
+                        </select>
+                        <select id="sortSelect" onchange="window.filterSnakes()" class="select select-bordered bg-[#15191e] rounded-xl text-sm w-full md:w-auto">
+                            <option value="newest">เรียง: ล่าสุด</option>
+                            <option value="weight">เรียง: น้ำหนัก</option>
+                            <option value="code">เรียง: รหัสงู</option>
+                        </select>
+                        <button onclick="window.exportData()" class="btn btn-outline btn-success rounded-xl md:w-auto w-12 px-0 flex-shrink-0" title="Export Excel"><i class="fa-solid fa-file-csv text-lg"></i></button>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6" id="snakeGrid"></div>
             </div>
 
-            <div id="tab-calendar" class="tab-content-item hidden">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="card bg-base-100 p-5 shadow border border-base-200 lg:col-span-1 h-fit">
-                        <h3 class="font-bold text-base mb-4 text-warning flex items-center gap-2"><i class="fa-solid fa-bolt"></i> แผงตั้งนัดหมายด่วน</h3>
-                        
-                        <div class="form-control mb-3">
-                            <label class="label"><span class="label-text text-xs text-gray-400">1. เลือกรายชื่อน้องงู</span></label>
-                            <select id="quick_sched_snake" onchange="window.loadQuickSchedule()" class="select select-bordered w-full">
-                                <option value="" disabled selected>-- กดเพื่อเลือก --</option>
-                            </select>
-                        </div>
+            <div id="tab-calendar" class="tab-content-item hidden animate-fade-in">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    
+                    <div class="lg:col-span-4 space-y-4">
+                        <div class="card bg-[#1e232a] shadow-xl border border-base-200/50 rounded-2xl">
+                            <div class="card-body p-5">
+                                <h3 class="font-bold text-lg mb-4 text-white border-b border-gray-700 pb-2"><i class="fa-solid fa-bolt text-warning mr-2"></i> ตั้งนัดหมายด่วน</h3>
+                                
+                                <div class="form-control mb-4">
+                                    <label class="label"><span class="label-text text-xs text-gray-400 font-bold">1. เลือกงูเป้าหมาย</span></label>
+                                    <select id="quick_sched_snake" onchange="window.loadQuickSchedule()" class="select select-bordered bg-[#15191e] rounded-xl w-full">
+                                        <option value="" disabled selected>-- เลือกจากรายการ --</option>
+                                    </select>
+                                </div>
 
-                        <div class="form-control mb-3 bg-warning/10 p-3 rounded-xl border border-warning/30">
-                            <label class="label pt-0"><span class="label-text text-warning font-bold text-xs"><i class="fa-solid fa-utensils"></i> นัดให้อาหาร:</span></label>
-                            <div class="flex gap-2">
-                                <input type="date" id="quick_feed_date" class="input input-bordered input-sm w-full shadow-inner" />
-                                <button onclick="window.saveQuickSchedule('nextFeedDate', 'quick_feed_date')" class="btn btn-sm btn-warning">บันทึก</button>
-                            </div>
-                        </div>
+                                <div class="space-y-3">
+                                    <div class="bg-[#15191e] p-3 rounded-xl border border-warning/20">
+                                        <label class="label pt-0 pb-1"><span class="label-text text-warning font-bold text-xs"><i class="fa-solid fa-utensils w-4"></i> ให้อาหาร</span></label>
+                                        <div class="flex gap-2">
+                                            <input type="date" id="quick_feed_date" class="input input-bordered input-sm w-full bg-[#121212] rounded-lg" />
+                                            <button onclick="window.saveQuickSchedule('nextFeedDate', 'quick_feed_date')" class="btn btn-sm btn-warning rounded-lg"><i class="fa-solid fa-save"></i></button>
+                                        </div>
+                                    </div>
 
-                        <div class="form-control mb-3 bg-info/10 p-3 rounded-xl border border-info/30">
-                            <label class="label pt-0"><span class="label-text text-info font-bold text-xs"><i class="fa-solid fa-weight-scale"></i> นัดชั่งน้ำหนัก:</span></label>
-                            <div class="flex gap-2">
-                                <input type="date" id="quick_weight_date" class="input input-bordered input-sm w-full shadow-inner" />
-                                <button onclick="window.saveQuickSchedule('nextWeightDate', 'quick_weight_date')" class="btn btn-sm btn-info">บันทึก</button>
-                            </div>
-                        </div>
-                        
-                        <div class="form-control bg-error/10 p-3 rounded-xl border border-error/30">
-                            <label class="label pt-0"><span class="label-text text-error font-bold text-xs"><i class="fa-solid fa-pills"></i> นัดให้ยา/รักษา:</span></label>
-                            <div class="flex gap-2">
-                                <input type="date" id="quick_med_date" class="input input-bordered input-sm w-full shadow-inner" />
-                                <button onclick="window.saveQuickSchedule('nextMedDate', 'quick_med_date')" class="btn btn-sm btn-error text-white">บันทึก</button>
+                                    <div class="bg-[#15191e] p-3 rounded-xl border border-info/20">
+                                        <label class="label pt-0 pb-1"><span class="label-text text-info font-bold text-xs"><i class="fa-solid fa-weight-scale w-4"></i> ชั่งน้ำหนัก</span></label>
+                                        <div class="flex gap-2">
+                                            <input type="date" id="quick_weight_date" class="input input-bordered input-sm w-full bg-[#121212] rounded-lg" />
+                                            <button onclick="window.saveQuickSchedule('nextWeightDate', 'quick_weight_date')" class="btn btn-sm btn-info rounded-lg"><i class="fa-solid fa-save"></i></button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-[#15191e] p-3 rounded-xl border border-error/20">
+                                        <label class="label pt-0 pb-1"><span class="label-text text-error font-bold text-xs"><i class="fa-solid fa-pills w-4"></i> ให้ยา/รักษา</span></label>
+                                        <div class="flex gap-2">
+                                            <input type="date" id="quick_med_date" class="input input-bordered input-sm w-full bg-[#121212] rounded-lg" />
+                                            <button onclick="window.saveQuickSchedule('nextMedDate', 'quick_med_date')" class="btn btn-sm btn-error text-white rounded-lg"><i class="fa-solid fa-save"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="card bg-base-100 p-4 lg:p-6 shadow border border-base-200 lg:col-span-2">
-                        <h3 class="font-bold text-base mb-4 text-primary flex items-center gap-2"><i class="fa-solid fa-calendar-days"></i> ปฏิทินรอบการดูแล</h3>
-                        <div id="calendar" class="bg-base-200/50 p-2 rounded-xl"></div>
+                    <div class="lg:col-span-8">
+                        <div class="card bg-[#1e232a] shadow-xl border border-base-200/50 rounded-2xl h-full">
+                            <div class="card-body p-4 lg:p-6">
+                                <div id="calendar" class="bg-[#15191e] p-3 rounded-xl border border-gray-800 h-full min-h-[500px]"></div>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
             </div>
 
-            <div id="tab-finance" class="tab-content-item hidden">
+            <div id="tab-finance" class="tab-content-item hidden animate-fade-in">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="card bg-base-100 p-5 shadow border border-base-200">
-                        <h3 class="font-bold text-base mb-4 text-primary flex items-center gap-2"><i class="fa-solid fa-box-open"></i> ระบบสต็อกเหยื่อ/อาหาร</h3>
-                        <div class="flex gap-2 mb-4">
-                            <input type="text" id="fs_name" placeholder="ชื่อเหยื่อ เช่น หนูแช่ M" class="input input-bordered w-full" />
-                            <input type="number" id="fs_qty" placeholder="จำนวน" class="input input-bordered w-24" />
-                            <button onclick="window.addFoodStock()" class="btn btn-primary px-6">เพิ่ม</button>
+                    
+                    <div class="card bg-[#1e232a] shadow-xl border border-base-200/50 rounded-2xl">
+                        <div class="card-body p-5 lg:p-6">
+                            <h3 class="font-bold text-lg mb-4 text-white flex items-center gap-2 border-b border-gray-700 pb-2"><i class="fa-solid fa-box-open text-primary"></i> คลังเหยื่อ/อาหาร</h3>
+                            
+                            <div class="bg-[#15191e] p-3 rounded-xl border border-gray-700 mb-4 flex flex-wrap sm:flex-nowrap gap-2 items-center">
+                                <div class="flex-1 w-full sm:w-auto relative">
+                                    <input type="text" id="fs_name" placeholder="ชื่อเหยื่อ (เช่น หนูไมซ์ M)" class="input input-bordered input-sm w-full bg-[#121212] rounded-lg" />
+                                </div>
+                                <div class="w-24 flex-shrink-0">
+                                    <input type="number" id="fs_qty" placeholder="จำนวน" class="input input-bordered input-sm w-full bg-[#121212] rounded-lg text-center" />
+                                </div>
+                                <button onclick="window.addFoodStock()" class="btn btn-primary btn-sm rounded-lg w-full sm:w-auto"><i class="fa-solid fa-plus"></i></button>
+                            </div>
+                            
+                            <div class="overflow-y-auto max-h-[350px] space-y-2 text-sm custom-scrollbar pr-1" id="foodStockList"></div>
+                            
+                            <div class="mt-4 p-3 rounded-xl bg-info/10 border border-info/20 flex gap-3 items-start">
+                                <i class="fa-solid fa-circle-info text-info mt-0.5"></i>
+                                <p class="text-xs text-info/80 leading-relaxed">ระบบจะตัดสต็อกให้ <b>1 ตัว อัตโนมัติ</b> เมื่อคุณบันทึกว่า <b>"กินปกติ (ตัดสต็อก)"</b> ในหน้าประวัติการให้อาหารของงูแต่ละตัว</p>
+                            </div>
                         </div>
-                        <div class="divider my-2"></div>
-                        <div class="overflow-y-auto max-h-72 space-y-2 text-sm custom-scrollbar pr-2" id="foodStockList"></div>
-                        <p class="text-xs text-warning mt-4 bg-warning/10 p-2 rounded"><i class="fa-solid fa-circle-info"></i> สต็อกจะลดลง 1 ตัวอัตโนมัติ เมื่อกดสถานะการให้อาหารว่า 'กินปกติ' ในแฟ้มประวัติงู</p>
                     </div>
 
-                    <div class="card bg-base-100 p-5 shadow border border-base-200">
-                        <h3 class="font-bold text-base mb-4 text-error flex items-center gap-2"><i class="fa-solid fa-receipt"></i> บันทึกบัญชีรายจ่าย</h3>
-                        <form onsubmit="window.addExpense(event)" class="space-y-3 mb-4">
-                            <input type="text" id="fx_title" placeholder="รายละเอียดรายการ เช่น ซื้อกล่องเลี้ยง, ค่าไฟ" required class="input input-bordered w-full" />
-                            <div class="flex gap-2">
-                                <input type="number" id="fx_amount" placeholder="ยอดเงิน (บาท)" required class="input input-bordered w-full" />
-                                <select id="fx_category" class="select select-bordered w-full">
-                                    <option value="ค่าอาหาร">หมวดหมู่: ค่าอาหาร</option>
-                                    <option value="ค่าอุปกรณ์">หมวดหมู่: ค่าอุปกรณ์</option>
-                                    <option value="ค่ายา/รักษา">หมวดหมู่: ค่ายา/รักษา</option>
-                                    <option value="อื่นๆ">หมวดหมู่: อื่นๆ</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-error text-white w-full font-bold shadow-md">บันทึกบิลรายจ่าย</button>
-                        </form>
-                        <div class="divider my-2"></div>
-                        <div class="overflow-y-auto max-h-60 space-y-2 text-sm custom-scrollbar pr-2" id="expenseList"></div>
+                    <div class="card bg-[#1e232a] shadow-xl border border-base-200/50 rounded-2xl">
+                        <div class="card-body p-5 lg:p-6">
+                            <h3 class="font-bold text-lg mb-4 text-white flex items-center gap-2 border-b border-gray-700 pb-2"><i class="fa-solid fa-wallet text-error"></i> บัญชีรายจ่ายฟาร์ม</h3>
+                            
+                            <form onsubmit="window.addExpense(event)" class="bg-[#15191e] p-3 rounded-xl border border-gray-700 mb-4 space-y-3">
+                                <div>
+                                    <input type="text" id="fx_title" placeholder="รายการ (เช่น ค่ากล่อง, ค่าไฟ, ค่ารักษา)" required class="input input-bordered input-sm w-full bg-[#121212] rounded-lg" />
+                                </div>
+                                <div class="flex gap-2">
+                                    <input type="number" id="fx_amount" placeholder="ยอดเงิน (฿)" required class="input input-bordered input-sm w-1/2 bg-[#121212] rounded-lg" />
+                                    <select id="fx_category" class="select select-bordered select-sm w-1/2 bg-[#121212] rounded-lg text-gray-300">
+                                        <option value="ค่าอาหาร">หมวด: ค่าอาหาร</option>
+                                        <option value="ค่าอุปกรณ์">หมวด: ค่าอุปกรณ์</option>
+                                        <option value="ค่ายา/รักษา">หมวด: ค่ายา/รักษา</option>
+                                        <option value="อื่นๆ">หมวด: อื่นๆ</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-error btn-sm text-white w-full rounded-lg shadow-md"><i class="fa-solid fa-plus"></i> บันทึกรายจ่าย</button>
+                            </form>
+                            
+                            <div class="overflow-y-auto max-h-[300px] space-y-2 text-sm custom-scrollbar pr-1" id="expenseList"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -247,79 +364,89 @@
         </div>
 
         <div class="fixed bottom-24 lg:bottom-10 right-6 lg:right-10 z-40">
-            <button onclick="window.openAddModal()" class="btn btn-primary btn-circle btn-lg shadow-2xl hover:scale-110 transition-transform"><i class="fa-solid fa-plus text-2xl"></i></button>
+            <button onclick="window.openAddModal()" class="btn btn-primary btn-circle h-14 w-14 shadow-[0_10px_20px_var(--primary-glow)] hover:scale-110 transition-transform"><i class="fa-solid fa-plus text-2xl"></i></button>
         </div>
 
-        <div class="btm-nav border-t border-base-200 bg-base-100 lg:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-            <button onclick="window.switchTab('dashboard')" id="nav-dashboard" class="active text-primary transition-colors">
-                <i class="fa-solid fa-chart-line text-lg mb-1"></i><span class="text-[10px] font-bold">แดชบอร์ด</span>
+        <div class="btm-nav lg:hidden pb-safe">
+            <button onclick="window.switchTab('dashboard')" id="nav-dashboard" class="active text-primary transition-all duration-300 hover:bg-base-200">
+                <i class="fa-solid fa-chart-pie text-lg mb-1"></i><span class="text-[10px] font-bold">แดชบอร์ด</span>
             </button>
-            <button onclick="window.switchTab('snakes')" id="nav-snakes" class="transition-colors">
-                <i class="fa-solid fa-snake text-lg mb-1"></i><span class="text-[10px] font-bold">รายการงู</span>
+            <button onclick="window.switchTab('snakes')" id="nav-snakes" class="text-gray-400 transition-all duration-300 hover:bg-base-200 hover:text-gray-200">
+                <i class="fa-solid fa-list text-lg mb-1"></i><span class="text-[10px] font-bold">รายการงู</span>
             </button>
-            <button onclick="window.switchTab('calendar')" id="nav-calendar" class="transition-colors">
-                <i class="fa-solid fa-calendar-week text-lg mb-1"></i><span class="text-[10px] font-bold">ปฏิทิน</span>
+            <button onclick="window.switchTab('calendar')" id="nav-calendar" class="text-gray-400 transition-all duration-300 hover:bg-base-200 hover:text-gray-200">
+                <i class="fa-solid fa-calendar-day text-lg mb-1"></i><span class="text-[10px] font-bold">ปฏิทิน</span>
             </button>
-            <button onclick="window.switchTab('finance')" id="nav-finance" class="transition-colors">
-                <i class="fa-solid fa-wallet text-lg mb-1"></i><span class="text-[10px] font-bold">บัญชี/สต็อก</span>
+            <button onclick="window.switchTab('finance')" id="nav-finance" class="text-gray-400 transition-all duration-300 hover:bg-base-200 hover:text-gray-200">
+                <i class="fa-solid fa-box text-lg mb-1"></i><span class="text-[10px] font-bold">คลัง/บัญชี</span>
             </button>
         </div>
     </div>
 
     <datalist id="foodDatalist"></datalist>
 
-    <dialog id="detailModal" class="modal bg-black/60 backdrop-blur-sm">
-        <div class="modal-box max-w-6xl w-11/12 bg-base-100 shadow-2xl rounded-3xl p-5 lg:p-8" id="detailContent"></div>
+    <dialog id="detailModal" class="modal">
+        <div class="modal-box w-11/12 max-w-6xl p-0" id="detailContent">
+            </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
     </dialog>
 
-    <dialog id="snakeModal" class="modal bg-black/60 backdrop-blur-sm">
-        <div class="modal-box max-w-3xl w-11/12 bg-base-100 shadow-2xl rounded-3xl p-5 lg:p-8">
-            <h3 class="font-bold text-xl mb-6 text-primary flex items-center gap-2" id="modalTitle"><i class="fa-solid fa-file-pen"></i> ลงทะเบียนสมาชิกงูรายใหม่</h3>
-            <form id="snakeForm" onsubmit="window.saveSnake(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+    <dialog id="snakeModal" class="modal">
+        <div class="modal-box w-11/12 max-w-3xl p-6 lg:p-8">
+            <h3 class="font-bold text-xl mb-6 text-white flex items-center gap-2 border-b border-gray-700 pb-3" id="modalTitle"><i class="fa-solid fa-file-pen text-primary"></i> ลงทะเบียนสมาชิกงูรายใหม่</h3>
+            <form id="snakeForm" onsubmit="window.saveSnake(event)" class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
                 <input type="hidden" id="editSnakeId">
                 
-                <div class="form-control"><label class="label"><span class="label-text font-bold">รหัสประจำตัวงู (Code)</span></label><input type="text" id="s_code" required placeholder="เช่น BP26-001" class="input input-bordered w-full bg-base-200 focus:bg-base-100 transition-colors" /></div>
-                <div class="form-control"><label class="label"><span class="label-text font-bold">ชื่อเรียกเฉพาะตัว</span></label><input type="text" id="s_name" required placeholder="เช่น น้องสโนว์" class="input input-bordered w-full bg-base-200 focus:bg-base-100 transition-colors" /></div>
-                <div class="form-control"><label class="label"><span class="label-text font-bold">Morph (พันธุกรรม/ยีนส์)</span></label><input type="text" id="s_morph" required placeholder="เช่น Axanthic Pastel" class="input input-bordered w-full bg-base-200 focus:bg-base-100 transition-colors" /></div>
-                <div class="form-control"><label class="label"><span class="label-text font-bold">เพศโครงสร้าง</span></label><select id="s_gender" class="select select-bordered w-full bg-base-200 focus:bg-base-100"><option value="ผู้ (1.0)">ตัวผู้ (1.0)</option><option value="เมีย (0.1)">ตัวเมีย (0.1)</option><option value="ไม่ระบุ">ไม่ระบุเพศ</option></select></div>
+                <div class="md:col-span-2 text-primary font-bold border-b border-gray-700 pb-1 mt-2 text-xs uppercase tracking-wide">ข้อมูลพื้นฐาน</div>
+                <div class="form-control"><label class="label py-1"><span class="label-text text-gray-400 text-xs">รหัสประจำตัวงู (Code)*</span></label><input type="text" id="s_code" required placeholder="เช่น BP-001" class="input input-bordered input-sm h-10 w-full bg-[#15191e] rounded-lg" /></div>
+                <div class="form-control"><label class="label py-1"><span class="label-text text-gray-400 text-xs">ชื่อเรียก*</span></label><input type="text" id="s_name" required placeholder="ชื่อเล่น" class="input input-bordered input-sm h-10 w-full bg-[#15191e] rounded-lg" /></div>
+                <div class="form-control"><label class="label py-1"><span class="label-text text-gray-400 text-xs">สายพันธุ์/Morph*</span></label><input type="text" id="s_morph" required placeholder="ยีนส์" class="input input-bordered input-sm h-10 w-full bg-[#15191e] rounded-lg" /></div>
+                <div class="form-control"><label class="label py-1"><span class="label-text text-gray-400 text-xs">เพศ</span></label><select id="s_gender" class="select select-bordered select-sm h-10 w-full bg-[#15191e] rounded-lg"><option value="ผู้ (1.0)">ตัวผู้ (1.0)</option><option value="เมีย (0.1)">ตัวเมีย (0.1)</option><option value="ไม่ระบุ">ไม่ระบุ</option></select></div>
                 
-                <div class="form-control"><label class="label"><span class="label-text font-bold">ตู้แร็คเลี้ยง (Rack)</span></label><input type="text" id="s_rack" placeholder="เช่น Rack A" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
-                <div class="form-control"><label class="label"><span class="label-text font-bold">ชั้นวางแร็ค (Shelf)</span></label><input type="text" id="s_shelf" placeholder="ชั้นที่ 4" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
-                <div class="form-control"><label class="label"><span class="label-text font-bold">หมายเลขกล่อง (Box)</span></label><input type="text" id="s_box" placeholder="Box 12" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
-                <div class="form-control"><label class="label"><span class="label-text font-bold">น้ำหนักแรกรับ (กรัม)</span></label><input type="number" step="0.1" id="s_weight" required class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
+                <div class="md:col-span-2 text-primary font-bold border-b border-gray-700 pb-1 mt-4 text-xs uppercase tracking-wide">กายภาพ & สถานที่จัดเก็บ</div>
+                <div class="form-control"><label class="label py-1"><span class="label-text text-gray-400 text-xs">น้ำหนักปัจจุบัน (g)*</span></label><input type="number" step="0.1" id="s_weight" required class="input input-bordered input-sm h-10 w-full bg-[#15191e] rounded-lg" /></div>
+                <div class="form-control"><label class="label py-1"><span class="label-text text-gray-400 text-xs">ความยาว (cm)</span></label><input type="number" step="0.1" id="s_length" class="input input-bordered input-sm h-10 w-full bg-[#15191e] rounded-lg" /></div>
                 
-                <div class="form-control bg-warning/10 p-2 rounded-xl border border-warning/30"><label class="label pt-0"><span class="label-text text-warning font-bold">กำหนดวันให้อาหารถัดไป</span></label><input type="date" id="s_next_feed" class="input input-bordered input-sm w-full border-warning bg-base-100" /></div>
-                <div class="form-control bg-info/10 p-2 rounded-xl border border-info/30"><label class="label pt-0"><span class="label-text text-info font-bold">กำหนดวันชั่ง นน. ถัดไป</span></label><input type="date" id="s_next_weight" class="input input-bordered input-sm w-full border-info bg-base-100" /></div>
-                <div class="form-control bg-error/10 p-2 rounded-xl border border-error/30"><label class="label pt-0"><span class="label-text text-error font-bold">กำหนดวันให้ยา/รักษาถัดไป</span></label><input type="date" id="s_next_med" class="input input-bordered input-sm w-full border-error bg-base-100" /></div>
+                <div class="form-control"><label class="label py-1"><span class="label-text text-gray-400 text-xs">ตู้แร็ค (Rack)</span></label><input type="text" id="s_rack" placeholder="เช่น A" class="input input-bordered input-sm h-10 w-full bg-[#15191e] rounded-lg" /></div>
+                <div class="flex gap-2">
+                    <div class="form-control flex-1"><label class="label py-1"><span class="label-text text-gray-400 text-xs">ชั้น (Shelf)</span></label><input type="text" id="s_shelf" placeholder="1" class="input input-bordered input-sm h-10 w-full bg-[#15191e] rounded-lg" /></div>
+                    <div class="form-control flex-1"><label class="label py-1"><span class="label-text text-gray-400 text-xs">กล่อง (Box)</span></label><input type="text" id="s_box" placeholder="1" class="input input-bordered input-sm h-10 w-full bg-[#15191e] rounded-lg" /></div>
+                </div>
+
+                <div class="md:col-span-2 text-warning font-bold border-b border-gray-700 pb-1 mt-4 text-xs uppercase tracking-wide">ตั้งค่านัดหมายการดูแลถัดไป</div>
+                <div class="form-control bg-warning/5 p-2 rounded-xl border border-warning/20"><label class="label py-0"><span class="label-text text-warning text-xs">📅 วันให้อาหารถัดไป</span></label><input type="date" id="s_next_feed" class="input input-bordered input-sm h-9 w-full bg-[#121212] mt-1" /></div>
+                <div class="form-control bg-info/5 p-2 rounded-xl border border-info/20"><label class="label py-0"><span class="label-text text-info text-xs">📅 วันชั่ง นน. ถัดไป</span></label><input type="date" id="s_next_weight" class="input input-bordered input-sm h-9 w-full bg-[#121212] mt-1" /></div>
+                <div class="form-control bg-error/5 p-2 rounded-xl border border-error/20 md:col-span-2"><label class="label py-0"><span class="label-text text-error text-xs">📅 วันให้ยา/รักษาถัดไป</span></label><input type="date" id="s_next_med" class="input input-bordered input-sm h-9 w-full bg-[#121212] mt-1" /></div>
                 
-                <div class="form-control"><label class="label"><span class="label-text">ความยาวลำตัวเริ่มต้น (ซม.)</span></label><input type="number" step="0.1" id="s_length" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
-                <div class="form-control"><label class="label"><span class="label-text">วันเกิด / วันฟักออกจากไข่</span></label><input type="date" id="s_birth" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
-                <div class="form-control"><label class="label"><span class="label-text">วันที่รับงูเข้าบ้าน</span></label><input type="date" id="s_buy" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
-                <div class="form-control"><label class="label"><span class="label-text">ราคาซื้อเริ่มต้น (บาท)</span></label><input type="number" id="s_price" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
-                <div class="form-control"><label class="label"><span class="label-text">แหล่งที่มา / ผู้เพาะพันธุ์</span></label><input type="text" id="s_source" class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
+                <div class="md:col-span-2 text-primary font-bold border-b border-gray-700 pb-1 mt-4 text-xs uppercase tracking-wide">ข้อมูลการรับเข้า & อื่นๆ</div>
+                <div class="form-control"><label class="label py-1"><span class="label-text text-gray-400 text-xs">วันเกิด/วันฟัก</span></label><input type="date" id="s_birth" class="input input-bordered input-sm h-10 w-full bg-[#15191e] rounded-lg" /></div>
+                <div class="form-control"><label class="label py-1"><span class="label-text text-gray-400 text-xs">วันที่รับเข้าบ้าน</span></label><input type="date" id="s_buy" class="input input-bordered input-sm h-10 w-full bg-[#15191e] rounded-lg" /></div>
+                <div class="form-control"><label class="label py-1"><span class="label-text text-gray-400 text-xs">ราคาที่ซื้อ (฿)</span></label><input type="number" id="s_price" class="input input-bordered input-sm h-10 w-full bg-[#15191e] rounded-lg" /></div>
+                <div class="form-control"><label class="label py-1"><span class="label-text text-gray-400 text-xs">แหล่งที่มา/ฟาร์ม</span></label><input type="text" id="s_source" class="input input-bordered input-sm h-10 w-full bg-[#15191e] rounded-lg" /></div>
                 
-                <div class="form-control">
-                    <label class="label"><span class="label-text">สถานะปัจจุบัน</span></label>
-                    <select id="s_status" class="select select-bordered w-full bg-base-200 focus:bg-base-100 text-primary font-bold">
-                        <option value="เลี้ยงปกติ">เลี้ยงปกติ</option>
-                        <option value="กำลังลอกคราบ">กำลังลอกคราบ</option>
-                        <option value="ขายแล้ว">ขายแล้ว</option>
-                        <option value="ตาย">ตาย</option>
+                <div class="form-control md:col-span-2">
+                    <label class="label py-1"><span class="label-text text-gray-400 text-xs">สถานะปัจจุบัน</span></label>
+                    <select id="s_status" class="select select-bordered select-sm h-10 w-full bg-[#15191e] rounded-lg text-white font-bold border-gray-600 focus:border-primary">
+                        <option value="เลี้ยงปกติ">🟢 เลี้ยงปกติ</option>
+                        <option value="กำลังลอกคราบ">🔵 กำลังลอกคราบ (ตาฟ้า)</option>
+                        <option value="ขายแล้ว">🟠 จำหน่ายออกแล้ว</option>
+                        <option value="ตาย">🔴 เสียชีวิต</option>
                     </select>
                 </div>
 
-                <div class="form-control md:col-span-2"><label class="label"><span class="label-text font-bold">ลิงก์คลังรูปภาพ (คั่นด้วย , )</span></label><input type="text" id="s_images" placeholder="วางลิงก์รูปภาพที่นี่..." class="input input-bordered w-full bg-base-200 focus:bg-base-100" /></div>
-                <div class="form-control md:col-span-2"><label class="label"><span class="label-text font-bold">หมายเหตุรายละเอียดตำหนิ/ข้อมูลเพิ่มเติม</span></label><textarea id="s_note" placeholder="รายละเอียดประวัติเพิ่มเติม..." class="textarea textarea-bordered w-full h-20 bg-base-200 focus:bg-base-100"></textarea></div>
+                <div class="form-control md:col-span-2"><label class="label py-1"><span class="label-text text-gray-400 text-xs">ลิงก์รูปภาพ (คั่นด้วย , )</span></label><input type="text" id="s_images" placeholder="URL รูปภาพ..." class="input input-bordered input-sm h-10 w-full bg-[#15191e] rounded-lg text-xs" /></div>
+                <div class="form-control md:col-span-2"><label class="label py-1"><span class="label-text text-gray-400 text-xs">หมายเหตุ / ตำหนิ</span></label><textarea id="s_note" placeholder="บันทึกเพิ่มเติม..." class="textarea textarea-bordered w-full h-20 bg-[#15191e] rounded-xl leading-relaxed text-sm"></textarea></div>
                 
-                <div class="md:col-span-2 flex gap-3 mt-4">
-                    <button type="submit" class="btn btn-primary flex-1 font-bold text-lg rounded-xl shadow-lg">บันทึกข้อมูล</button>
-                    <button type="button" onclick="document.getElementById('snakeModal').close()" class="btn btn-ghost rounded-xl">ยกเลิก</button>
+                <div class="md:col-span-2 flex gap-3 mt-6 pt-4 border-t border-gray-800">
+                    <button type="submit" class="btn btn-primary flex-1 font-bold text-base rounded-xl shadow-[0_4px_15px_var(--primary-glow)]">💾 บันทึกข้อมูล</button>
+                    <button type="button" onclick="document.getElementById('snakeModal').close()" class="btn btn-ghost rounded-xl bg-gray-800 hover:bg-gray-700">ยกเลิก</button>
                 </div>
             </form>
         </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
     </dialog>
 
-    <div id="toastContainer" class="toast toast-top toast-end z-50"></div>
+    <div id="toastContainer" class="toast toast-top toast-end z-[9999] mt-2 mr-2"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
@@ -370,18 +497,24 @@
             document.querySelectorAll('.tab-content-item').forEach(el => el.classList.add('hidden'));
             document.getElementById(`tab-${tabName}`).classList.remove('hidden');
             
-            document.querySelectorAll('.btm-nav button').forEach(el => el.classList.remove('active', 'text-primary'));
+            document.querySelectorAll('.btm-nav button').forEach(el => {
+                el.classList.remove('active', 'text-primary');
+                el.classList.add('text-gray-400');
+            });
             const mobNav = document.getElementById(`nav-${tabName}`);
-            if(mobNav) mobNav.classList.add('active', 'text-primary');
+            if(mobNav) {
+                mobNav.classList.add('active', 'text-primary');
+                mobNav.classList.remove('text-gray-400');
+            }
 
             document.querySelectorAll('.navbar-center button').forEach(el => {
-                el.classList.remove('btn-primary', 'shadow');
-                el.classList.add('btn-ghost');
+                el.classList.remove('btn-primary', 'shadow-[0_0_10px_var(--primary-glow)]');
+                el.classList.add('btn-ghost', 'text-gray-300');
             });
             const deskNav = document.getElementById(`desk-nav-${tabName}`);
             if(deskNav) {
-                deskNav.classList.remove('btn-ghost');
-                deskNav.classList.add('btn-primary', 'shadow');
+                deskNav.classList.remove('btn-ghost', 'text-gray-300');
+                deskNav.classList.add('btn-primary', 'shadow-[0_0_10px_var(--primary-glow)]');
             }
 
             if(tabName === 'calendar' && calendarObj) { setTimeout(() => calendarObj.render(), 100); }
@@ -391,12 +524,24 @@
             const container = document.getElementById('toastContainer');
             if(!container) return;
             const toast = document.createElement('div');
-            toast.className = `alert alert-${status} shadow-lg text-white font-bold text-xs rounded-xl animate-bounce`;
-            toast.innerHTML = `<span>${message}</span>`;
+            
+            let icon = "check-circle";
+            if(status === "error") icon = "triangle-exclamation";
+            if(status === "warning") icon = "circle-exclamation";
+            if(status === "info") icon = "circle-info";
+
+            toast.className = `alert alert-${status} shadow-[0_10px_20px_rgba(0,0,0,0.5)] text-white font-bold text-xs rounded-xl animate-fade-in border-none`;
+            toast.innerHTML = `<i class="fa-solid fa-${icon} text-lg"></i> <span>${message}</span>`;
             container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3500);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
 
+        // ==========================================
+        // 🔄 ระบบตรวจสอบสถานะล็อกอิน และ QR Code GUEST
+        // ==========================================
         onAuthStateChanged(auth, (user) => {
             const urlParams = new URLSearchParams(window.location.search);
             const scanCode = urlParams.get('code');
@@ -411,10 +556,11 @@
                 currentUser = null;
                 
                 if (scanCode) {
+                    // ปลดล็อกหน้าแอปให้แสดงผลทันทีโดยไม่ต้องผ่านฟอร์มล็อกอิน
                     document.getElementById('authSection').classList.add('hidden');
                     document.getElementById('appSection').classList.remove('hidden');
-                    initCalendar();
                     
+                    // ดึงข้อมูลงูจาก Firebase แบบไม่ต้องสนว่าล็อกอินไหม (อ้างอิง Rules: allow read: if true)
                     const qSnakesNoAuth = query(collection(db, "snakes"));
                     onSnapshot(qSnakesNoAuth, (snapshot) => {
                         cachedSnakes = [];
@@ -423,14 +569,19 @@
                         
                         const targetSnake = cachedSnakes.find(s => (s.code||"").toLowerCase() === scanCode.toLowerCase());
                         if (targetSnake) {
+                            // ล้าง URL ไม่ให้ดูเกะกะ
                             window.history.replaceState({}, document.title, window.location.pathname);
+                            // เรียกเปิดหน้าประวัติ Detail ของงูตัวนั้นขึ้นมาตรงกลางหน้าจอ
                             viewDetail(targetSnake.id);
+                        } else {
+                            triggerToast("ไม่พบข้อมูลน้องงูรหัสนี้ในระบบ", "error");
                         }
                     }, (err) => {
                         console.error("NoAuth Fetch Error:", err);
-                        triggerToast("⚠️ หากข้อมูลไม่แสดง โปรดแก้ Firebase Rules เป็น allow read, write: if true;", "error");
+                        triggerToast("⚠️ โปรดแก้ Firebase Rules เป็น allow read: if true;", "error");
                     });
 
+                    // ดึงสต็อกอาหารมารอไว้สำหรับให้กรอกในฟอร์มของงู
                     const qStockNoAuth = query(collection(db, "foodStock"));
                     onSnapshot(qStockNoAuth, (snapshot) => {
                         cachedFoodStock = [];
@@ -438,6 +589,7 @@
                         updateFoodStockDropdowns();
                     });
                 } else {
+                    // ถ้าเข้าเว็บตรงๆ ไม่ได้สแกน QR มา ให้ไปหน้าล็อกอินปกติ
                     document.getElementById('authSection').classList.remove('hidden');
                     document.getElementById('appSection').classList.add('hidden');
                 }
@@ -447,32 +599,32 @@
         window.loginUser = async () => {
             try { 
                 await signInWithEmailAndPassword(auth, email.value, password.value); 
-                triggerToast("🔒 เข้าสู่คลังข้อมูลส่วนบุคคลสำเร็จ");
+                triggerToast("🔒 เข้าสู่คลังข้อมูลสำเร็จ");
             } 
             catch(err) { document.getElementById('authMessage').innerText = "อีเมลหรือรหัสผ่านระบบจัดเก็บข้อมูลไม่ถูกต้อง"; }
         };
         window.registerUser = async () => {
             try { 
                 await createUserWithEmailAndPassword(auth, email.value, password.value); 
-                triggerToast("✨ ลงทะเบียนสารบบออนไลน์ส่วนตัวเสร็จสิ้น");
+                triggerToast("✨ ลงทะเบียนสำเร็จ");
             } 
             catch(err) { document.getElementById('authMessage').innerText = err.message; }
         };
         window.logoutUser = () => {
-            signOut(auth).then(() => {
-                window.location.href = window.location.pathname; 
-            });
+            signOut(auth).then(() => { window.location.href = window.location.pathname; });
         };
 
         function initCalendar() {
             const calendarEl = document.getElementById('calendar');
+            if(!calendarEl) return;
             calendarObj = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 locale: 'th',
                 themeSystem: 'standard',
                 events: [],
                 height: 'auto',
-                contentHeight: 'auto'
+                contentHeight: 'auto',
+                headerToolbar: { left: 'prev,next', center: 'title', right: 'today' }
             });
             calendarObj.render();
         }
@@ -482,7 +634,7 @@
                 const dateVal = document.getElementById(inputId).value;
                 if(!dateVal) return;
                 await updateDoc(doc(db, "snakes", snakeId), { [fieldName]: dateVal });
-                triggerToast("📅 บันทึกประวัติตารางวันดูแลถัดไปลงปฏิทินสำเร็จ");
+                triggerToast("📅 บันทึกตารางนัดหมายสำเร็จ");
             } catch(e) { console.error(e); triggerToast("เกิดข้อผิดพลาดในการตั้งนัดหมาย", "error"); }
         };
 
@@ -498,7 +650,7 @@
 
         window.saveQuickSchedule = async (fieldName, inputId) => {
             const snakeId = document.getElementById('quick_sched_snake').value;
-            if (!snakeId) { alert("กรุณาเลือกน้องงูที่ต้องการตั้งเวลาจาก Dropdown ก่อนครับ!"); return; }
+            if (!snakeId) { alert("กรุณาเลือกน้องงูก่อนครับ!"); return; }
             await window.updateNextDate(snakeId, fieldName, inputId);
         };
 
@@ -524,31 +676,14 @@
                     let data = doc.data();
                     cachedSnakes.push({id: doc.id, ...data});
                     
-                    if(data.nextFeedDate) {
-                        calendarEvents.push({ title: '🍖 ให้อาหาร: ' + (data.name||""), start: data.nextFeedDate, color: '#fbbd23', allDay: true });
-                    }
-                    if(data.nextWeightDate) {
-                        calendarEvents.push({ title: '⚖️ ชั่ง นน: ' + (data.name||""), start: data.nextWeightDate, color: '#3abff8', allDay: true });
-                    }
-                    if(data.nextMedDate) {
-                        calendarEvents.push({ title: '💊 ให้ยา: ' + (data.name||""), start: data.nextMedDate, color: '#f87272', allDay: true });
-                    }
+                    if(data.nextFeedDate) calendarEvents.push({ title: '🍖 ' + (data.name||""), start: data.nextFeedDate, color: '#fbbd23', allDay: true });
+                    if(data.nextWeightDate) calendarEvents.push({ title: '⚖️ ' + (data.name||""), start: data.nextWeightDate, color: '#3abff8', allDay: true });
+                    if(data.nextMedDate) calendarEvents.push({ title: '💊 ' + (data.name||""), start: data.nextMedDate, color: '#f87272', allDay: true });
                 });
 
                 cachedSnakes.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
-
                 renderUI();
                 runAIAnalysis();
-
-                const urlParams = new URLSearchParams(window.location.search);
-                const scanCode = urlParams.get('code');
-                if (scanCode) {
-                    const targetSnake = cachedSnakes.find(s => (s.code||"").toLowerCase() === scanCode.toLowerCase());
-                    if (targetSnake) {
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                        viewDetail(targetSnake.id);
-                    }
-                }
 
                 const quickSelect = document.getElementById('quick_sched_snake');
                 if(quickSelect) {
@@ -577,11 +712,14 @@
                     totalExp += data.amount;
                     if(expBox) {
                         expBox.innerHTML += `
-                        <div class="flex justify-between items-center bg-base-200 p-2 rounded-xl mb-2 shadow-sm border border-base-300">
-                            <span>📋 ${data.title || ''} <span class="text-gray-500 text-[10px] ml-1 bg-base-300 px-1 rounded">${data.category || ''}</span></span>
-                            <div class="flex items-center gap-2">
-                                <span class="text-error font-bold text-sm">-${(data.amount || 0).toLocaleString()} ฿</span>
-                                <button onclick="deleteExpense('${doc.id}')" class="btn btn-ghost btn-xs text-gray-400 hover:text-error px-1">✕</button>
+                        <div class="list-item-glass p-3 rounded-xl mb-2 flex justify-between items-center">
+                            <div>
+                                <div class="font-bold text-gray-200">${data.title || ''}</div>
+                                <div class="text-[10px] text-gray-500 mt-0.5"><i class="fa-solid fa-tag"></i> ${data.category || ''}</div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-error font-bold whitespace-nowrap">-${(data.amount || 0).toLocaleString()} ฿</span>
+                                <button onclick="window.deleteExpense('${doc.id}')" class="btn btn-circle btn-xs btn-ghost text-gray-500 hover:text-error hover:bg-error/10"><i class="fa-solid fa-xmark"></i></button>
                             </div>
                         </div>`;
                     }
@@ -595,9 +733,7 @@
                 cachedFoodStock = [];
                 let totalStock = 0;
                 const stockBox = document.getElementById('foodStockList');
-                const dataList = document.getElementById('foodDatalist');
                 if(stockBox) stockBox.innerHTML = "";
-                if(dataList) dataList.innerHTML = "";
 
                 snapshot.forEach(doc => {
                     const data = doc.data();
@@ -607,17 +743,17 @@
                     if(stockBox) {
                         let color = data.quantity > 5 ? 'text-success' : 'text-warning';
                         stockBox.innerHTML += `
-                        <div class="flex justify-between items-center bg-base-200 p-2 rounded-xl mb-2 shadow-sm border border-base-300">
-                            <span class="font-bold text-sm">${data.name || ''}</span>
-                            <div class="flex items-center gap-1">
-                                <button onclick="updateStockQty('${doc.id}', ${data.quantity}, -1)" class="btn btn-xs btn-circle btn-outline border-base-300">-</button>
-                                <span class="${color} font-bold w-6 text-center text-sm">${data.quantity}</span>
-                                <button onclick="updateStockQty('${doc.id}', ${data.quantity}, 1)" class="btn btn-xs btn-circle btn-outline border-base-300">+</button>
-                                <button onclick="deleteFoodStock('${doc.id}')" class="btn btn-ghost btn-xs text-gray-400 hover:text-error ml-2">✕</button>
+                        <div class="list-item-glass p-2.5 rounded-xl mb-2 flex justify-between items-center">
+                            <span class="font-bold text-gray-200 text-sm">${data.name || ''}</span>
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="window.updateStockQty('${doc.id}', ${data.quantity}, -1)" class="btn btn-xs btn-circle btn-outline border-gray-600 hover:bg-gray-700 hover:text-white"><i class="fa-solid fa-minus text-[10px]"></i></button>
+                                <span class="${color} font-bold w-7 text-center text-sm">${data.quantity}</span>
+                                <button onclick="window.updateStockQty('${doc.id}', ${data.quantity}, 1)" class="btn btn-xs btn-circle btn-outline border-gray-600 hover:bg-gray-700 hover:text-white"><i class="fa-solid fa-plus text-[10px]"></i></button>
+                                <div class="w-px h-4 bg-gray-700 mx-1"></div>
+                                <button onclick="window.deleteFoodStock('${doc.id}')" class="btn btn-ghost btn-xs btn-circle text-gray-500 hover:text-error hover:bg-error/10"><i class="fa-solid fa-trash-can"></i></button>
                             </div>
                         </div>`;
                     }
-                    if(dataList) { dataList.innerHTML += `<option value="${data.name || ''}">`; }
                 });
                 const dStockEl = document.getElementById('d_stock_total');
                 if(dStockEl) dStockEl.innerText = totalStock;
@@ -630,9 +766,9 @@
             const dropdowns = document.querySelectorAll('.dynamic-food-stock');
             dropdowns.forEach(dd => {
                 const currentVal = dd.value;
-                dd.innerHTML = '<option value="" disabled selected>-- เลือกเหยื่อ --</option>';
+                dd.innerHTML = '<option value="" disabled selected>-- เลือกจากสต็อก --</option>';
                 cachedFoodStock.filter(f => f.quantity > 0).forEach(f => {
-                    dd.innerHTML += `<option value="${f.name}">${f.name} (คงเหลือ: ${f.quantity})</option>`;
+                    dd.innerHTML += `<option value="${f.name}">${f.name} (เหลือ: ${f.quantity})</option>`;
                 });
                 if(currentVal) dd.value = currentVal;
             });
@@ -665,8 +801,8 @@
         };
 
         window.deleteFoodStock = async (id) => { 
-            try { if(confirm("ลบรายการสต็อกนี้?")) await deleteDoc(doc(db, "foodStock", id)); } 
-            catch(e) { triggerToast("Error ลบรายการสต็อก", "error"); }
+            try { if(confirm("ต้องการลบรายการนี้ออกจากสต็อก?")) await deleteDoc(doc(db, "foodStock", id)); } 
+            catch(e) { triggerToast("Error ลบรายการ", "error"); }
         };
 
         window.addExpense = async (e) => {
@@ -680,31 +816,31 @@
                 await addDoc(collection(db, "finance"), { uid: currentUser ? currentUser.uid : "global_qr_user", title, amount, category, createdAt: Date.now() });
                 document.getElementById('fx_title').value = "";
                 document.getElementById('fx_amount').value = "";
-                triggerToast("💰 บันทึกรายการบัญชีเรียบร้อย");
+                triggerToast("💰 บันทึกรายจ่ายสำเร็จ");
             } catch(err) { triggerToast("Error บันทึกรายจ่าย", "error"); }
         };
 
         window.deleteExpense = async (id) => { 
-            try { if(confirm("ลบรายจ่ายนี้?")) await deleteDoc(doc(db, "finance", id)); } 
-            catch(e) { triggerToast("Error ลบประวัติบัญชี", "error"); }
+            try { if(confirm("ต้องการลบประวัติรายจ่ายนี้?")) await deleteDoc(doc(db, "finance", id)); } 
+            catch(e) { triggerToast("Error ลบประวัติ", "error"); }
         };
 
         function runAIAnalysis() {
             const insightBox = document.getElementById('aiInsights');
             if (cachedSnakes.length === 0) {
-                insightBox.innerHTML = "<p>⚠️ สารบบคลังข้อมูลว่างเปล่า กรุณาลงทะเบียนข้อมููลงูหลักอย่างน้อย 1 ตัวเพื่อเปิดระบบพยากรณ์</p>";
+                insightBox.innerHTML = "<p class='text-gray-500 italic'>ยังไม่มีข้อมูลในระบบ ลงทะเบียนงูตัวแรกเพื่อเริ่มต้นพยากรณ์</p>";
                 return;
             }
             let html = "";
             let redEye = cachedSnakes.filter(s => s.status === "กำลังลอกคราบ");
             if (redEye.length > 0) {
-                html += `<p class="text-warning">🔮 <span class="font-bold">AI แจ้งเตือนคราบ:</span> พบงู ${redEye.length} ตัวกำลังอยู่ในสภาวะเตรียมการลอกผิวหนัง (เข้าตาฟ้า) แนะนำให้เพิ่มความชื้นกล่องเลี้ยง 10-15%</p>`;
+                html += `<div class="flex items-start gap-2 text-warning mb-2"><i class="fa-solid fa-droplet mt-1"></i> <p><b class="text-white">AI ตรวจพบการลอกคราบ:</b> มีงู ${redEye.length} ตัวกำลังเข้าคราบ แนะนำให้สเปรย์น้ำเพิ่มความชื้น 15%</p></div>`;
             } else {
-                html += `<p class="text-success">✨ <span class="font-bold">AI Keeper Diagnostic:</span> ดัชนีความเจริญเติบโตปกติ ไม่พบประวัติการอ้วกหรือปฏิเสธเหยื่อผิดปกติ อัตราการเติบโตอยู่ในเกณฑ์มาตรฐาน</p>`;
+                html += `<div class="flex items-start gap-2 text-success mb-2"><i class="fa-solid fa-heart-pulse mt-1"></i> <p><b class="text-white">AI สถานะสุขภาพ:</b> ภาพรวมเติบโตปกติ ไม่พบพฤติกรรมปฏิเสธเหยื่อต่อเนื่องเกินมาตรฐาน</p></div>`;
             }
             let lowStock = cachedFoodStock.filter(f => f.quantity > 0 && f.quantity <= 5);
             if(lowStock.length > 0) {
-                html += `<p class="text-error mt-1">📦 <span class="font-bold">AI Stock Alert:</span> อาหารใกล้หมดสต็อก ได้แก่ ${lowStock.map(f=>f.name||"").join(', ')}</p>`;
+                html += `<div class="flex items-start gap-2 text-error"><i class="fa-solid fa-box-archive mt-1"></i> <p><b class="text-white">AI สต็อกแจ้งเตือน:</b> อาหารเหลือน้อยกว่ากำหนด ได้แก่ ${lowStock.map(f=>f.name||"").join(', ')}</p></div>`;
             }
             insightBox.innerHTML = html;
         }
@@ -720,32 +856,36 @@
             document.getElementById('d_med').innerText = cachedSnakes.filter(s => s.nextMedDate == todayStr).length;
             document.getElementById('d_shed').innerText = cachedSnakes.filter(s => s.status === "กำลังลอกคราบ").length;
 
-            const eggWidget = document.getElementById('d_eggs');
-            if (eggWidget && eggWidget.parentElement) {
-                eggWidget.parentElement.classList.add('hidden');
-            }
-
             const grid = document.getElementById('snakeGrid');
             grid.innerHTML = "";
             
             cachedSnakes.forEach(s => {
-                let validImg = (s.images && s.images.length > 0 && s.images[0].trim() !== '') ? s.images[0] : 'https://placehold.co/400x300/2a323c/a6adbb?text=No+Image';
+                let validImg = (s.images && s.images.length > 0 && s.images[0].trim() !== '') ? s.images[0] : 'https://placehold.co/400x300/1e232a/3abff8?text=NO+IMAGE';
 
                 const div = document.createElement('div');
-                div.className = "card bg-base-100 shadow-lg border border-base-200 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-200";
+                div.className = "snake-card rounded-2xl overflow-hidden cursor-pointer group";
+                div.onclick = () => window.viewDetail(s.id); // คลิกทั้งการ์ดเพื่อเปิด
+                
+                let statusBadge = '';
+                if(s.status === 'เลี้ยงปกติ') statusBadge = '<div class="badge badge-success badge-sm border-none font-bold shadow-md">ปกติ</div>';
+                if(s.status === 'กำลังลอกคราบ') statusBadge = '<div class="badge badge-secondary badge-sm border-none font-bold shadow-md">ลอกคราบ</div>';
+                if(s.status === 'ตาย' || s.status === 'ขายแล้ว') statusBadge = `<div class="badge badge-neutral badge-sm border-none text-gray-400 font-bold shadow-md">${s.status}</div>`;
+
                 div.innerHTML = `
-                    <figure class="h-48 lg:h-52 bg-neutral relative">
-                        <img src="${validImg}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x300/2a323c/a6adbb?text=No+Image'">
-                        <div class="absolute top-3 left-3 badge badge-neutral shadow-lg bg-black/80 font-mono border-none">${s.code||''}</div>
-                        <div class="absolute bottom-3 right-3 text-[10px] bg-primary/90 backdrop-blur text-white px-2 py-1 rounded-lg font-bold shadow-lg">📍 R:${s.rack || '-'} B:${s.box || '-'}</div>
+                    <figure class="h-44 bg-[#15191e] relative overflow-hidden">
+                        <img src="${validImg}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.onerror=null;this.src='https://placehold.co/400x300/1e232a/3abff8?text=NO+IMAGE'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#1e232a] to-transparent opacity-80"></div>
+                        <div class="absolute top-3 left-3 bg-[#121212]/80 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10 font-mono text-xs font-bold text-white shadow-lg">${s.code||''}</div>
+                        <div class="absolute top-3 right-3">${statusBadge}</div>
+                        <div class="absolute bottom-3 left-3 text-white">
+                            <h3 class="text-base font-black leading-tight drop-shadow-md truncate w-40">${s.name||'ไม่ระบุชื่อ'}</h3>
+                        </div>
                     </figure>
-                    <div class="card-body p-4 lg:p-5 gap-1 text-sm">
-                        <h3 class="card-title text-base lg:text-lg font-bold text-base-content leading-tight">${s.name||''}</h3>
-                        <p class="text-primary font-bold text-xs opacity-90">${s.morph||''} (${s.gender||''})</p>
-                        <div class="divider my-1 opacity-50"></div>
-                        <p class="text-gray-400 text-xs"><i class="fa-solid fa-weight-scale w-4"></i> ปัจจุบัน: <b class="text-base-content text-sm ml-1">${s.weight||0} g</b></p>
-                        <div class="card-actions justify-end mt-3">
-                            <button onclick="viewDetail('${s.id}')" class="btn btn-sm btn-primary w-full font-bold rounded-xl shadow-md"><i class="fa-solid fa-folder-open"></i> แฟ้มประวัติ</button>
+                    <div class="p-4 gap-1 text-sm bg-[#1e232a] relative">
+                        <p class="text-primary font-bold text-xs truncate mb-2">${s.morph||'Normal'} <span class="text-gray-400 font-normal ml-1">(${s.gender||'-'})</span></p>
+                        <div class="flex justify-between items-center text-xs text-gray-400 bg-[#15191e] p-2 rounded-xl border border-gray-800">
+                            <span><i class="fa-solid fa-weight-scale text-info mr-1"></i> <b class="text-gray-200">${s.weight||0}g</b></span>
+                            <span class="font-mono"><i class="fa-solid fa-box text-warning mr-1"></i> R${s.rack||'-'} : B${s.box||'-'}</span>
                         </div>
                     </div>
                 `;
@@ -762,57 +902,61 @@
                 
                 const data = {
                     uid: currentUser ? currentUser.uid : "global_qr_user",
-                    code: s_code.value,
-                    name: s_name.value,
-                    morph: s_morph.value,
-                    gender: s_gender.value,
+                    code: document.getElementById('s_code').value,
+                    name: document.getElementById('s_name').value,
+                    morph: document.getElementById('s_morph').value,
+                    gender: document.getElementById('s_gender').value,
                     rack: document.getElementById('s_rack').value,
                     shelf: document.getElementById('s_shelf').value,
                     box: document.getElementById('s_box').value,
-                    weight: parseFloat(s_weight.value),
-                    length: parseFloat(s_length.value) || 0,
-                    birthDate: s_birth.value,
-                    buyDate: s_buy.value,
-                    price: parseFloat(s_price.value) || 0,
-                    source: s_source.value,
-                    status: s_status.value,
+                    weight: parseFloat(document.getElementById('s_weight').value),
+                    length: parseFloat(document.getElementById('s_length').value) || 0,
+                    birthDate: document.getElementById('s_birth').value,
+                    buyDate: document.getElementById('s_buy').value,
+                    price: parseFloat(document.getElementById('s_price').value) || 0,
+                    source: document.getElementById('s_source').value,
+                    status: document.getElementById('s_status').value,
                     nextFeedDate: document.getElementById('s_next_feed').value || "",    
                     nextWeightDate: document.getElementById('s_next_weight').value || "", 
                     nextMedDate: document.getElementById('s_next_med').value || "", 
                     images: imgArray,
-                    note: s_note.value,
+                    note: document.getElementById('s_note').value,
                     updatedAt: Date.now()
                 };
 
                 if (id) {
                     await updateDoc(doc(db, "snakes", id), data);
-                    triggerToast("📝 อัปเดตข้อมูลโครงสร้างหลักเรียบร้อย");
+                    triggerToast("📝 อัปเดตข้อมูลเรียบร้อย");
                 } else {
                     data.createdAt = Date.now();
                     await addDoc(collection(db, "snakes"), data);
-                    triggerToast("🎉 เพิ่มงูตัวใหม่ลงสารบบสำเร็จ");
+                    triggerToast("🎉 บันทึกงูตัวใหม่สำเร็จ");
                 }
                 document.getElementById('snakeModal').close();
-            } catch(e) { triggerToast("เกิดข้อผิดพลาดในการบันทึกข้อมูล", "error"); }
+            } catch(e) { triggerToast("Error: " + e.message, "error"); }
         };
 
         window.openAddModal = () => {
             document.getElementById('snakeForm').reset();
             document.getElementById('editSnakeId').value = "";
-            document.getElementById('modalTitle').innerHTML = "<i class='fa-solid fa-plus-circle'></i> ลงทะเบียนงูเข้าคลังเลี้ยงระบบส่วนตัว";
+            document.getElementById('modalTitle').innerHTML = "<i class='fa-solid fa-plus-circle text-primary'></i> ลงทะเบียนสมาชิกใหม่";
             document.getElementById('snakeModal').showModal();
         };
 
         window.switchDetailTab = (btnEl, tabId) => {
             const container = document.getElementById('detailContent');
-            container.querySelectorAll('.sub-tab-content').forEach(el => el.classList.add('hidden'));
-            container.querySelectorAll('.detail-tab-btn').forEach(el => {
-                el.classList.remove('tab-active', 'bg-primary', 'text-white', 'shadow-md');
-                el.classList.add('hover:bg-base-300', 'text-gray-400');
+            container.querySelectorAll('.sub-tab-content').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('animate-fade-in');
             });
-            container.querySelector('#' + tabId).classList.remove('hidden');
-            btnEl.classList.remove('hover:bg-base-300', 'text-gray-400');
-            btnEl.classList.add('tab-active', 'bg-primary', 'text-white', 'shadow-md');
+            container.querySelectorAll('.detail-tab-btn').forEach(el => {
+                el.classList.remove('tab-active');
+            });
+            
+            const target = container.querySelector('#' + tabId);
+            target.classList.remove('hidden');
+            target.classList.add('animate-fade-in');
+            btnEl.classList.add('tab-active');
         };
 
         window.triggerEditFromDetail = (id) => {
@@ -842,12 +986,13 @@
             document.getElementById('s_images').value = (s.images || []).join(', ');
             document.getElementById('s_note').value = s.note || "";
             
-            document.getElementById('modalTitle').innerHTML = "<i class='fa-solid fa-pen-to-square'></i> แก้ไขข้อมูลโครงสร้างหลัก";
+            document.getElementById('modalTitle').innerHTML = "<i class='fa-solid fa-pen-to-square text-warning'></i> แก้ไขข้อมูลโครงสร้างหลัก";
             
             document.getElementById('detailModal').close(); 
-            setTimeout(() => { document.getElementById('snakeModal').showModal(); }, 150); 
+            setTimeout(() => { document.getElementById('snakeModal').showModal(); }, 200); 
         };
 
+        // ======= สร้าง Modal Detail ด้วย UI/UX ใหม่ (แบ่งสัดส่วนสะอาดตา) =======
         window.viewDetail = async (id) => {
             const s = cachedSnakes.find(item => item.id === id);
             if(!s) return;
@@ -855,166 +1000,292 @@
             clearSubcollectionListeners();
 
             let validImages = (s.images || []).filter(img => img.trim() !== '');
-            if(validImages.length === 0) validImages = ['https://placehold.co/400x300/2a323c/a6adbb?text=No+Image'];
+            if(validImages.length === 0) validImages = ['https://placehold.co/400x300/1e232a/3abff8?text=No+Image'];
 
             const content = document.getElementById('detailContent');
             content.innerHTML = `
-                <div class="flex justify-between items-center mb-5 border-b border-base-200 pb-3">
-                    <h2 class="text-lg lg:text-2xl font-bold text-primary flex items-center gap-2">
-                        <i class="fa-solid fa-address-card"></i> ${s.name || ''} <span class="badge badge-lg badge-neutral font-mono text-xs ml-1 shadow">${s.code || ''}</span>
-                    </h2>
-                    <button onclick="document.getElementById('detailModal').close()" class="btn btn-sm btn-circle text-lg bg-base-200 hover:bg-error hover:text-white transition-colors">✕</button>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <div class="lg:col-span-4 flex flex-col gap-4">
-                        <div class="carousel w-full rounded-2xl shadow-lg border border-base-200 bg-neutral overflow-hidden">
-                            ${validImages.map((img, i) => `
-                                <div id="slide${i}" class="carousel-item relative w-full h-48 lg:h-56">
-                                    <img src="${img}" class="w-full object-cover cursor-zoom-in hover:scale-105 transition-transform" onclick="if(this.src.includes('Image+Error')){alert('URL รูปภาพเสีย');}else{window.open('${img}','_blank')}" onerror="this.onerror=null;this.src='https://placehold.co/400x300/2a323c/a6adbb?text=Image+Error'" />
+                <div class="bg-[#1e232a] min-h-[85vh] lg:min-h-[70vh] flex flex-col">
+                    
+                    <div class="sticky top-0 z-50 bg-[#1e232a]/95 backdrop-blur-xl border-b border-gray-800 p-4 flex justify-between items-center shadow-lg">
+                        <div class="flex items-center gap-3">
+                            <div class="avatar placeholder">
+                                <div class="bg-primary text-white rounded-full w-10 h-10 shadow-[0_0_10px_var(--primary-glow)] font-black text-lg">
+                                    ${(s.name||'S')[0].toUpperCase()}
                                 </div>
-                            `).join('')}
-                        </div>
-                        
-                        <div class="bg-base-200 p-4 rounded-2xl shadow-sm border border-base-300 text-sm space-y-2">
-                            <div class="flex justify-between items-center mb-2 pb-2 border-b border-base-300">
-                                <span class="font-bold text-primary"><i class="fa-solid fa-circle-info"></i> ข้อมูลพื้นฐาน</span>
-                                <button onclick="triggerEditFromDetail('${s.id}')" class="btn btn-xs btn-warning rounded-lg shadow-sm font-bold text-black"><i class="fa-solid fa-pen"></i> แก้ไข</button>
                             </div>
-                            <p class="flex justify-between"><span class="text-gray-400">ยีนส์ (Morph):</span> <span class="font-bold text-right ml-2">${s.morph || ''}</span></p>
-                            <p class="flex justify-between"><span class="text-gray-400">เพศโครงสร้าง:</span> <span class="font-bold">${s.gender || ''}</span></p>
-                            <p class="flex justify-between"><span class="text-gray-400">ความยาว:</span> <span class="font-bold">${s.length || '-'} ซม.</span></p>
-                            <div class="divider my-1 opacity-30"></div>
-                            <p class="flex justify-between"><span class="text-gray-400">น้ำหนักล่าสุด:</span> <span class="font-bold text-success text-base">${s.weight || 0} g</span></p>
-                            <p class="flex justify-between mt-2 pt-2 border-t border-base-300"><span class="text-gray-400">พิกัดกล่อง:</span> <span class="font-mono bg-base-100 px-2 py-0.5 rounded border border-base-300 shadow-sm text-xs">R:${s.rack || '-'} / S:${s.shelf || '-'} / B:${s.box || '-'}</span></p>
+                            <div>
+                                <h2 class="text-xl font-black text-white leading-none">${s.name || 'ไม่ระบุชื่อ'}</h2>
+                                <span class="font-mono text-xs text-primary font-bold mt-1 inline-block">${s.code || '-'}</span>
+                            </div>
                         </div>
-
-                        <div class="bg-white p-3 rounded-2xl flex flex-col items-center justify-center text-black shadow-sm border border-gray-200">
-                            <div id="qrCanvas"></div>
-                            <span class="text-[10px] font-bold mt-2 text-neutral-500 bg-gray-100 px-3 py-1 rounded-full"><i class="fa-solid fa-qrcode"></i> สแกนดูประวัติหน้ากล่องเลี้ยง</span>
+                        <div class="flex gap-2">
+                            <button onclick="window.triggerEditFromDetail('${s.id}')" class="btn btn-sm btn-circle btn-warning btn-outline border-gray-600 hover:bg-warning hover:border-warning hover:text-black"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="document.getElementById('detailModal').close()" class="btn btn-sm btn-circle bg-gray-800 hover:bg-error hover:text-white border-none"><i class="fa-solid fa-xmark text-lg"></i></button>
                         </div>
-                        
-                        <button onclick="deleteMainSnake('${s.id}')" class="btn btn-sm btn-error btn-outline w-full rounded-xl"><i class="fa-solid fa-trash"></i> ลบข้อมูลถาวร</button>
                     </div>
 
-                    <div class="lg:col-span-8 flex flex-col">
-                        <div class="tabs tabs-boxed bg-base-200 p-1.5 rounded-xl flex flex-nowrap overflow-x-auto gap-1 mb-4 shadow-sm custom-scrollbar">
-                            <button onclick="switchDetailTab(this, 'sub-tab-feed')" class="detail-tab-btn tab flex-1 min-w-[70px] tab-active bg-primary text-white shadow-md font-bold rounded-lg transition-all">🍖 อาหาร</button>
-                            <button onclick="switchDetailTab(this, 'sub-tab-weight')" class="detail-tab-btn tab flex-1 min-w-[70px] text-gray-400 font-bold rounded-lg transition-all hover:bg-base-300">⚖️ น้ำหนัก</button>
-                            <button onclick="switchDetailTab(this, 'sub-tab-shed')" class="detail-tab-btn tab flex-1 min-w-[70px] text-gray-400 font-bold rounded-lg transition-all hover:bg-base-300">🐍 คราบ</button>
-                            <button onclick="switchDetailTab(this, 'sub-tab-poop')" class="detail-tab-btn tab flex-1 min-w-[70px] text-gray-400 font-bold rounded-lg transition-all hover:bg-base-300">💩 ขับถ่าย</button>
-                            <button onclick="switchDetailTab(this, 'sub-tab-med')" class="detail-tab-btn tab flex-1 min-w-[70px] text-gray-400 font-bold rounded-lg transition-all hover:bg-base-300">💊 รักษา</button>
+                    <div class="flex-1 overflow-y-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-[#121212]">
+                        
+                        <div class="lg:col-span-4 flex flex-col gap-4">
+                            
+                            <div class="carousel w-full rounded-2xl shadow-xl border border-gray-800 bg-[#15191e] overflow-hidden">
+                                ${validImages.map((img, i) => `
+                                    <div id="slide${i}" class="carousel-item relative w-full h-52 lg:h-64">
+                                        <img src="${img}" class="w-full object-cover cursor-zoom-in hover:scale-105 transition-transform duration-500" onclick="if(this.src.includes('Image+Error')){alert('URL รูปภาพเสีย');}else{window.open('${img}','_blank')}" onerror="this.onerror=null;this.src='https://placehold.co/400x300/1e232a/3abff8?text=Image+Error'" />
+                                    </div>
+                                `).join('')}
+                            </div>
+                            
+                            <div class="bg-[#1e232a] p-5 rounded-2xl shadow-xl border border-gray-800 text-sm space-y-3 relative overflow-hidden">
+                                <div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+                                
+                                <div class="grid grid-cols-2 gap-y-4 gap-x-2 relative z-10">
+                                    <div>
+                                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1"><i class="fa-solid fa-dna text-primary"></i> Morph</p>
+                                        <p class="font-bold text-gray-200 truncate pr-2">${s.morph || '-'}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1"><i class="fa-solid fa-venus-mars text-secondary"></i> เพศ</p>
+                                        <p class="font-bold text-gray-200">${s.gender || '-'}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1"><i class="fa-solid fa-weight-scale text-info"></i> น้ำหนักล่าสุด</p>
+                                        <p class="font-black text-info text-lg leading-none">${s.weight || 0} <span class="text-xs text-gray-500 font-normal">g</span></p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1"><i class="fa-solid fa-ruler text-warning"></i> ความยาว</p>
+                                        <p class="font-bold text-gray-200">${s.length || '-'} <span class="text-xs text-gray-500 font-normal">cm</span></p>
+                                    </div>
+                                </div>
+                                
+                                <div class="divider my-0 border-gray-800"></div>
+                                
+                                <div class="bg-[#15191e] rounded-xl p-3 flex justify-between items-center border border-gray-800">
+                                    <span class="text-[10px] text-gray-500 font-bold uppercase"><i class="fa-solid fa-box text-gray-400"></i> Location</span>
+                                    <span class="font-mono font-bold text-white text-xs bg-gray-800 px-2 py-1 rounded-md">Rack ${s.rack || '-'} / Box ${s.box || '-'}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <div class="flex-1 bg-white p-3 rounded-2xl flex flex-col items-center justify-center shadow-xl shadow-white/5 border border-gray-200 transition-transform hover:scale-[1.02]">
+                                    <div id="qrCanvas"></div>
+                                    <span class="text-[9px] font-black uppercase tracking-widest mt-2 text-gray-400">Scan for Profile</span>
+                                </div>
+                                <div class="flex-1 flex flex-col justify-end">
+                                    <button onclick="window.deleteMainSnake('${s.id}')" class="btn btn-outline border-gray-700 text-gray-500 hover:bg-error hover:text-white hover:border-error w-full rounded-xl text-xs h-auto min-h-[2.5rem] py-2">
+                                        <i class="fa-solid fa-trash-can mb-1 block text-lg"></i> ลบข้อมูลถาวร
+                                    </button>
+                                </div>
+                            </div>
+
                         </div>
 
-                        <div class="flex-1 bg-base-200 rounded-2xl p-4 lg:p-5 shadow-sm border border-base-300 min-h-[300px]">
+                        <div class="lg:col-span-8 flex flex-col h-[500px] lg:h-auto">
                             
-                            <div id="sub-tab-feed" class="sub-tab-content h-full flex flex-col text-sm">
-                                <div class="bg-base-100 p-4 rounded-2xl mb-4 grid grid-cols-1 md:grid-cols-3 gap-3 items-end shadow-sm border border-base-200">
-                                    <div><label class="label-text block mb-1 font-bold text-xs text-gray-400">เลือกชนิดอาหารในสต็อก</label>
-                                        <select id="sub_f_item" class="dynamic-food-stock select select-bordered select-sm w-full shadow-inner">
-                                            <option value="" disabled selected>-- เลือกเหยื่อ --</option>
-                                        </select>
-                                    </div>
-                                    <div><label class="label-text block mb-1 font-bold text-xs text-gray-400">น้ำหนัก (g)</label><input type="number" id="sub_f_wt" placeholder="กรัม" class="input input-bordered input-sm w-full shadow-inner" /></div>
-                                    <div><label class="label-text block mb-1 font-bold text-xs text-gray-400">ผลการกิน</label>
-                                        <select id="sub_f_status" class="select select-bordered select-sm w-full"><option value="กิน">กินปกติ (ตัดสต็อก)</option><option value="ไม่กิน">ปฏิเสธมื้ออาหาร</option><option value="อ้วก">อาเจียนออก (อ้วก)</option></select>
-                                    </div>
-                                    <button onclick="addSubFeed('${s.id}')" class="btn btn-sm btn-warning w-full font-bold md:col-span-3 rounded-xl shadow-md"><i class="fa-solid fa-plus"></i> บันทึกมื้ออาหาร</button>
-                                </div>
-                                <div class="bg-warning/10 border border-warning/30 p-3 rounded-2xl mb-4 flex flex-col sm:flex-row gap-3 items-center shadow-sm">
-                                    <span class="font-bold text-warning text-xs flex-1"><i class="fa-solid fa-bell"></i> ปฏิทินนัดให้อาหารถัดไป:</span>
-                                    <div class="flex gap-2 w-full sm:w-auto">
-                                        <input type="date" id="btn_next_feed" value="${s.nextFeedDate || ''}" class="input input-bordered input-sm w-full sm:w-36 bg-base-100" />
-                                        <button onclick="updateNextDate('${s.id}', 'nextFeedDate', 'btn_next_feed')" class="btn btn-sm btn-warning rounded-xl">ตั้งนัด</button>
-                                    </div>
-                                </div>
-                                <div class="overflow-y-auto flex-1 space-y-2 custom-scrollbar pr-2" id="subFeedList"></div>
+                            <div class="flex flex-nowrap overflow-x-auto gap-2 mb-4 pb-1 custom-scrollbar sticky top-0 bg-[#121212] z-10 pt-2">
+                                <button onclick="window.switchDetailTab(this, 'sub-tab-feed')" class="detail-tab-btn tab-btn tab-active px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap"><i class="fa-solid fa-drumstick-bite mr-1"></i> อาหาร</button>
+                                <button onclick="window.switchDetailTab(this, 'sub-tab-weight')" class="detail-tab-btn tab-btn px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap"><i class="fa-solid fa-scale-balanced mr-1"></i> น้ำหนัก</button>
+                                <button onclick="window.switchDetailTab(this, 'sub-tab-shed')" class="detail-tab-btn tab-btn px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap"><i class="fa-solid fa-shirt mr-1"></i> ลอกคราบ</button>
+                                <button onclick="window.switchDetailTab(this, 'sub-tab-poop')" class="detail-tab-btn tab-btn px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap"><i class="fa-solid fa-poop mr-1"></i> ขับถ่าย</button>
+                                <button onclick="window.switchDetailTab(this, 'sub-tab-med')" class="detail-tab-btn tab-btn px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap"><i class="fa-solid fa-syringe mr-1"></i> รักษา</button>
                             </div>
 
-                            <div id="sub-tab-weight" class="sub-tab-content hidden h-full flex flex-col text-sm">
-                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center mb-4">
-                                    <div class="md:col-span-3 chart-container bg-base-100 p-3 rounded-2xl border border-base-200 shadow-sm">
-                                        <canvas id="nestedWeightChart"></canvas>
+                            <div class="flex-1 bg-[#1e232a] rounded-3xl p-4 lg:p-6 shadow-xl border border-gray-800 flex flex-col overflow-hidden relative">
+                                
+                                <div id="sub-tab-feed" class="sub-tab-content h-full flex flex-col animate-fade-in absolute inset-0 p-4 lg:p-6 overflow-y-auto custom-scrollbar">
+                                    
+                                    <div class="bg-[#15191e] p-4 rounded-2xl mb-4 border border-gray-800 shadow-inner">
+                                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                                            <div class="md:col-span-5">
+                                                <label class="label-text block mb-1.5 font-bold text-[10px] text-gray-500 uppercase tracking-wider">เลือกเหยื่อจากสต็อก</label>
+                                                <select id="sub_f_item" class="dynamic-food-stock select select-bordered select-sm w-full bg-[#121212] border-gray-700">
+                                                    <option value="" disabled selected>-- โหลดข้อมูล... --</option>
+                                                </select>
+                                            </div>
+                                            <div class="md:col-span-3">
+                                                <label class="label-text block mb-1.5 font-bold text-[10px] text-gray-500 uppercase tracking-wider">น้ำหนักเหยื่อ (g)</label>
+                                                <input type="number" id="sub_f_wt" placeholder="0" class="input input-bordered input-sm w-full bg-[#121212] border-gray-700 text-center" />
+                                            </div>
+                                            <div class="md:col-span-4">
+                                                <label class="label-text block mb-1.5 font-bold text-[10px] text-gray-500 uppercase tracking-wider">ผลลัพธ์</label>
+                                                <select id="sub_f_status" class="select select-bordered select-sm w-full bg-[#121212] border-gray-700 font-bold text-success">
+                                                    <option value="กิน" class="text-success">✅ กินปกติ (ตัดสต็อก)</option>
+                                                    <option value="ไม่กิน" class="text-warning">⚠️ ปฏิเสธอาหาร</option>
+                                                    <option value="อ้วก" class="text-error">🤮 อาเจียน (อ้วก)</option>
+                                                </select>
+                                            </div>
+                                            <div class="md:col-span-12 mt-2">
+                                                <button onclick="window.addSubFeed('${s.id}')" class="btn btn-sm btn-primary w-full rounded-xl shadow-[0_4px_10px_var(--primary-glow)] font-bold text-sm"><i class="fa-solid fa-utensils"></i> ป้อนอาหาร</button>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="bg-base-100 p-3 rounded-2xl text-[11px] space-y-1 h-full flex flex-col justify-center border border-base-200 shadow-sm">
-                                        <p class="font-bold text-success text-center border-b border-base-200 pb-2 mb-2"><i class="fa-solid fa-chart-line"></i> สถิติการเติบโต</p>
-                                        <span id="weightStats" class="leading-relaxed text-gray-400">รอคำนวณ...</span>
-                                    </div>
-                                </div>
-                                <div class="bg-base-100 p-3 rounded-2xl mb-4 flex gap-2 shadow-sm border border-base-200">
-                                    <input type="number" id="sub_w_val" placeholder="น้ำหนักชั่งได้ (กรัม)..." class="input input-bordered input-sm w-full shadow-inner" />
-                                    <button onclick="addSubWeight('${s.id}')" class="btn btn-sm btn-primary font-bold px-6 rounded-xl shadow-md"><i class="fa-solid fa-check"></i> อัปเดต</button>
-                                </div>
-                                <div class="bg-info/10 border border-info/30 p-3 rounded-2xl mb-4 flex flex-col sm:flex-row gap-3 items-center shadow-sm">
-                                    <span class="font-bold text-info text-xs flex-1"><i class="fa-solid fa-bell"></i> ปฏิทินนัดชั่งน้ำหนักถัดไป:</span>
-                                    <div class="flex gap-2 w-full sm:w-auto">
-                                        <input type="date" id="btn_next_weight" value="${s.nextWeightDate || ''}" class="input input-bordered input-sm w-full sm:w-36 bg-base-100" />
-                                        <button onclick="updateNextDate('${s.id}', 'nextWeightDate', 'btn_next_weight')" class="btn btn-sm btn-info rounded-xl">ตั้งนัด</button>
-                                    </div>
-                                </div>
-                                <div class="overflow-y-auto flex-1 space-y-2 custom-scrollbar pr-2" id="subWeightList"></div>
-                            </div>
 
-                            <div id="sub-tab-shed" class="sub-tab-content hidden h-full flex flex-col text-sm">
-                                <div class="bg-base-100 p-4 rounded-2xl mb-4 flex flex-col gap-3 shadow-sm border border-base-200">
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <div><label class="label-text text-xs text-gray-400 font-bold mb-1 block">วันที่ตาฟ้า (Red-eye)</label><input type="date" id="sub_sh_blue" class="input input-bordered input-sm w-full" /></div>
-                                        <div><label class="label-text text-xs text-gray-400 font-bold mb-1 block">วันที่คราบลอกหลุด</label><input type="date" id="sub_sh_shed" class="input input-bordered input-sm w-full" /></div>
+                                    <div class="bg-warning/5 border border-warning/20 p-3 rounded-2xl mb-5 flex justify-between items-center">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center text-warning"><i class="fa-regular fa-calendar-check"></i></div>
+                                            <div>
+                                                <div class="text-[10px] text-warning/70 font-bold uppercase tracking-wider leading-tight">กำหนดการ</div>
+                                                <div class="text-xs text-warning font-bold">ป้อนอาหารมื้อถัดไป</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <input type="date" id="btn_next_feed" value="${s.nextFeedDate || ''}" class="input input-bordered input-sm w-32 sm:w-36 bg-[#121212] border-warning/30 text-xs" />
+                                            <button onclick="window.updateNextDate('${s.id}', 'nextFeedDate', 'btn_next_feed')" class="btn btn-sm btn-warning btn-square rounded-xl shadow-md"><i class="fa-solid fa-save"></i></button>
+                                        </div>
                                     </div>
-                                    <div><label class="label-text text-xs text-gray-400 font-bold mb-1 block">ผลลัพธ์</label>
-                                        <select id="sub_sh_status" class="select select-bordered select-sm w-full"><option value="ลอกสมบูรณ์">ลอกสมบูรณ์ทั้งตัวสวยงาม</option><option value="ลอกไม่สมบูรณ์">คราบขาดติดขัด (ลอกไม่สุด)</option></select>
-                                    </div>
-                                    <button onclick="addSubShed('${s.id}')" class="btn btn-sm btn-secondary font-bold rounded-xl mt-1"><i class="fa-solid fa-plus"></i> บันทึกประวัติคราบ</button>
-                                </div>
-                                <div class="overflow-y-auto flex-1 space-y-2 custom-scrollbar pr-2" id="subShedList"></div>
-                            </div>
 
-                            <div id="sub-tab-poop" class="sub-tab-content hidden h-full flex flex-col text-sm">
-                                <div class="bg-base-100 p-4 rounded-2xl mb-4 flex gap-2 items-end shadow-sm border border-base-200">
-                                    <div class="flex-1"><label class="label-text text-xs text-gray-400 font-bold mb-1 block">ลักษณะการขับถ่าย</label>
-                                        <select id="sub_p_status" class="select select-bordered select-sm w-full"><option value="ปกติ">ปกติ (ก้อนดี)</option><option value="เหลว">เหลว/ท้องเสีย</option><option value="แข็ง">แข็งผิดปกติ</option><option value="มีเลือด">ปนเลือด (อันตราย)</option></select>
-                                    </div>
-                                    <button onclick="addSubPoop('${s.id}')" class="btn btn-sm btn-neutral font-bold px-6 rounded-xl"><i class="fa-solid fa-poop"></i> บันทึก</button>
+                                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2">ประวัติย้อนหลัง</h4>
+                                    <div class="space-y-2 pb-10" id="subFeedList"></div>
                                 </div>
-                                <div class="overflow-y-auto flex-1 space-y-2 custom-scrollbar pr-2" id="subPoopList"></div>
-                            </div>
 
-                            <div id="sub-tab-med" class="sub-tab-content hidden h-full flex flex-col text-sm">
-                                <div class="bg-base-100 p-4 rounded-2xl mb-4 flex flex-col gap-3 shadow-sm border border-base-200">
-                                    <div><label class="label-text text-xs text-gray-400 font-bold mb-1 block">อาการป่วยเบื้องต้น</label><input type="text" id="sub_m_symptom" placeholder="เช่น หายใจมีเสียงดัง / มีน้ำมูก" class="input input-bordered input-sm w-full shadow-inner" /></div>
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <div><label class="label-text text-xs text-gray-400 font-bold mb-1 block">ชื่อยา / วัคซีน</label><input type="text" id="sub_m_drug" placeholder="เช่น ยาถ่ายพยาธิ" class="input input-bordered input-sm w-full shadow-inner" /></div>
-                                        <div><label class="label-text text-xs text-gray-400 font-bold mb-1 block">ค่ารักษาคลินิก (฿)</label><input type="number" id="sub_m_cost" placeholder="เช่น 500" class="input input-bordered input-sm w-full shadow-inner" /></div>
+                                <div id="sub-tab-weight" class="sub-tab-content hidden h-full flex flex-col absolute inset-0 p-4 lg:p-6 overflow-y-auto custom-scrollbar">
+                                    
+                                    <div class="bg-[#15191e] rounded-2xl border border-gray-800 p-4 mb-4 flex flex-col md:flex-row gap-4">
+                                        <div class="chart-container flex-1 h-[150px]">
+                                            <canvas id="nestedWeightChart"></canvas>
+                                        </div>
+                                        <div class="w-full md:w-40 flex flex-col justify-center items-center bg-[#121212] rounded-xl p-3 border border-gray-800">
+                                            <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-2 border-b border-gray-800 pb-2 w-full text-center">สถิติ</span>
+                                            <div id="weightStats" class="w-full text-center"></div>
+                                        </div>
                                     </div>
-                                    <button onclick="addSubMedical('${s.id}')" class="btn btn-sm btn-error text-white font-bold rounded-xl mt-1"><i class="fa-solid fa-briefcase-medical"></i> บันทึกการพยาบาล</button>
-                                </div>
-                                <div class="bg-error/10 border border-error/30 p-3 rounded-2xl mb-4 flex flex-col sm:flex-row gap-3 items-center shadow-sm">
-                                    <span class="font-bold text-error text-xs flex-1"><i class="fa-solid fa-bell"></i> ปฏิทินนัดให้ยา/รักษา ถัดไป:</span>
-                                    <div class="flex gap-2 w-full sm:w-auto">
-                                        <input type="date" id="btn_next_med" value="${s.nextMedDate || ''}" class="input input-bordered input-sm w-full sm:w-36 bg-base-100" />
-                                        <button onclick="updateNextDate('${s.id}', 'nextMedDate', 'btn_next_med')" class="btn btn-sm btn-error text-white rounded-xl">ตั้งนัด</button>
-                                    </div>
-                                </div>
-                                <div class="overflow-y-auto flex-1 space-y-2 custom-scrollbar pr-2" id="subMedList"></div>
-                            </div>
 
+                                    <div class="flex gap-2 mb-5">
+                                        <div class="relative flex-1">
+                                            <input type="number" step="0.1" id="sub_w_val" placeholder="ระบุน้ำหนักที่ชั่งได้..." class="input input-bordered w-full bg-[#15191e] border-gray-700 pl-12 rounded-xl h-11 text-lg font-bold text-info" />
+                                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 text-lg"><i class="fa-solid fa-weight-scale"></i></div>
+                                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-gray-500 font-bold">g</div>
+                                        </div>
+                                        <button onclick="window.addSubWeight('${s.id}')" class="btn btn-info h-11 px-6 rounded-xl shadow-[0_4px_10px_rgba(58,191,248,0.2)] text-white font-bold"><i class="fa-solid fa-plus"></i> บันทึก</button>
+                                    </div>
+
+                                    <div class="bg-info/5 border border-info/20 p-3 rounded-2xl mb-5 flex justify-between items-center">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-8 h-8 rounded-full bg-info/20 flex items-center justify-center text-info"><i class="fa-regular fa-calendar-check"></i></div>
+                                            <div>
+                                                <div class="text-[10px] text-info/70 font-bold uppercase tracking-wider leading-tight">กำหนดการ</div>
+                                                <div class="text-xs text-info font-bold">ชั่งน้ำหนักถัดไป</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <input type="date" id="btn_next_weight" value="${s.nextWeightDate || ''}" class="input input-bordered input-sm w-32 sm:w-36 bg-[#121212] border-info/30 text-xs" />
+                                            <button onclick="window.updateNextDate('${s.id}', 'nextWeightDate', 'btn_next_weight')" class="btn btn-sm btn-info text-white btn-square rounded-xl shadow-md"><i class="fa-solid fa-save"></i></button>
+                                        </div>
+                                    </div>
+
+                                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2">ประวัติย้อนหลัง</h4>
+                                    <div class="space-y-2 pb-10" id="subWeightList"></div>
+                                </div>
+
+                                <div id="sub-tab-shed" class="sub-tab-content hidden h-full flex flex-col absolute inset-0 p-4 lg:p-6 overflow-y-auto custom-scrollbar">
+                                    <div class="bg-[#15191e] p-4 rounded-2xl mb-5 border border-gray-800 shadow-inner">
+                                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                                            <div class="md:col-span-4">
+                                                <label class="label-text block mb-1.5 font-bold text-[10px] text-gray-500 uppercase tracking-wider text-blue-400">💧 วันที่ตาฟ้า</label>
+                                                <input type="date" id="sub_sh_blue" class="input input-bordered input-sm w-full bg-[#121212] border-gray-700" />
+                                            </div>
+                                            <div class="md:col-span-4">
+                                                <label class="label-text block mb-1.5 font-bold text-[10px] text-gray-500 uppercase tracking-wider text-green-400">🐍 วันลอกหลุด</label>
+                                                <input type="date" id="sub_sh_shed" class="input input-bordered input-sm w-full bg-[#121212] border-gray-700" />
+                                            </div>
+                                            <div class="md:col-span-4">
+                                                <label class="label-text block mb-1.5 font-bold text-[10px] text-gray-500 uppercase tracking-wider">ผลลัพธ์</label>
+                                                <select id="sub_sh_status" class="select select-bordered select-sm w-full bg-[#121212] border-gray-700">
+                                                    <option value="ลอกสมบูรณ์" class="text-success">✨ ลอกสมบูรณ์ทั้งตัว</option>
+                                                    <option value="ลอกไม่สมบูรณ์" class="text-warning">⚠️ คราบขาด/ไม่สุด</option>
+                                                </select>
+                                            </div>
+                                            <div class="md:col-span-12 mt-2">
+                                                <button onclick="window.addSubShed('${s.id}')" class="btn btn-sm btn-secondary w-full rounded-xl shadow-[0_4px_10px_rgba(217,38,169,0.2)] font-bold text-sm"><i class="fa-solid fa-plus"></i> บันทึกคราบ</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2">ประวัติย้อนหลัง</h4>
+                                    <div class="space-y-2 pb-10" id="subShedList"></div>
+                                </div>
+
+                                <div id="sub-tab-poop" class="sub-tab-content hidden h-full flex flex-col absolute inset-0 p-4 lg:p-6 overflow-y-auto custom-scrollbar">
+                                    <div class="bg-[#15191e] p-4 rounded-2xl mb-5 border border-gray-800 flex flex-col sm:flex-row gap-3 items-end">
+                                        <div class="flex-1 w-full">
+                                            <label class="label-text block mb-1.5 font-bold text-[10px] text-gray-500 uppercase tracking-wider">ลักษณะการขับถ่าย</label>
+                                            <select id="sub_p_status" class="select select-bordered w-full bg-[#121212] border-gray-700 h-11">
+                                                <option value="ปกติ">🟤 ก้อนปกติ (ดี)</option>
+                                                <option value="เหลว">🟡 เหลว / ท้องเสีย</option>
+                                                <option value="แข็ง">🪨 แข็งผิดปกติ</option>
+                                                <option value="มีเลือด">🔴 ปนเลือด (อันตราย)</option>
+                                            </select>
+                                        </div>
+                                        <button onclick="window.addSubPoop('${s.id}')" class="btn btn-neutral w-full sm:w-auto h-11 px-8 rounded-xl font-bold border-gray-600"><i class="fa-solid fa-poop text-orange-400"></i> บันทึก</button>
+                                    </div>
+
+                                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2">ประวัติย้อนหลัง</h4>
+                                    <div class="space-y-2 pb-10" id="subPoopList"></div>
+                                </div>
+
+                                <div id="sub-tab-med" class="sub-tab-content hidden h-full flex flex-col absolute inset-0 p-4 lg:p-6 overflow-y-auto custom-scrollbar">
+                                    <div class="bg-[#15191e] p-4 rounded-2xl mb-4 border border-gray-800 shadow-inner">
+                                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                                            <div class="md:col-span-12">
+                                                <label class="label-text block mb-1.5 font-bold text-[10px] text-error uppercase tracking-wider"><i class="fa-solid fa-triangle-exclamation"></i> อาการป่วย / วินิจฉัย</label>
+                                                <input type="text" id="sub_m_symptom" placeholder="ระบุอาการ เช่น มีน้ำมูก, หายใจมีเสียง" class="input input-bordered input-sm w-full h-10 bg-[#121212] border-error/30" />
+                                            </div>
+                                            <div class="md:col-span-7">
+                                                <label class="label-text block mb-1.5 font-bold text-[10px] text-gray-500 uppercase tracking-wider">ตัวยา / การรักษา</label>
+                                                <input type="text" id="sub_m_drug" placeholder="เช่น ยาถ่ายพยาธิ, ป้อนวิตามิน" class="input input-bordered input-sm w-full bg-[#121212] border-gray-700" />
+                                            </div>
+                                            <div class="md:col-span-5">
+                                                <label class="label-text block mb-1.5 font-bold text-[10px] text-gray-500 uppercase tracking-wider">ค่าใช้จ่าย (บาท)</label>
+                                                <input type="number" id="sub_m_cost" placeholder="0" class="input input-bordered input-sm w-full bg-[#121212] border-gray-700 text-right" />
+                                            </div>
+                                            <div class="md:col-span-12 mt-2">
+                                                <button onclick="window.addSubMedical('${s.id}')" class="btn btn-sm btn-error text-white w-full rounded-xl shadow-[0_4px_10px_rgba(248,114,114,0.2)] font-bold text-sm"><i class="fa-solid fa-syringe"></i> บันทึกประวัติการรักษา</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-error/5 border border-error/20 p-3 rounded-2xl mb-5 flex justify-between items-center">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-8 h-8 rounded-full bg-error/20 flex items-center justify-center text-error"><i class="fa-regular fa-calendar-check"></i></div>
+                                            <div>
+                                                <div class="text-[10px] text-error/70 font-bold uppercase tracking-wider leading-tight">กำหนดการ</div>
+                                                <div class="text-xs text-error font-bold">รับยา/พบแพทย์ ถัดไป</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <input type="date" id="btn_next_med" value="${s.nextMedDate || ''}" class="input input-bordered input-sm w-32 sm:w-36 bg-[#121212] border-error/30 text-xs" />
+                                            <button onclick="window.updateNextDate('${s.id}', 'nextMedDate', 'btn_next_med')" class="btn btn-sm btn-error text-white btn-square rounded-xl shadow-md"><i class="fa-solid fa-save"></i></button>
+                                        </div>
+                                    </div>
+
+                                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2">ประวัติย้อนหลัง</h4>
+                                    <div class="space-y-2 pb-10" id="subMedList"></div>
+                                </div>
+
+                            </div>
                         </div>
                     </div>
                 </div>
             `;
             document.getElementById('detailModal').showModal();
 
+            // เรนเดอร์ QR และเชื่อมต่อ ฐานข้อมูลย่อย
             setTimeout(() => {
-                updateFoodStockDropdowns(); 
+                window.updateFoodStockDropdowns(); 
                 const canvasNode = document.getElementById("qrCanvas");
                 canvasNode.innerHTML = "";
                 const currentUrlWithoutParams = window.location.origin + window.location.pathname;
                 new QRCode(canvasNode, { text: currentUrlWithoutParams + "?code=" + (s.code||""), width: 90, height: 90, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
+                
+                // สั่งโหลดกราฟและลิสต์ข้อมูล
                 syncSubcollections(s.id);
             }, 100);
         };
 
+        // ================= Subcollections Sync =================
         function syncSubcollections(snakeId) {
+            
+            // --- 1. น้ำหนัก (อัปเดตกราฟให้สวยขึ้น) ---
             const wRef = query(collection(db, "snakes", snakeId, "weightHistory"), orderBy("date", "asc"));
             const unsubW = onSnapshot(wRef, (wSnapshot) => {
                 let labels = ['รับเข้า'];
@@ -1025,9 +1296,11 @@
 
                 let maxW = weights[0], minW = weights[0], totalW = weights[0], countW = 1;
 
+                // วนลูปสร้างประวัติย้อนหลัง จากใหม่ไปเก่า (Prepend)
+                const itemsHTML = [];
                 wSnapshot.forEach(doc => {
                     const data = doc.data();
-                    labels.push(new Date(data.date).toLocaleDateString('th-TH'));
+                    labels.push(new Date(data.date).toLocaleDateString('th-TH', {month:'short', day:'numeric'}));
                     weights.push(data.weight);
                     
                     if(data.weight > maxW) maxW = data.weight;
@@ -1035,17 +1308,24 @@
                     totalW += data.weight;
                     countW++;
 
-                    listEl.innerHTML += `
-                        <div class="bg-base-100 p-2.5 rounded-xl mb-2 flex justify-between items-center text-xs shadow-sm border border-base-200">
-                            <span><i class="fa-regular fa-calendar text-gray-400 mr-1"></i> ${new Date(data.date).toLocaleDateString('th-TH')} <i class="fa-solid fa-arrow-right text-gray-500 mx-2 text-[10px]"></i> <b class="text-success text-sm">${data.weight} g</b></span>
-                            <button onclick="deleteSubDoc('${snakeId}','weightHistory','${doc.id}')" class="text-gray-400 hover:text-error bg-base-200 hover:bg-base-300 rounded px-2 py-1 transition-colors"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>`;
+                    itemsHTML.unshift(`
+                        <div class="list-item-glass p-2.5 rounded-xl flex justify-between items-center text-xs">
+                            <span class="flex items-center text-gray-300"><i class="fa-regular fa-calendar text-gray-500 mr-2 w-4"></i> ${new Date(data.date).toLocaleDateString('th-TH')} <i class="fa-solid fa-caret-right text-gray-600 mx-3 text-[10px]"></i> <b class="text-info text-sm ml-1">${data.weight} g</b></span>
+                            <button onclick="window.deleteSubDoc('${snakeId}','weightHistory','${doc.id}')" class="text-gray-500 hover:text-error hover:bg-error/10 rounded-lg p-1.5 transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>`);
                 });
+                listEl.innerHTML = itemsHTML.join('');
 
                 let avgW = (totalW / countW).toFixed(1);
                 let growthPct = (((weights[weights.length-1] - weights[0]) / (weights[0] || 1)) * 100).toFixed(1);
                 const wStatsEl = document.getElementById('weightStats');
-                if(wStatsEl) wStatsEl.innerHTML = `<div class="space-y-1 mt-1 text-gray-300"><p>🔼 น้ำหนักสูงสุด: <b class="text-white">${maxW}g</b></p><p>📉 ต่ำสุด: <b class="text-white">${minW}g</b></p><p>⚖️ น้ำหนักเฉลี่ย: <b class="text-white">${avgW}g</b></p><p>📈 อัตราเติบโต: <b class="${growthPct >= 0 ? 'text-success' : 'text-error'}">${growthPct >= 0 ? '+' : ''}${growthPct}%</b></p></div>`;
+                if(wStatsEl) wStatsEl.innerHTML = `
+                    <div class="grid grid-cols-2 gap-2 text-left w-full mt-1">
+                        <div class="bg-black/30 p-2 rounded-lg"><span class="text-[9px] text-gray-500 block">สูงสุด</span><b class="text-white">${maxW}g</b></div>
+                        <div class="bg-black/30 p-2 rounded-lg"><span class="text-[9px] text-gray-500 block">ต่ำสุด</span><b class="text-white">${minW}g</b></div>
+                        <div class="bg-black/30 p-2 rounded-lg"><span class="text-[9px] text-gray-500 block">เฉลี่ย</span><b class="text-white">${avgW}g</b></div>
+                        <div class="bg-black/30 p-2 rounded-lg"><span class="text-[9px] text-gray-500 block">Growth</span><b class="${growthPct >= 0 ? 'text-success' : 'text-error'}">${growthPct >= 0 ? '+' : ''}${growthPct}%</b></div>
+                    </div>`;
 
                 const chartNode = document.getElementById('nestedWeightChart');
                 if(chartNode){
@@ -1055,14 +1335,34 @@
                         type: 'line',
                         data: {
                             labels: labels,
-                            datasets: [{ label: 'น้ำหนัก (g)', data: weights, borderColor: '#3abff8', backgroundColor: 'rgba(58,191,248,0.1)', fill: true, tension: 0.2, pointBackgroundColor: '#fff', pointBorderColor: '#3abff8', pointRadius: 4 }]
+                            datasets: [{ 
+                                label: 'น้ำหนัก (g)', 
+                                data: weights, 
+                                borderColor: '#3abff8', 
+                                backgroundColor: 'rgba(58,191,248,0.1)', 
+                                fill: true, 
+                                tension: 0.4, 
+                                borderWidth: 2,
+                                pointBackgroundColor: '#1e232a', 
+                                pointBorderColor: '#3abff8', 
+                                pointRadius: 3,
+                                pointHoverRadius: 5
+                            }]
                         },
-                        options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } } }
+                        options: { 
+                            responsive: true, maintainAspectRatio: false, 
+                            plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, backgroundColor: 'rgba(0,0,0,0.8)', titleColor: '#3abff8' } },
+                            scales: { 
+                                x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af', font: {size: 9} } },
+                                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af', font: {size: 9} }, beginAtZero: false }
+                            }
+                        }
                     });
                 }
             });
             activeSubcollectionListeners.push(unsubW);
 
+            // --- 2. อาหาร ---
             const fRef = query(collection(db, "snakes", snakeId, "feedingHistory"), orderBy("date", "desc"));
             const unsubF = onSnapshot(fRef, (fSnapshot) => {
                 const fList = document.getElementById('subFeedList');
@@ -1071,16 +1371,29 @@
                     fSnapshot.forEach(doc => {
                         const data = doc.data();
                         let colorClass = data.status === 'กิน' ? 'text-success' : (data.status === 'อ้วก' ? 'text-error' : 'text-warning');
+                        let statusIcon = data.status === 'กิน' ? 'fa-check' : (data.status === 'อ้วก' ? 'fa-skull' : 'fa-xmark');
+                        
                         fList.innerHTML += `
-                            <div class="bg-base-100 p-2.5 rounded-xl mb-2 flex justify-between items-center text-xs shadow-sm border border-base-200">
-                                <div><i class="fa-regular fa-calendar text-gray-400 mr-1"></i> ${new Date(data.date).toLocaleDateString('th-TH')}<br><span class="text-gray-400 ml-4">เหยื่อ: <span class="text-base-content font-bold">${data.foodItem || ''} (${data.foodWeight || 0}g)</span></span> <i class="fa-solid fa-arrow-right text-gray-500 mx-1 text-[10px]"></i> <span class="${colorClass} font-bold bg-base-200 px-2 py-0.5 rounded">${data.status || ''}</span></div>
-                                <button onclick="deleteSubDoc('${snakeId}','feedingHistory','${doc.id}')" class="text-gray-400 hover:text-error bg-base-200 hover:bg-base-300 rounded px-2 py-1 transition-colors h-fit"><i class="fa-solid fa-trash-can"></i></button>
+                            <div class="list-item-glass p-3 rounded-xl mb-2 flex justify-between items-center text-xs relative overflow-hidden">
+                                <div class="absolute left-0 top-0 bottom-0 w-1 ${data.status === 'กิน'?'bg-success':(data.status==='อ้วก'?'bg-error':'bg-warning')}"></div>
+                                <div class="pl-2">
+                                    <div class="flex items-center text-gray-400 mb-1"><i class="fa-regular fa-calendar mr-2 w-4 text-center"></i> ${new Date(data.date).toLocaleDateString('th-TH')}</div>
+                                    <div class="flex items-center text-gray-200"><i class="fa-solid fa-mouse mr-2 w-4 text-center text-gray-500"></i> <span class="font-bold">${data.foodItem || '-'}</span> <span class="text-gray-500 ml-1">(${data.foodWeight || 0}g)</span></div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="flex items-center gap-1 bg-[#121212] px-2 py-1 rounded-md border border-gray-800">
+                                        <i class="fa-solid ${statusIcon} ${colorClass} text-[10px]"></i>
+                                        <span class="${colorClass} font-bold">${data.status || ''}</span>
+                                    </div>
+                                    <button onclick="window.deleteSubDoc('${snakeId}','feedingHistory','${doc.id}')" class="text-gray-500 hover:text-error hover:bg-error/10 rounded-lg p-1.5 transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
                             </div>`;
                     });
                 }
             });
             activeSubcollectionListeners.push(unsubF);
 
+            // --- 3. คราบ ---
             const sRef = query(collection(db, "snakes", snakeId, "shedHistory"), orderBy("date", "desc"));
             const unsubS = onSnapshot(sRef, (sSnapshot) => {
                 const sList = document.getElementById('subShedList');
@@ -1088,16 +1401,24 @@
                     sList.innerHTML = "";
                     sSnapshot.forEach(doc => {
                         const data = doc.data();
+                        let badgeColor = data.status === 'ลอกสมบูรณ์' ? 'text-success' : 'text-warning';
                         sList.innerHTML += `
-                            <div class="bg-base-100 p-2.5 rounded-xl mb-2 flex justify-between items-center text-xs shadow-sm border border-base-200">
-                                <div><i class="fa-solid fa-eye text-blue-400 mr-1"></i> ตาฟ้า: ${data.blueDate ? new Date(data.blueDate).toLocaleDateString('th-TH') : '-'}<br><i class="fa-solid fa-shirt text-green-400 mr-1 ml-1"></i> ลอกหลุด: ${data.shedDate ? new Date(data.shedDate).toLocaleDateString('th-TH') : '-'} <i class="fa-solid fa-arrow-right text-gray-500 mx-1 text-[10px]"></i> <b class="text-info">${data.status || ''}</b></div>
-                                <button onclick="deleteSubDoc('${snakeId}','shedHistory','${doc.id}')" class="text-gray-400 hover:text-error bg-base-200 hover:bg-base-300 rounded px-2 py-1 transition-colors h-fit"><i class="fa-solid fa-trash-can"></i></button>
+                            <div class="list-item-glass p-3 rounded-xl mb-2 flex justify-between items-center text-xs">
+                                <div>
+                                    <div class="text-gray-400 mb-1"><i class="fa-solid fa-eye text-blue-400 mr-2 w-4 text-center"></i> ตาฟ้า: <span class="text-gray-200">${data.blueDate ? new Date(data.blueDate).toLocaleDateString('th-TH') : '-'}</span></div>
+                                    <div class="text-gray-400"><i class="fa-solid fa-shirt text-emerald-400 mr-2 w-4 text-center"></i> ลอกคราบ: <span class="text-gray-200 font-bold">${data.shedDate ? new Date(data.shedDate).toLocaleDateString('th-TH') : '-'}</span></div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="${badgeColor} font-bold bg-[#121212] px-2 py-1 rounded-md border border-gray-800">${data.status || ''}</span>
+                                    <button onclick="window.deleteSubDoc('${snakeId}','shedHistory','${doc.id}')" class="text-gray-500 hover:text-error hover:bg-error/10 rounded-lg p-1.5 transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
                             </div>`;
                     });
                 }
             });
             activeSubcollectionListeners.push(unsubS);
 
+            // --- 4. ขับถ่าย ---
             const pRef = query(collection(db, "snakes", snakeId, "poopHistory"), orderBy("date", "desc"));
             const unsubP = onSnapshot(pRef, (pSnapshot) => {
                 const pList = document.getElementById('subPoopList');
@@ -1105,16 +1426,26 @@
                     pList.innerHTML = "";
                     pSnapshot.forEach(doc => {
                         const data = doc.data();
+                        let icon = 'fa-check'; let color = 'text-gray-400';
+                        if(data.status === 'ปกติ') { icon = 'fa-check'; color = 'text-success'; }
+                        if(data.status === 'เหลว') { icon = 'fa-water'; color = 'text-warning'; }
+                        if(data.status === 'แข็ง') { icon = 'fa-cube'; color = 'text-gray-400'; }
+                        if(data.status === 'มีเลือด') { icon = 'fa-triangle-exclamation'; color = 'text-error'; }
+
                         pList.innerHTML += `
-                            <div class="bg-base-100 p-2.5 rounded-xl mb-2 flex justify-between items-center text-xs shadow-sm border border-base-200">
-                                <span><i class="fa-regular fa-calendar text-gray-400 mr-1"></i> ${new Date(data.date).toLocaleDateString('th-TH')} <i class="fa-solid fa-arrow-right text-gray-500 mx-2 text-[10px]"></i> ลักษณะอึ: <b class="text-secondary bg-base-200 px-2 py-0.5 rounded">${data.status || ''}</b></span>
-                                <button onclick="deleteSubDoc('${snakeId}','poopHistory','${doc.id}')" class="text-gray-400 hover:text-error bg-base-200 hover:bg-base-300 rounded px-2 py-1 transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                            <div class="list-item-glass p-3 rounded-xl mb-2 flex justify-between items-center text-xs">
+                                <span class="text-gray-300"><i class="fa-regular fa-calendar text-gray-500 mr-2 w-4"></i> ${new Date(data.date).toLocaleDateString('th-TH')}</span>
+                                <div class="flex items-center gap-3">
+                                    <span class="${color} font-bold bg-[#121212] px-2 py-1 rounded-md border border-gray-800"><i class="fa-solid ${icon} mr-1"></i> ${data.status || ''}</span>
+                                    <button onclick="window.deleteSubDoc('${snakeId}','poopHistory','${doc.id}')" class="text-gray-500 hover:text-error hover:bg-error/10 rounded-lg p-1.5 transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
                             </div>`;
                     });
                 }
             });
             activeSubcollectionListeners.push(unsubP);
 
+            // --- 5. รักษาโรค ---
             const mRef = query(collection(db, "snakes", snakeId, "medicalHistory"), orderBy("date", "desc"));
             const unsubM = onSnapshot(mRef, (mSnapshot) => {
                 const mList = document.getElementById('subMedList');
@@ -1123,9 +1454,13 @@
                     mSnapshot.forEach(doc => {
                         const data = doc.data();
                         mList.innerHTML += `
-                            <div class="bg-base-100 p-2.5 rounded-xl mb-2 flex justify-between items-center text-xs shadow-sm border border-base-200">
-                                <div><i class="fa-solid fa-stethoscope text-error mr-1"></i> อาการ: <span class="font-bold text-error">${data.symptom || ''}</span><br><span class="text-gray-400 ml-4">ยา: ${data.drug || ''}</span> <span class="text-gray-500 ml-2">(${(data.cost || 0)} ฿)</span></div>
-                                <button onclick="deleteSubDoc('${snakeId}','medicalHistory','${doc.id}')" class="text-gray-400 hover:text-error bg-base-200 hover:bg-base-300 rounded px-2 py-1 transition-colors h-fit"><i class="fa-solid fa-trash-can"></i></button>
+                            <div class="list-item-glass p-3 rounded-xl mb-2 flex justify-between items-start text-xs border-l-2 border-l-error">
+                                <div>
+                                    <div class="text-gray-400 mb-1"><i class="fa-regular fa-calendar mr-2 w-4 text-center"></i> ${new Date(data.date).toLocaleDateString('th-TH')}</div>
+                                    <div class="font-bold text-error mb-1"><i class="fa-solid fa-virus mr-2 w-4 text-center"></i> อาการ: ${data.symptom || ''}</div>
+                                    <div class="text-gray-300"><i class="fa-solid fa-pills text-gray-500 mr-2 w-4 text-center"></i> ยา: ${data.drug || '-'} <span class="text-gray-500 ml-1">(${(data.cost || 0).toLocaleString()} ฿)</span></div>
+                                </div>
+                                <button onclick="window.deleteSubDoc('${snakeId}','medicalHistory','${doc.id}')" class="text-gray-500 hover:text-error hover:bg-error/10 rounded-lg p-1.5 transition-colors h-fit"><i class="fa-solid fa-trash-can"></i></button>
                             </div>`;
                     });
                 }
@@ -1133,10 +1468,11 @@
             activeSubcollectionListeners.push(unsubM);
         }
 
+        // ================= Button Handlers =================
         window.addSubWeight = async (snakeId) => {
             try {
                 const wVal = parseFloat(document.getElementById('sub_w_val').value);
-                if(!wVal || isNaN(wVal)) return;
+                if(!wVal || isNaN(wVal)) { triggerToast("โปรดกรอกตัวเลขให้ถูกต้อง", "warning"); return; }
                 await addDoc(collection(db, "snakes", snakeId, "weightHistory"), { weight: wVal, date: Date.now() });
                 await updateDoc(doc(db, "snakes", snakeId), { weight: wVal }); 
                 document.getElementById('sub_w_val').value = "";
@@ -1149,7 +1485,7 @@
                 const item = document.getElementById('sub_f_item').value.trim();
                 const itemWt = parseFloat(document.getElementById('sub_f_wt').value) || 0;
                 const stat = document.getElementById('sub_f_status').value;
-                if(!item) return;
+                if(!item) { triggerToast("โปรดเลือกชนิดอาหาร", "warning"); return; }
 
                 if(stat === 'กิน') {
                     const stockItem = cachedFoodStock.find(f => (f.name||"").toLowerCase() === item.toLowerCase());
@@ -1170,6 +1506,8 @@
                 const blue = document.getElementById('sub_sh_blue').value;
                 const shed = document.getElementById('sub_sh_shed').value;
                 const stat = document.getElementById('sub_sh_status').value;
+                if(!blue && !shed) { triggerToast("โปรดเลือกวันที่อย่างน้อย 1 ช่อง", "warning"); return; }
+                
                 await addDoc(collection(db, "snakes", snakeId, "shedHistory"), { blueDate: blue, shedDate: shed, status: stat, date: Date.now() });
                 document.getElementById('sub_sh_blue').value = "";
                 document.getElementById('sub_sh_shed').value = "";
@@ -1190,7 +1528,7 @@
                 const sym = document.getElementById('sub_m_symptom').value.trim();
                 const drg = document.getElementById('sub_m_drug').value.trim();
                 const cst = parseFloat(document.getElementById('sub_m_cost').value) || 0;
-                if(!sym) return;
+                if(!sym) { triggerToast("โปรดระบุอาการป่วย", "warning"); return; }
 
                 await addDoc(collection(db, "snakes", snakeId, "medicalHistory"), { symptom: sym, drug: drg, cost: cst, date: Date.now() });
                 if(cst > 0) {
@@ -1228,9 +1566,9 @@
         };
 
         window.filterSnakes = () => {
-            const textQuery = searchBar.value.toLowerCase();
-            const filterType = filterSelect.value;
-            const sortType = sortSelect.value;
+            const textQuery = document.getElementById('searchBar').value.toLowerCase();
+            const filterType = document.getElementById('filterSelect').value;
+            const sortType = document.getElementById('sortSelect').value;
 
             let result = cachedSnakes.filter(s => {
                 const matchesSearch = 
@@ -1252,23 +1590,32 @@
             const grid = document.getElementById('snakeGrid');
             grid.innerHTML = "";
             result.forEach(s => {
-                let validImg = (s.images && s.images.length > 0 && s.images[0].trim() !== '') ? s.images[0] : 'https://placehold.co/400x300/2a323c/a6adbb?text=No+Image';
+                let validImg = (s.images && s.images.length > 0 && s.images[0].trim() !== '') ? s.images[0] : 'https://placehold.co/400x300/1e232a/3abff8?text=NO+IMAGE';
                 
                 const div = document.createElement('div');
-                div.className = "card bg-base-100 shadow-lg border border-base-200 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-200";
+                div.className = "snake-card rounded-2xl overflow-hidden cursor-pointer group";
+                div.onclick = () => window.viewDetail(s.id); 
+                
+                let statusBadge = '';
+                if(s.status === 'เลี้ยงปกติ') statusBadge = '<div class="badge badge-success badge-sm border-none font-bold shadow-md">ปกติ</div>';
+                if(s.status === 'กำลังลอกคราบ') statusBadge = '<div class="badge badge-secondary badge-sm border-none font-bold shadow-md">ลอกคราบ</div>';
+                if(s.status === 'ตาย' || s.status === 'ขายแล้ว') statusBadge = `<div class="badge badge-neutral badge-sm border-none text-gray-400 font-bold shadow-md">${s.status}</div>`;
+
                 div.innerHTML = `
-                    <figure class="h-48 lg:h-52 bg-neutral relative">
-                        <img src="${validImg}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x300/2a323c/a6adbb?text=No+Image'">
-                        <div class="absolute top-3 left-3 badge badge-neutral shadow-lg bg-black/80 font-mono border-none">${s.code||''}</div>
-                        <div class="absolute bottom-3 right-3 text-[10px] bg-primary/90 backdrop-blur text-white px-2 py-1 rounded-lg font-bold shadow-lg">📍 R:${s.rack || '-'} B:${s.box || '-'}</div>
+                    <figure class="h-44 bg-[#15191e] relative overflow-hidden">
+                        <img src="${validImg}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.onerror=null;this.src='https://placehold.co/400x300/1e232a/3abff8?text=NO+IMAGE'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#1e232a] to-transparent opacity-80"></div>
+                        <div class="absolute top-3 left-3 bg-[#121212]/80 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10 font-mono text-xs font-bold text-white shadow-lg">${s.code||''}</div>
+                        <div class="absolute top-3 right-3">${statusBadge}</div>
+                        <div class="absolute bottom-3 left-3 text-white">
+                            <h3 class="text-base font-black leading-tight drop-shadow-md truncate w-40">${s.name||'ไม่ระบุชื่อ'}</h3>
+                        </div>
                     </figure>
-                    <div class="card-body p-4 lg:p-5 gap-1 text-sm">
-                        <h3 class="card-title text-base lg:text-lg font-bold text-base-content leading-tight">${s.name||''}</h3>
-                        <p class="text-primary font-bold text-xs opacity-90">${s.morph||''} (${s.gender||''})</p>
-                        <div class="divider my-1 opacity-50"></div>
-                        <p class="text-gray-400 text-xs"><i class="fa-solid fa-weight-scale w-4"></i> ปัจจุบัน: <b class="text-base-content text-sm ml-1">${s.weight||0} g</b></p>
-                        <div class="card-actions justify-end mt-3">
-                            <button onclick="viewDetail('${s.id}')" class="btn btn-sm btn-primary w-full font-bold rounded-xl shadow-md"><i class="fa-solid fa-folder-open"></i> แฟ้มประวัติ</button>
+                    <div class="p-4 gap-1 text-sm bg-[#1e232a] relative">
+                        <p class="text-primary font-bold text-xs truncate mb-2">${s.morph||'Normal'} <span class="text-gray-400 font-normal ml-1">(${s.gender||'-'})</span></p>
+                        <div class="flex justify-between items-center text-xs text-gray-400 bg-[#15191e] p-2 rounded-xl border border-gray-800">
+                            <span><i class="fa-solid fa-weight-scale text-info mr-1"></i> <b class="text-gray-200">${s.weight||0}g</b></span>
+                            <span class="font-mono"><i class="fa-solid fa-box text-warning mr-1"></i> R${s.rack||'-'} : B${s.box||'-'}</span>
                         </div>
                     </div>
                 `;
