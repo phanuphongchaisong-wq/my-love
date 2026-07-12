@@ -398,6 +398,9 @@
         }
 
         onAuthStateChanged(auth, (user) => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const scanCode = urlParams.get('code');
+
             if (user) {
                 currentUser = user;
                 document.getElementById('authSection').classList.add('hidden');
@@ -406,8 +409,38 @@
                 listenToData();
             } else {
                 currentUser = null;
-                document.getElementById('authSection').classList.remove('hidden');
-                document.getElementById('appSection').classList.add('hidden');
+                
+                if (scanCode) {
+                    document.getElementById('authSection').classList.add('hidden');
+                    document.getElementById('appSection').classList.remove('hidden');
+                    initCalendar();
+                    
+                    const qSnakesNoAuth = query(collection(db, "snakes"));
+                    onSnapshot(qSnakesNoAuth, (snapshot) => {
+                        cachedSnakes = [];
+                        snapshot.forEach(doc => cachedSnakes.push({id: doc.id, ...doc.data()}));
+                        renderUI();
+                        
+                        const targetSnake = cachedSnakes.find(s => (s.code||"").toLowerCase() === scanCode.toLowerCase());
+                        if (targetSnake) {
+                            window.history.replaceState({}, document.title, window.location.pathname);
+                            viewDetail(targetSnake.id);
+                        }
+                    }, (err) => {
+                        console.error("NoAuth Fetch Error:", err);
+                        triggerToast("⚠️ หากข้อมูลไม่แสดง โปรดแก้ Firebase Rules เป็น allow read, write: if true;", "error");
+                    });
+
+                    const qStockNoAuth = query(collection(db, "foodStock"));
+                    onSnapshot(qStockNoAuth, (snapshot) => {
+                        cachedFoodStock = [];
+                        snapshot.forEach(doc => cachedFoodStock.push({id: doc.id, ...doc.data()}));
+                        updateFoodStockDropdowns();
+                    });
+                } else {
+                    document.getElementById('authSection').classList.remove('hidden');
+                    document.getElementById('appSection').classList.add('hidden');
+                }
             }
         });
 
@@ -425,7 +458,11 @@
             } 
             catch(err) { document.getElementById('authMessage').innerText = err.message; }
         };
-        window.logoutUser = () => signOut(auth);
+        window.logoutUser = () => {
+            signOut(auth).then(() => {
+                window.location.href = window.location.pathname; 
+            });
+        };
 
         function initCalendar() {
             const calendarEl = document.getElementById('calendar');
@@ -476,6 +513,8 @@
         };
 
         function listenToData() {
+            if(!currentUser) return; 
+            
             const qSnakes = query(collection(db, "snakes"), where("uid", "==", currentUser.uid));
             onSnapshot(qSnakes, (snapshot) => {
                 cachedSnakes = [];
@@ -556,10 +595,8 @@
                 cachedFoodStock = [];
                 let totalStock = 0;
                 const stockBox = document.getElementById('foodStockList');
-                if(stockBox) stockBox.innerHTML = "";
-
-                // อัปเดต datalist ให้เลือกในหน้าฟาร์ม/ข้อมูล
                 const dataList = document.getElementById('foodDatalist');
+                if(stockBox) stockBox.innerHTML = "";
                 if(dataList) dataList.innerHTML = "";
 
                 snapshot.forEach(doc => {
@@ -580,15 +617,11 @@
                             </div>
                         </div>`;
                     }
-
-                    if(dataList) {
-                        dataList.innerHTML += `<option value="${data.name || ''}">`;
-                    }
+                    if(dataList) { dataList.innerHTML += `<option value="${data.name || ''}">`; }
                 });
                 const dStockEl = document.getElementById('d_stock_total');
                 if(dStockEl) dStockEl.innerText = totalStock;
 
-                // Update UI Dropdown หากมีการเปิด Modal อยู่แล้ว
                 updateFoodStockDropdowns();
             });
         }
@@ -615,7 +648,7 @@
                 if(existing) {
                     await updateDoc(doc(db, "foodStock", existing.id), { quantity: existing.quantity + qty });
                 } else {
-                    await addDoc(collection(db, "foodStock"), { uid: currentUser.uid, name: name, quantity: qty, updatedAt: Date.now() });
+                    await addDoc(collection(db, "foodStock"), { uid: currentUser ? currentUser.uid : "global_qr_user", name: name, quantity: qty, updatedAt: Date.now() });
                 }
                 document.getElementById('fs_name').value = "";
                 document.getElementById('fs_qty').value = "";
@@ -644,7 +677,7 @@
                 const category = document.getElementById('fx_category').value;
                 if(!title || isNaN(amount)) return;
 
-                await addDoc(collection(db, "finance"), { uid: currentUser.uid, title, amount, category, createdAt: Date.now() });
+                await addDoc(collection(db, "finance"), { uid: currentUser ? currentUser.uid : "global_qr_user", title, amount, category, createdAt: Date.now() });
                 document.getElementById('fx_title').value = "";
                 document.getElementById('fx_amount').value = "";
                 triggerToast("💰 บันทึกรายการบัญชีเรียบร้อย");
@@ -687,6 +720,11 @@
             document.getElementById('d_med').innerText = cachedSnakes.filter(s => s.nextMedDate == todayStr).length;
             document.getElementById('d_shed').innerText = cachedSnakes.filter(s => s.status === "กำลังลอกคราบ").length;
 
+            const eggWidget = document.getElementById('d_eggs');
+            if (eggWidget && eggWidget.parentElement) {
+                eggWidget.parentElement.classList.add('hidden');
+            }
+
             const grid = document.getElementById('snakeGrid');
             grid.innerHTML = "";
             
@@ -723,7 +761,7 @@
                 const imgArray = rawImages.filter(url => url !== "");
                 
                 const data = {
-                    uid: currentUser.uid,
+                    uid: currentUser ? currentUser.uid : "global_qr_user",
                     code: s_code.value,
                     name: s_name.value,
                     morph: s_morph.value,
@@ -967,7 +1005,7 @@
             detailModal.showModal();
 
             setTimeout(() => {
-                updateFoodStockDropdowns(); // ดึงสต็อกมาใส่ Dropdown ทันทีตอนเปิด
+                updateFoodStockDropdowns(); // ดึงสต็อกมาใส่ Dropdown ทันทีตอนเปิดแฟ้มเชิงลึก
                 const canvasNode = document.getElementById("qrCanvas");
                 canvasNode.innerHTML = "";
                 const currentUrlWithoutParams = window.location.origin + window.location.pathname;
@@ -1100,7 +1138,7 @@
                 const wVal = parseFloat(document.getElementById('sub_w_val').value);
                 if(!wVal || isNaN(wVal)) return;
                 await addDoc(collection(db, "snakes", snakeId, "weightHistory"), { weight: wVal, date: Date.now() });
-                await updateDoc(doc(db, "snakes", snakeId), { weight: wVal }); // อัปเดตแฟ้มหลักตามข้อ 2
+                await updateDoc(doc(db, "snakes", snakeId), { weight: wVal }); 
                 document.getElementById('sub_w_val').value = "";
                 triggerToast("⚖️ บันทึกประวัติน้ำหนักเรียบร้อย");
             } catch(e) { triggerToast("เกิดข้อผิดพลาดในการบันทึกน้ำหนัก", "error"); }
@@ -1155,9 +1193,8 @@
                 if(!sym) return;
 
                 await addDoc(collection(db, "snakes", snakeId, "medicalHistory"), { symptom: sym, drug: drg, cost: cst, date: Date.now() });
-                // บันทึกรายจ่ายส่งตรงเข้า Finance ฟาร์มอัตโนมัติ (ข้อ 2)
                 if(cst > 0) {
-                    await addDoc(collection(db, "finance"), { uid: currentUser.uid, title: `ค่ายารักษางู (${sym})`, amount: cst, category: "ค่ายา/รักษา", createdAt: Date.now() });
+                    await addDoc(collection(db, "finance"), { uid: currentUser ? currentUser.uid : "global_qr_user", title: `ค่ายารักษางู (${sym})`, amount: cst, category: "ค่ายา/รักษา", createdAt: Date.now() });
                 }
                 document.getElementById('sub_m_symptom').value = "";
                 document.getElementById('sub_m_drug').value = "";
