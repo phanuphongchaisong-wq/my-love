@@ -146,20 +146,20 @@
 
             <div id="tab-snakes" class="tab-content-item hidden">
                 <div class="bg-base-100 p-4 rounded-xl shadow mb-6 border border-base-200 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    <input type="text" id="searchBar" oninput="filterSnakes()" placeholder="🔍 ค้นหาด้วย ชื่อ, รหัส, Morph, หรือพิกัด..." class="input input-bordered w-full text-xs lg:text-sm shadow-inner lg:col-span-2" />
-                    <select id="filterSelect" onchange="filterSnakes()" class="select select-bordered w-full text-xs lg:text-sm">
+                    <input type="text" id="searchBar" oninput="window.filterSnakes()" placeholder="🔍 ค้นหาด้วย ชื่อ, รหัส, Morph, หรือพิกัด..." class="input input-bordered w-full text-xs lg:text-sm shadow-inner lg:col-span-2" />
+                    <select id="filterSelect" onchange="window.filterSnakes()" class="select select-bordered w-full text-xs lg:text-sm">
                         <option value="all">กรองสถานะ: ทั้งหมด</option>
                         <option value="เลี้ยงปกติ">สถานะ: เลี้ยงปกติ</option>
                         <option value="กำลังลอกคราบ">สถานะ: เข้าคราบ/เรดอาย</option>
                         <option value="ขายแล้ว">สถานะ: จำหน่ายออกแล้ว</option>
                         <option value="ตาย">สถานะ: ตาย</option>
                     </select>
-                    <select id="sortSelect" onchange="filterSnakes()" class="select select-bordered w-full text-xs lg:text-sm">
+                    <select id="sortSelect" onchange="window.filterSnakes()" class="select select-bordered w-full text-xs lg:text-sm">
                         <option value="newest">เรียงลำดับ: เพิ่มสมาชิกล่าสุด</option>
                         <option value="weight">เรียงลำดับ: น้ำหนัก (มาก - น้อย)</option>
                         <option value="code">เรียงลำดับ: เรียงตามรหัสงู</option>
                     </select>
-                    <button onclick="exportData()" class="btn btn-outline btn-success btn-sm w-full"><i class="fa-solid fa-file-excel"></i> ส่งออกข้อมูล Excel</button>
+                    <button onclick="window.exportData()" class="btn btn-outline btn-success btn-sm w-full"><i class="fa-solid fa-file-excel"></i> ส่งออกข้อมูล Excel</button>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6" id="snakeGrid"></div>
@@ -172,7 +172,7 @@
                         
                         <div class="form-control mb-3">
                             <label class="label"><span class="label-text text-xs text-gray-400">1. เลือกรายชื่อน้องงู</span></label>
-                            <select id="quick_sched_snake" onchange="loadQuickSchedule()" class="select select-bordered w-full">
+                            <select id="quick_sched_snake" onchange="window.loadQuickSchedule()" class="select select-bordered w-full">
                                 <option value="" disabled selected>-- กดเพื่อเลือก --</option>
                             </select>
                         </div>
@@ -181,7 +181,7 @@
                             <label class="label pt-0"><span class="label-text text-warning font-bold text-xs"><i class="fa-solid fa-utensils"></i> นัดให้อาหาร:</span></label>
                             <div class="flex gap-2">
                                 <input type="date" id="quick_feed_date" class="input input-bordered input-sm w-full shadow-inner" />
-                                <button onclick="saveQuickSchedule('nextFeedDate', 'quick_feed_date')" class="btn btn-sm btn-warning">บันทึก</button>
+                                <button onclick="window.saveQuickSchedule('nextFeedDate', 'quick_feed_date')" class="btn btn-sm btn-warning">บันทึก</button>
                             </div>
                         </div>
 
@@ -189,7 +189,7 @@
                             <label class="label pt-0"><span class="label-text text-info font-bold text-xs"><i class="fa-solid fa-weight-scale"></i> นัดชั่งน้ำหนัก:</span></label>
                             <div class="flex gap-2">
                                 <input type="date" id="quick_weight_date" class="input input-bordered input-sm w-full shadow-inner" />
-                                <button onclick="saveQuickSchedule('nextWeightDate', 'quick_weight_date')" class="btn btn-sm btn-info">บันทึก</button>
+                                <button onclick="window.saveQuickSchedule('nextWeightDate', 'quick_weight_date')" class="btn btn-sm btn-info">บันทึก</button>
                             </div>
                         </div>
                         
@@ -197,7 +197,7 @@
                             <label class="label pt-0"><span class="label-text text-error font-bold text-xs"><i class="fa-solid fa-pills"></i> นัดให้ยา/รักษา:</span></label>
                             <div class="flex gap-2">
                                 <input type="date" id="quick_med_date" class="input input-bordered input-sm w-full shadow-inner" />
-                                <button onclick="saveQuickSchedule('nextMedDate', 'quick_med_date')" class="btn btn-sm btn-error text-white">บันทึก</button>
+                                <button onclick="window.saveQuickSchedule('nextMedDate', 'quick_med_date')" class="btn btn-sm btn-error text-white">บันทึก</button>
                             </div>
                         </div>
                     </div>
@@ -216,7 +216,7 @@
                         <div class="flex gap-2 mb-4">
                             <input type="text" id="fs_name" placeholder="ชื่อเหยื่อ เช่น หนูแช่ M" class="input input-bordered w-full" />
                             <input type="number" id="fs_qty" placeholder="จำนวน" class="input input-bordered w-24" />
-                            <button onclick="addFoodStock()" class="btn btn-primary px-6">เพิ่ม</button>
+                            <button onclick="window.addFoodStock()" class="btn btn-primary px-6">เพิ่ม</button>
                         </div>
                         <div class="divider my-2"></div>
                         <div class="overflow-y-auto max-h-72 space-y-2 text-sm custom-scrollbar pr-2" id="foodStockList"></div>
@@ -225,7 +225,7 @@
 
                     <div class="card bg-base-100 p-5 shadow border border-base-200">
                         <h3 class="font-bold text-base mb-4 text-error flex items-center gap-2"><i class="fa-solid fa-receipt"></i> บันทึกบัญชีรายจ่าย</h3>
-                        <form onsubmit="addExpense(event)" class="space-y-3 mb-4">
+                        <form onsubmit="window.addExpense(event)" class="space-y-3 mb-4">
                             <input type="text" id="fx_title" placeholder="รายละเอียดรายการ เช่น ซื้อกล่องเลี้ยง, ค่าไฟ" required class="input input-bordered w-full" />
                             <div class="flex gap-2">
                                 <input type="number" id="fx_amount" placeholder="ยอดเงิน (บาท)" required class="input input-bordered w-full" />
@@ -247,20 +247,20 @@
         </div>
 
         <div class="fixed bottom-24 lg:bottom-10 right-6 lg:right-10 z-40">
-            <button onclick="openAddModal()" class="btn btn-primary btn-circle btn-lg shadow-2xl hover:scale-110 transition-transform"><i class="fa-solid fa-plus text-2xl"></i></button>
+            <button onclick="window.openAddModal()" class="btn btn-primary btn-circle btn-lg shadow-2xl hover:scale-110 transition-transform"><i class="fa-solid fa-plus text-2xl"></i></button>
         </div>
 
         <div class="btm-nav border-t border-base-200 bg-base-100 lg:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="active text-primary transition-colors">
+            <button onclick="window.switchTab('dashboard')" id="nav-dashboard" class="active text-primary transition-colors">
                 <i class="fa-solid fa-chart-line text-lg mb-1"></i><span class="text-[10px] font-bold">แดชบอร์ด</span>
             </button>
-            <button onclick="switchTab('snakes')" id="nav-snakes" class="transition-colors">
+            <button onclick="window.switchTab('snakes')" id="nav-snakes" class="transition-colors">
                 <i class="fa-solid fa-snake text-lg mb-1"></i><span class="text-[10px] font-bold">รายการงู</span>
             </button>
-            <button onclick="switchTab('calendar')" id="nav-calendar" class="transition-colors">
+            <button onclick="window.switchTab('calendar')" id="nav-calendar" class="transition-colors">
                 <i class="fa-solid fa-calendar-week text-lg mb-1"></i><span class="text-[10px] font-bold">ปฏิทิน</span>
             </button>
-            <button onclick="switchTab('finance')" id="nav-finance" class="transition-colors">
+            <button onclick="window.switchTab('finance')" id="nav-finance" class="transition-colors">
                 <i class="fa-solid fa-wallet text-lg mb-1"></i><span class="text-[10px] font-bold">บัญชี/สต็อก</span>
             </button>
         </div>
@@ -275,7 +275,7 @@
     <dialog id="snakeModal" class="modal bg-black/60 backdrop-blur-sm">
         <div class="modal-box max-w-3xl w-11/12 bg-base-100 shadow-2xl rounded-3xl p-5 lg:p-8">
             <h3 class="font-bold text-xl mb-6 text-primary flex items-center gap-2" id="modalTitle"><i class="fa-solid fa-file-pen"></i> ลงทะเบียนสมาชิกงูรายใหม่</h3>
-            <form id="snakeForm" onsubmit="saveSnake(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <form id="snakeForm" onsubmit="window.saveSnake(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <input type="hidden" id="editSnakeId">
                 
                 <div class="form-control"><label class="label"><span class="label-text font-bold">รหัสประจำตัวงู (Code)</span></label><input type="text" id="s_code" required placeholder="เช่น BP26-001" class="input input-bordered w-full bg-base-200 focus:bg-base-100 transition-colors" /></div>
@@ -313,7 +313,7 @@
                 
                 <div class="md:col-span-2 flex gap-3 mt-4">
                     <button type="submit" class="btn btn-primary flex-1 font-bold text-lg rounded-xl shadow-lg">บันทึกข้อมูล</button>
-                    <button type="button" onclick="snakeModal.close()" class="btn btn-ghost rounded-xl">ยกเลิก</button>
+                    <button type="button" onclick="document.getElementById('snakeModal').close()" class="btn btn-ghost rounded-xl">ยกเลิก</button>
                 </div>
             </form>
         </div>
@@ -792,7 +792,7 @@
                     await addDoc(collection(db, "snakes"), data);
                     triggerToast("🎉 เพิ่มงูตัวใหม่ลงสารบบสำเร็จ");
                 }
-                snakeModal.close();
+                document.getElementById('snakeModal').close();
             } catch(e) { triggerToast("เกิดข้อผิดพลาดในการบันทึกข้อมูล", "error"); }
         };
 
@@ -800,7 +800,7 @@
             document.getElementById('snakeForm').reset();
             document.getElementById('editSnakeId').value = "";
             document.getElementById('modalTitle').innerHTML = "<i class='fa-solid fa-plus-circle'></i> ลงทะเบียนงูเข้าคลังเลี้ยงระบบส่วนตัว";
-            snakeModal.showModal();
+            document.getElementById('snakeModal').showModal();
         };
 
         window.switchDetailTab = (btnEl, tabId) => {
@@ -844,8 +844,8 @@
             
             document.getElementById('modalTitle').innerHTML = "<i class='fa-solid fa-pen-to-square'></i> แก้ไขข้อมูลโครงสร้างหลัก";
             
-            detailModal.close(); 
-            setTimeout(() => { snakeModal.showModal(); }, 150); 
+            document.getElementById('detailModal').close(); 
+            setTimeout(() => { document.getElementById('snakeModal').showModal(); }, 150); 
         };
 
         window.viewDetail = async (id) => {
@@ -863,7 +863,7 @@
                     <h2 class="text-lg lg:text-2xl font-bold text-primary flex items-center gap-2">
                         <i class="fa-solid fa-address-card"></i> ${s.name || ''} <span class="badge badge-lg badge-neutral font-mono text-xs ml-1 shadow">${s.code || ''}</span>
                     </h2>
-                    <button onclick="detailModal.close()" class="btn btn-sm btn-circle text-lg bg-base-200 hover:bg-error hover:text-white transition-colors">✕</button>
+                    <button onclick="document.getElementById('detailModal').close()" class="btn btn-sm btn-circle text-lg bg-base-200 hover:bg-error hover:text-white transition-colors">✕</button>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -1002,10 +1002,10 @@
                     </div>
                 </div>
             `;
-            detailModal.showModal();
+            document.getElementById('detailModal').showModal();
 
             setTimeout(() => {
-                updateFoodStockDropdowns(); // ดึงสต็อกมาใส่ Dropdown ทันทีตอนเปิดแฟ้มเชิงลึก
+                updateFoodStockDropdowns(); 
                 const canvasNode = document.getElementById("qrCanvas");
                 canvasNode.innerHTML = "";
                 const currentUrlWithoutParams = window.location.origin + window.location.pathname;
@@ -1221,7 +1221,7 @@
                         snap.forEach(async (subDocItem) => { await deleteDoc(doc(db, "snakes", id, sub, subDocItem.id)); });
                     }
                     await deleteDoc(doc(db, "snakes", id));
-                    detailModal.close();
+                    document.getElementById('detailModal').close();
                     triggerToast("🗑️ ลบแฟ้มงูตัวหลักและประวัติย่อยถาวรเสร็จสิ้น");
                 }
             } catch(e) { triggerToast("ไม่สามารถลบข้อมููลงูหลักได้", "error"); }
