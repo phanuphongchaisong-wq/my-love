@@ -98,7 +98,6 @@
         }
         .tab-btn:hover:not(.tab-active) { background: rgba(255, 255, 255, 0.05); }
 
-        /* Custom List Item styling */
         .list-item-glass {
             background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
             border: 1px solid var(--border-glass);
@@ -138,21 +137,18 @@
     </div>
 
     <div id="appSection" class="hidden">
-        
         <div class="navbar sticky-header px-4 lg:px-8">
             <div class="navbar-start w-full lg:w-1/3">
                 <span class="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary flex items-center gap-2">
                     <i class="fa-solid fa-snake text-primary"></i> Snake Keeper
                 </span>
             </div>
-            
             <div class="navbar-center hidden lg:flex gap-2">
                 <button onclick="switchTab('dashboard')" id="desk-nav-dashboard" class="btn btn-primary btn-sm rounded-full px-6 font-bold shadow-[0_0_10px_var(--primary-glow)]"><i class="fa-solid fa-chart-pie mr-1"></i> แดชบอร์ด</button>
                 <button onclick="switchTab('snakes')" id="desk-nav-snakes" class="btn btn-ghost btn-sm rounded-full px-6 text-gray-300 hover:text-white"><i class="fa-solid fa-list mr-1"></i> รายการงู</button>
                 <button onclick="switchTab('calendar')" id="desk-nav-calendar" class="btn btn-ghost btn-sm rounded-full px-6 text-gray-300 hover:text-white"><i class="fa-regular fa-calendar mr-1"></i> ปฏิทิน</button>
                 <button onclick="switchTab('finance')" id="desk-nav-finance" class="btn btn-ghost btn-sm rounded-full px-6 text-gray-300 hover:text-white"><i class="fa-solid fa-wallet mr-1"></i> คลัง/บัญชี</button>
             </div>
-
             <div class="navbar-end w-auto lg:w-1/3 gap-3 ml-auto">
                 <div class="badge badge-sm badge-outline font-mono text-[10px] text-gray-400 border-gray-600 hidden sm:inline-flex">v3.5 PRO</div>
                 <button onclick="logoutUser()" class="btn btn-sm btn-circle btn-ghost text-error hover:bg-error hover:text-white transition-colors" title="ออกจากระบบ"><i class="fa-solid fa-power-off"></i></button>
@@ -160,7 +156,6 @@
         </div>
 
         <div class="container mx-auto max-w-7xl p-4 lg:p-6 space-y-6">
-            
             <div id="tab-dashboard" class="tab-content-item animate-fade-in">
                 <div class="card bg-gradient-to-r from-[#1e232a] to-[#1a202c] border border-secondary/30 shadow-[0_0_20px_rgba(217,38,169,0.1)] mb-6 rounded-2xl overflow-hidden relative">
                     <div class="absolute top-0 left-0 w-1 h-full bg-secondary"></div>
@@ -198,13 +193,11 @@
                         <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">ชั่งน้ำหนักวันนี้</div>
                         <div class="text-2xl font-black text-info" id="d_weight">0</div>
                     </div>
-                    
                     <div class="stat-card p-4 rounded-2xl flex flex-col justify-center items-center text-center hidden" id="d_eggs_container">
                         <div class="text-emerald-400 mb-1"><i class="fa-solid fa-egg text-lg"></i></div>
                         <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">ไข่รอฟัก</div>
                         <div class="text-2xl font-black text-emerald-400" id="d_eggs">0</div>
                     </div>
-                    
                     <div class="stat-card p-4 rounded-2xl flex flex-col justify-center items-center text-center relative overflow-hidden">
                         <div class="absolute -right-3 -bottom-4 text-error/10 text-6xl"><i class="fa-solid fa-suitcase-medical"></i></div>
                         <div class="text-error mb-1"><i class="fa-solid fa-pills text-lg"></i></div>
@@ -227,13 +220,11 @@
             </div>
 
             <div id="tab-snakes" class="tab-content-item hidden animate-fade-in">
-                
                 <div class="bg-[#1e232a] p-3 rounded-2xl shadow-lg mb-6 border border-base-200/50 flex flex-col md:flex-row gap-3 items-center">
                     <div class="relative w-full md:w-1/2 lg:w-1/3">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500"><i class="fa-solid fa-magnifying-glass"></i></div>
                         <input type="text" id="searchBar" oninput="window.filterSnakes()" placeholder="ค้นหา ชื่อ, รหัส, Morph, พิกัด..." class="input input-bordered w-full pl-10 bg-[#15191e] rounded-xl text-sm" />
                     </div>
-                    
                     <div class="flex w-full md:w-auto gap-2 flex-1 justify-end">
                         <select id="filterSelect" onchange="window.filterSnakes()" class="select select-bordered bg-[#15191e] rounded-xl text-sm w-full md:w-auto">
                             <option value="all">สถานะ: ทั้งหมด</option>
@@ -250,25 +241,21 @@
                         <button onclick="window.exportData()" class="btn btn-outline btn-success rounded-xl md:w-auto w-12 px-0 flex-shrink-0" title="Export Excel"><i class="fa-solid fa-file-csv text-lg"></i></button>
                     </div>
                 </div>
-
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6" id="snakeGrid"></div>
             </div>
 
             <div id="tab-calendar" class="tab-content-item hidden animate-fade-in">
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    
                     <div class="lg:col-span-4 space-y-4">
                         <div class="card bg-[#1e232a] shadow-xl border border-base-200/50 rounded-2xl">
                             <div class="card-body p-5">
                                 <h3 class="font-bold text-lg mb-4 text-white border-b border-gray-700 pb-2"><i class="fa-solid fa-bolt text-warning mr-2"></i> ตั้งนัดหมายด่วน</h3>
-                                
                                 <div class="form-control mb-4">
                                     <label class="label"><span class="label-text text-xs text-gray-400 font-bold">1. เลือกงูเป้าหมาย</span></label>
                                     <select id="quick_sched_snake" onchange="window.loadQuickSchedule()" class="select select-bordered bg-[#15191e] rounded-xl w-full">
                                         <option value="" disabled selected>-- เลือกจากรายการ --</option>
                                     </select>
                                 </div>
-
                                 <div class="space-y-3">
                                     <div class="bg-[#15191e] p-3 rounded-xl border border-warning/20">
                                         <label class="label pt-0 pb-1"><span class="label-text text-warning font-bold text-xs"><i class="fa-solid fa-utensils w-4"></i> ให้อาหาร</span></label>
@@ -277,7 +264,6 @@
                                             <button onclick="window.saveQuickSchedule('nextFeedDate', 'quick_feed_date')" class="btn btn-sm btn-warning rounded-lg"><i class="fa-solid fa-save"></i></button>
                                         </div>
                                     </div>
-
                                     <div class="bg-[#15191e] p-3 rounded-xl border border-info/20">
                                         <label class="label pt-0 pb-1"><span class="label-text text-info font-bold text-xs"><i class="fa-solid fa-weight-scale w-4"></i> ชั่งน้ำหนัก</span></label>
                                         <div class="flex gap-2">
@@ -285,7 +271,6 @@
                                             <button onclick="window.saveQuickSchedule('nextWeightDate', 'quick_weight_date')" class="btn btn-sm btn-info rounded-lg"><i class="fa-solid fa-save"></i></button>
                                         </div>
                                     </div>
-                                    
                                     <div class="bg-[#15191e] p-3 rounded-xl border border-error/20">
                                         <label class="label pt-0 pb-1"><span class="label-text text-error font-bold text-xs"><i class="fa-solid fa-pills w-4"></i> ให้ยา/รักษา</span></label>
                                         <div class="flex gap-2">
@@ -297,7 +282,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="lg:col-span-8">
                         <div class="card bg-[#1e232a] shadow-xl border border-base-200/50 rounded-2xl h-full">
                             <div class="card-body p-4 lg:p-6">
@@ -305,17 +289,14 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
 
             <div id="tab-finance" class="tab-content-item hidden animate-fade-in">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    
                     <div class="card bg-[#1e232a] shadow-xl border border-base-200/50 rounded-2xl">
                         <div class="card-body p-5 lg:p-6">
                             <h3 class="font-bold text-lg mb-4 text-white flex items-center gap-2 border-b border-gray-700 pb-2"><i class="fa-solid fa-box-open text-primary"></i> คลังเหยื่อ/อาหาร</h3>
-                            
                             <div class="bg-[#15191e] p-3 rounded-xl border border-gray-700 mb-4 flex flex-wrap sm:flex-nowrap gap-2 items-center">
                                 <div class="flex-1 w-full sm:w-auto relative">
                                     <input type="text" id="fs_name" placeholder="ชื่อเหยื่อ (เช่น หนูไมซ์ M)" class="input input-bordered input-sm w-full bg-[#121212] rounded-lg" />
@@ -325,23 +306,19 @@
                                 </div>
                                 <button onclick="window.addFoodStock()" class="btn btn-primary btn-sm rounded-lg w-full sm:w-auto"><i class="fa-solid fa-plus"></i></button>
                             </div>
-                            
                             <div class="overflow-y-auto max-h-[350px] space-y-2 text-sm custom-scrollbar pr-1" id="foodStockList"></div>
-                            
                             <div class="mt-4 p-3 rounded-xl bg-info/10 border border-info/20 flex gap-3 items-start">
                                 <i class="fa-solid fa-circle-info text-info mt-0.5"></i>
                                 <p class="text-xs text-info/80 leading-relaxed">ระบบจะตัดสต็อกให้ <b>1 ตัว อัตโนมัติ</b> เมื่อคุณบันทึกว่า <b>"กินปกติ (ตัดสต็อก)"</b> ในหน้าประวัติการให้อาหารของงูแต่ละตัว</p>
                             </div>
                         </div>
                     </div>
-
                     <div class="card bg-[#1e232a] shadow-xl border border-base-200/50 rounded-2xl">
                         <div class="card-body p-5 lg:p-6">
                             <h3 class="font-bold text-lg mb-4 text-white flex items-center gap-2 border-b border-gray-700 pb-2"><i class="fa-solid fa-wallet text-error"></i> บัญชีรายจ่ายฟาร์ม</h3>
-                            
                             <form onsubmit="window.addExpense(event)" class="bg-[#15191e] p-3 rounded-xl border border-gray-700 mb-4 space-y-3">
                                 <div>
-                                    <input type="text" id="fx_title" placeholder="รายการ (เช่น ค่ากล่อง, ค่าไฟ, ค่ารักษา)" required class="input input-bordered input-sm w-full bg-[#121212] rounded-lg" />
+                                    <input type="text" id="fx_title" placeholder="รายการ (เช่น ซื้อกล่องเลี้ยง, ค่าไฟ, ค่ารักษา)" required class="input input-bordered input-sm w-full bg-[#121212] rounded-lg" />
                                 </div>
                                 <div class="flex gap-2">
                                     <input type="number" id="fx_amount" placeholder="ยอดเงิน (฿)" required class="input input-bordered input-sm w-1/2 bg-[#121212] rounded-lg" />
@@ -354,7 +331,6 @@
                                 </div>
                                 <button type="submit" class="btn btn-error btn-sm text-white w-full rounded-lg shadow-md"><i class="fa-solid fa-plus"></i> บันทึกรายจ่าย</button>
                             </form>
-                            
                             <div class="overflow-y-auto max-h-[300px] space-y-2 text-sm custom-scrollbar pr-1" id="expenseList"></div>
                         </div>
                     </div>
@@ -386,7 +362,7 @@
     <datalist id="foodDatalist"></datalist>
 
     <dialog id="detailModal" class="modal">
-        <div class="modal-box w-11/12 max-w-6xl p-0" id="detailContent">
+        <div class="modal-box w-11/12 max-w-6xl p-0 overflow-hidden flex flex-col" id="detailContent">
             </div>
         <form method="dialog" class="modal-backdrop"><button>close</button></form>
     </dialog>
@@ -475,7 +451,6 @@
         let cachedFoodStock = []; 
         let calendarObj = null;
         let weightChartInstance = null;
-
         let activeSubcollectionListeners = [];
 
         function clearSubcollectionListeners() {
@@ -539,9 +514,6 @@
             }, 3000);
         }
 
-        // ==========================================
-        // 🔄 ระบบตรวจสอบสถานะล็อกอิน และ QR Code GUEST
-        // ==========================================
         onAuthStateChanged(auth, (user) => {
             const urlParams = new URLSearchParams(window.location.search);
             const scanCode = urlParams.get('code');
@@ -554,13 +526,10 @@
                 listenToData();
             } else {
                 currentUser = null;
-                
                 if (scanCode) {
-                    // ปลดล็อกหน้าแอปให้แสดงผลทันทีโดยไม่ต้องผ่านฟอร์มล็อกอิน
                     document.getElementById('authSection').classList.add('hidden');
                     document.getElementById('appSection').classList.remove('hidden');
                     
-                    // ดึงข้อมูลงูจาก Firebase แบบไม่ต้องสนว่าล็อกอินไหม (อ้างอิง Rules: allow read: if true)
                     const qSnakesNoAuth = query(collection(db, "snakes"));
                     onSnapshot(qSnakesNoAuth, (snapshot) => {
                         cachedSnakes = [];
@@ -569,19 +538,16 @@
                         
                         const targetSnake = cachedSnakes.find(s => (s.code||"").toLowerCase() === scanCode.toLowerCase());
                         if (targetSnake) {
-                            // ล้าง URL ไม่ให้ดูเกะกะ
                             window.history.replaceState({}, document.title, window.location.pathname);
-                            // เรียกเปิดหน้าประวัติ Detail ของงูตัวนั้นขึ้นมาตรงกลางหน้าจอ
                             viewDetail(targetSnake.id);
                         } else {
-                            triggerToast("ไม่พบข้อมูลน้องงูรหัสนี้ในระบบ", "error");
+                            triggerToast("ไม่พบข้อมูลน้องงูรหัสนี้", "error");
                         }
                     }, (err) => {
-                        console.error("NoAuth Fetch Error:", err);
-                        triggerToast("⚠️ โปรดแก้ Firebase Rules เป็น allow read: if true;", "error");
+                        console.error(err);
+                        triggerToast("⚠️ โปรดแก้ Firebase Rules เป็น allow read, write: if true;", "error");
                     });
 
-                    // ดึงสต็อกอาหารมารอไว้สำหรับให้กรอกในฟอร์มของงู
                     const qStockNoAuth = query(collection(db, "foodStock"));
                     onSnapshot(qStockNoAuth, (snapshot) => {
                         cachedFoodStock = [];
@@ -589,7 +555,6 @@
                         updateFoodStockDropdowns();
                     });
                 } else {
-                    // ถ้าเข้าเว็บตรงๆ ไม่ได้สแกน QR มา ให้ไปหน้าล็อกอินปกติ
                     document.getElementById('authSection').classList.remove('hidden');
                     document.getElementById('appSection').classList.add('hidden');
                 }
@@ -599,9 +564,9 @@
         window.loginUser = async () => {
             try { 
                 await signInWithEmailAndPassword(auth, email.value, password.value); 
-                triggerToast("🔒 เข้าสู่คลังข้อมูลสำเร็จ");
+                triggerToast("🔒 เข้าสู่ระบบสำเร็จ");
             } 
-            catch(err) { document.getElementById('authMessage').innerText = "อีเมลหรือรหัสผ่านระบบจัดเก็บข้อมูลไม่ถูกต้อง"; }
+            catch(err) { document.getElementById('authMessage').innerText = "ข้อมูลไม่ถูกต้อง"; }
         };
         window.registerUser = async () => {
             try { 
@@ -634,8 +599,8 @@
                 const dateVal = document.getElementById(inputId).value;
                 if(!dateVal) return;
                 await updateDoc(doc(db, "snakes", snakeId), { [fieldName]: dateVal });
-                triggerToast("📅 บันทึกตารางนัดหมายสำเร็จ");
-            } catch(e) { console.error(e); triggerToast("เกิดข้อผิดพลาดในการตั้งนัดหมาย", "error"); }
+                triggerToast("📅 บันทึกนัดหมายสำเร็จ");
+            } catch(e) { console.error(e); triggerToast("เกิดข้อผิดพลาด", "error"); }
         };
 
         window.loadQuickSchedule = () => {
@@ -660,8 +625,8 @@
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "SnakesData");
                 XLSX.writeFile(wb, "SnakeKeeper_Export.xlsx");
-                triggerToast("📊 ส่งออกไฟล์ Excel สำเร็จ");
-            } catch(e) { triggerToast("Error Export Excel", "error"); }
+                triggerToast("📊 ส่งออก Excel สำเร็จ");
+            } catch(e) { triggerToast("Error", "error"); }
         };
 
         function listenToData() {
@@ -762,7 +727,7 @@
             });
         }
 
-        function updateFoodStockDropdowns() {
+        window.updateFoodStockDropdowns = () => {
             const dropdowns = document.querySelectorAll('.dynamic-food-stock');
             dropdowns.forEach(dd => {
                 const currentVal = dd.value;
@@ -772,7 +737,7 @@
                 });
                 if(currentVal) dd.value = currentVal;
             });
-        }
+        };
 
         window.addFoodStock = async () => {
             try {
@@ -788,8 +753,8 @@
                 }
                 document.getElementById('fs_name').value = "";
                 document.getElementById('fs_qty').value = "";
-                triggerToast("🎯 เพิ่มสต็อกเหยื่อเรียบร้อย");
-            } catch(e) { triggerToast("Error เพิ่มคลังสต็อก", "error"); }
+                triggerToast("🎯 เพิ่มสต็อกสำเร็จ");
+            } catch(e) { triggerToast("Error", "error"); }
         };
 
         window.updateStockQty = async (id, currentQty, diff) => {
@@ -797,12 +762,12 @@
                 const newQty = currentQty + diff;
                 if(newQty < 0) return;
                 await updateDoc(doc(db, "foodStock", id), { quantity: newQty, updatedAt: Date.now() });
-            } catch(e) { triggerToast("Error อัปเดตสต็อก", "error"); }
+            } catch(e) { triggerToast("Error", "error"); }
         };
 
         window.deleteFoodStock = async (id) => { 
             try { if(confirm("ต้องการลบรายการนี้ออกจากสต็อก?")) await deleteDoc(doc(db, "foodStock", id)); } 
-            catch(e) { triggerToast("Error ลบรายการ", "error"); }
+            catch(e) { triggerToast("Error", "error"); }
         };
 
         window.addExpense = async (e) => {
@@ -817,12 +782,12 @@
                 document.getElementById('fx_title').value = "";
                 document.getElementById('fx_amount').value = "";
                 triggerToast("💰 บันทึกรายจ่ายสำเร็จ");
-            } catch(err) { triggerToast("Error บันทึกรายจ่าย", "error"); }
+            } catch(err) { triggerToast("Error", "error"); }
         };
 
         window.deleteExpense = async (id) => { 
             try { if(confirm("ต้องการลบประวัติรายจ่ายนี้?")) await deleteDoc(doc(db, "finance", id)); } 
-            catch(e) { triggerToast("Error ลบประวัติ", "error"); }
+            catch(e) { triggerToast("Error", "error"); }
         };
 
         function runAIAnalysis() {
@@ -856,15 +821,17 @@
             document.getElementById('d_med').innerText = cachedSnakes.filter(s => s.nextMedDate == todayStr).length;
             document.getElementById('d_shed').innerText = cachedSnakes.filter(s => s.status === "กำลังลอกคราบ").length;
 
+            const eggWidget = document.getElementById('d_eggs');
+            if (eggWidget && eggWidget.parentElement) eggWidget.parentElement.classList.add('hidden');
+
             const grid = document.getElementById('snakeGrid');
             grid.innerHTML = "";
             
             cachedSnakes.forEach(s => {
                 let validImg = (s.images && s.images.length > 0 && s.images[0].trim() !== '') ? s.images[0] : 'https://placehold.co/400x300/1e232a/3abff8?text=NO+IMAGE';
-
                 const div = document.createElement('div');
                 div.className = "snake-card rounded-2xl overflow-hidden cursor-pointer group";
-                div.onclick = () => window.viewDetail(s.id); // คลิกทั้งการ์ดเพื่อเปิด
+                div.onclick = () => window.viewDetail(s.id);
                 
                 let statusBadge = '';
                 if(s.status === 'เลี้ยงปกติ') statusBadge = '<div class="badge badge-success badge-sm border-none font-bold shadow-md">ปกติ</div>';
@@ -992,7 +959,6 @@
             setTimeout(() => { document.getElementById('snakeModal').showModal(); }, 200); 
         };
 
-        // ======= สร้าง Modal Detail ด้วย UI/UX ใหม่ (แบ่งสัดส่วนสะอาดตา) =======
         window.viewDetail = async (id) => {
             const s = cachedSnakes.find(item => item.id === id);
             if(!s) return;
@@ -1000,11 +966,11 @@
             clearSubcollectionListeners();
 
             let validImages = (s.images || []).filter(img => img.trim() !== '');
-            if(validImages.length === 0) validImages = ['https://placehold.co/400x300/1e232a/3abff8?text=No+Image'];
+            if(validImages.length === 0) validImages = ['https://placehold.co/400x300/1e232a/3abff8?text=NO+IMAGE'];
 
             const content = document.getElementById('detailContent');
             content.innerHTML = `
-                <div class="bg-[#1e232a] min-h-[85vh] lg:min-h-[70vh] flex flex-col">
+                <div class="bg-[#1e232a] h-[100vh] lg:h-[85vh] flex flex-col relative">
                     
                     <div class="sticky top-0 z-50 bg-[#1e232a]/95 backdrop-blur-xl border-b border-gray-800 p-4 flex justify-between items-center shadow-lg">
                         <div class="flex items-center gap-3">
@@ -1027,7 +993,6 @@
                     <div class="flex-1 overflow-y-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-[#121212]">
                         
                         <div class="lg:col-span-4 flex flex-col gap-4">
-                            
                             <div class="carousel w-full rounded-2xl shadow-xl border border-gray-800 bg-[#15191e] overflow-hidden">
                                 ${validImages.map((img, i) => `
                                     <div id="slide${i}" class="carousel-item relative w-full h-52 lg:h-64">
@@ -1077,10 +1042,9 @@
                                     </button>
                                 </div>
                             </div>
-
                         </div>
 
-                        <div class="lg:col-span-8 flex flex-col h-[500px] lg:h-auto">
+                        <div class="lg:col-span-8 flex flex-col min-h-[500px] lg:min-h-0">
                             
                             <div class="flex flex-nowrap overflow-x-auto gap-2 mb-4 pb-1 custom-scrollbar sticky top-0 bg-[#121212] z-10 pt-2">
                                 <button onclick="window.switchDetailTab(this, 'sub-tab-feed')" class="detail-tab-btn tab-btn tab-active px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap"><i class="fa-solid fa-drumstick-bite mr-1"></i> อาหาร</button>
@@ -1090,11 +1054,10 @@
                                 <button onclick="window.switchDetailTab(this, 'sub-tab-med')" class="detail-tab-btn tab-btn px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap"><i class="fa-solid fa-syringe mr-1"></i> รักษา</button>
                             </div>
 
-                            <div class="flex-1 bg-[#1e232a] rounded-3xl p-4 lg:p-6 shadow-xl border border-gray-800 flex flex-col overflow-hidden relative">
+                            <div class="flex-1 bg-[#1e232a] rounded-3xl shadow-xl border border-gray-800 flex flex-col relative overflow-hidden">
                                 
-                                <div id="sub-tab-feed" class="sub-tab-content h-full flex flex-col animate-fade-in absolute inset-0 p-4 lg:p-6 overflow-y-auto custom-scrollbar">
-                                    
-                                    <div class="bg-[#15191e] p-4 rounded-2xl mb-4 border border-gray-800 shadow-inner">
+                                <div id="sub-tab-feed" class="sub-tab-content h-full flex flex-col absolute inset-0 p-4 lg:p-6 overflow-y-auto custom-scrollbar">
+                                    <div class="bg-[#15191e] p-4 rounded-2xl mb-4 border border-gray-800 shadow-inner shrink-0">
                                         <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                                             <div class="md:col-span-5">
                                                 <label class="label-text block mb-1.5 font-bold text-[10px] text-gray-500 uppercase tracking-wider">เลือกเหยื่อจากสต็อก</label>
@@ -1120,7 +1083,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="bg-warning/5 border border-warning/20 p-3 rounded-2xl mb-5 flex justify-between items-center">
+                                    <div class="bg-warning/5 border border-warning/20 p-3 rounded-2xl mb-5 flex justify-between items-center shrink-0">
                                         <div class="flex items-center gap-2">
                                             <div class="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center text-warning"><i class="fa-regular fa-calendar-check"></i></div>
                                             <div>
@@ -1134,13 +1097,14 @@
                                         </div>
                                     </div>
 
-                                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2">ประวัติย้อนหลัง</h4>
-                                    <div class="space-y-2 pb-10" id="subFeedList"></div>
+                                    <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2 sticky top-0 bg-[#1e232a] z-10 py-1">ประวัติย้อนหลัง</h4>
+                                        <div class="space-y-2 pb-10" id="subFeedList"></div>
+                                    </div>
                                 </div>
 
                                 <div id="sub-tab-weight" class="sub-tab-content hidden h-full flex flex-col absolute inset-0 p-4 lg:p-6 overflow-y-auto custom-scrollbar">
-                                    
-                                    <div class="bg-[#15191e] rounded-2xl border border-gray-800 p-4 mb-4 flex flex-col md:flex-row gap-4">
+                                    <div class="bg-[#15191e] rounded-2xl border border-gray-800 p-4 mb-4 flex flex-col md:flex-row gap-4 shrink-0">
                                         <div class="chart-container flex-1 h-[150px]">
                                             <canvas id="nestedWeightChart"></canvas>
                                         </div>
@@ -1150,7 +1114,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="flex gap-2 mb-5">
+                                    <div class="flex gap-2 mb-5 shrink-0">
                                         <div class="relative flex-1">
                                             <input type="number" step="0.1" id="sub_w_val" placeholder="ระบุน้ำหนักที่ชั่งได้..." class="input input-bordered w-full bg-[#15191e] border-gray-700 pl-12 rounded-xl h-11 text-lg font-bold text-info" />
                                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 text-lg"><i class="fa-solid fa-weight-scale"></i></div>
@@ -1159,7 +1123,7 @@
                                         <button onclick="window.addSubWeight('${s.id}')" class="btn btn-info h-11 px-6 rounded-xl shadow-[0_4px_10px_rgba(58,191,248,0.2)] text-white font-bold"><i class="fa-solid fa-plus"></i> บันทึก</button>
                                     </div>
 
-                                    <div class="bg-info/5 border border-info/20 p-3 rounded-2xl mb-5 flex justify-between items-center">
+                                    <div class="bg-info/5 border border-info/20 p-3 rounded-2xl mb-5 flex justify-between items-center shrink-0">
                                         <div class="flex items-center gap-2">
                                             <div class="w-8 h-8 rounded-full bg-info/20 flex items-center justify-center text-info"><i class="fa-regular fa-calendar-check"></i></div>
                                             <div>
@@ -1173,12 +1137,14 @@
                                         </div>
                                     </div>
 
-                                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2">ประวัติย้อนหลัง</h4>
-                                    <div class="space-y-2 pb-10" id="subWeightList"></div>
+                                    <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2 sticky top-0 bg-[#1e232a] z-10 py-1">ประวัติย้อนหลัง</h4>
+                                        <div class="space-y-2 pb-10" id="subWeightList"></div>
+                                    </div>
                                 </div>
 
                                 <div id="sub-tab-shed" class="sub-tab-content hidden h-full flex flex-col absolute inset-0 p-4 lg:p-6 overflow-y-auto custom-scrollbar">
-                                    <div class="bg-[#15191e] p-4 rounded-2xl mb-5 border border-gray-800 shadow-inner">
+                                    <div class="bg-[#15191e] p-4 rounded-2xl mb-5 border border-gray-800 shadow-inner shrink-0">
                                         <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                                             <div class="md:col-span-4">
                                                 <label class="label-text block mb-1.5 font-bold text-[10px] text-gray-500 uppercase tracking-wider text-blue-400">💧 วันที่ตาฟ้า</label>
@@ -1192,21 +1158,23 @@
                                                 <label class="label-text block mb-1.5 font-bold text-[10px] text-gray-500 uppercase tracking-wider">ผลลัพธ์</label>
                                                 <select id="sub_sh_status" class="select select-bordered select-sm w-full bg-[#121212] border-gray-700">
                                                     <option value="ลอกสมบูรณ์" class="text-success">✨ ลอกสมบูรณ์ทั้งตัว</option>
-                                                    <option value="ลอกไม่สมบูรณ์" class="text-warning">⚠️ คราบขาด/ไม่สุด</option>
+                                                    <option value="ลอกไม่สมบูรณ์" class="text-warning">⚠️ คราบขาดติดขัด</option>
                                                 </select>
                                             </div>
                                             <div class="md:col-span-12 mt-2">
-                                                <button onclick="window.addSubShed('${s.id}')" class="btn btn-sm btn-secondary w-full rounded-xl shadow-[0_4px_10px_rgba(217,38,169,0.2)] font-bold text-sm"><i class="fa-solid fa-plus"></i> บันทึกคราบ</button>
+                                                <button onclick="window.addSubShed('${s.id}')" class="btn btn-sm btn-secondary w-full rounded-xl shadow-[0_4px_10px_rgba(217,38,169,0.2)] font-bold text-sm"><i class="fa-solid fa-plus"></i> บันทึกประวัติคราบ</button>
                                             </div>
                                         </div>
                                     </div>
                                     
-                                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2">ประวัติย้อนหลัง</h4>
-                                    <div class="space-y-2 pb-10" id="subShedList"></div>
+                                    <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2 sticky top-0 bg-[#1e232a] z-10 py-1">ประวัติย้อนหลัง</h4>
+                                        <div class="space-y-2 pb-10" id="subShedList"></div>
+                                    </div>
                                 </div>
 
                                 <div id="sub-tab-poop" class="sub-tab-content hidden h-full flex flex-col absolute inset-0 p-4 lg:p-6 overflow-y-auto custom-scrollbar">
-                                    <div class="bg-[#15191e] p-4 rounded-2xl mb-5 border border-gray-800 flex flex-col sm:flex-row gap-3 items-end">
+                                    <div class="bg-[#15191e] p-4 rounded-2xl mb-5 border border-gray-800 flex flex-col sm:flex-row gap-3 items-end shrink-0">
                                         <div class="flex-1 w-full">
                                             <label class="label-text block mb-1.5 font-bold text-[10px] text-gray-500 uppercase tracking-wider">ลักษณะการขับถ่าย</label>
                                             <select id="sub_p_status" class="select select-bordered w-full bg-[#121212] border-gray-700 h-11">
@@ -1219,12 +1187,14 @@
                                         <button onclick="window.addSubPoop('${s.id}')" class="btn btn-neutral w-full sm:w-auto h-11 px-8 rounded-xl font-bold border-gray-600"><i class="fa-solid fa-poop text-orange-400"></i> บันทึก</button>
                                     </div>
 
-                                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2">ประวัติย้อนหลัง</h4>
-                                    <div class="space-y-2 pb-10" id="subPoopList"></div>
+                                    <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2 sticky top-0 bg-[#1e232a] z-10 py-1">ประวัติย้อนหลัง</h4>
+                                        <div class="space-y-2 pb-10" id="subPoopList"></div>
+                                    </div>
                                 </div>
 
                                 <div id="sub-tab-med" class="sub-tab-content hidden h-full flex flex-col absolute inset-0 p-4 lg:p-6 overflow-y-auto custom-scrollbar">
-                                    <div class="bg-[#15191e] p-4 rounded-2xl mb-4 border border-gray-800 shadow-inner">
+                                    <div class="bg-[#15191e] p-4 rounded-2xl mb-4 border border-gray-800 shadow-inner shrink-0">
                                         <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                                             <div class="md:col-span-12">
                                                 <label class="label-text block mb-1.5 font-bold text-[10px] text-error uppercase tracking-wider"><i class="fa-solid fa-triangle-exclamation"></i> อาการป่วย / วินิจฉัย</label>
@@ -1239,12 +1209,12 @@
                                                 <input type="number" id="sub_m_cost" placeholder="0" class="input input-bordered input-sm w-full bg-[#121212] border-gray-700 text-right" />
                                             </div>
                                             <div class="md:col-span-12 mt-2">
-                                                <button onclick="window.addSubMedical('${s.id}')" class="btn btn-sm btn-error text-white w-full rounded-xl shadow-[0_4px_10px_rgba(248,114,114,0.2)] font-bold text-sm"><i class="fa-solid fa-syringe"></i> บันทึกประวัติการรักษา</button>
+                                                <button onclick="window.addSubMedical('${s.id}')" class="btn btn-sm btn-error text-white w-full rounded-xl shadow-[0_4px_10px_rgba(248,114,114,0.2)] font-bold text-sm"><i class="fa-solid fa-syringe"></i> บันทึกการพยาบาล</button>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="bg-error/5 border border-error/20 p-3 rounded-2xl mb-5 flex justify-between items-center">
+                                    <div class="bg-error/5 border border-error/20 p-3 rounded-2xl mb-5 flex justify-between items-center shrink-0">
                                         <div class="flex items-center gap-2">
                                             <div class="w-8 h-8 rounded-full bg-error/20 flex items-center justify-center text-error"><i class="fa-regular fa-calendar-check"></i></div>
                                             <div>
@@ -1258,8 +1228,10 @@
                                         </div>
                                     </div>
 
-                                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2">ประวัติย้อนหลัง</h4>
-                                    <div class="space-y-2 pb-10" id="subMedList"></div>
+                                    <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2 sticky top-0 bg-[#1e232a] z-10 py-1">ประวัติย้อนหลัง</h4>
+                                        <div class="space-y-2 pb-10" id="subMedList"></div>
+                                    </div>
                                 </div>
 
                             </div>
@@ -1269,7 +1241,6 @@
             `;
             document.getElementById('detailModal').showModal();
 
-            // เรนเดอร์ QR และเชื่อมต่อ ฐานข้อมูลย่อย
             setTimeout(() => {
                 window.updateFoodStockDropdowns(); 
                 const canvasNode = document.getElementById("qrCanvas");
@@ -1278,14 +1249,11 @@
                 new QRCode(canvasNode, { text: currentUrlWithoutParams + "?code=" + (s.code||""), width: 90, height: 90, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
                 
                 // สั่งโหลดกราฟและลิสต์ข้อมูล
-                syncSubcollections(s.id);
+                window.syncSubcollections(s.id);
             }, 100);
         };
 
-        // ================= Subcollections Sync =================
-        function syncSubcollections(snakeId) {
-            
-            // --- 1. น้ำหนัก (อัปเดตกราฟให้สวยขึ้น) ---
+        window.syncSubcollections = (snakeId) => {
             const wRef = query(collection(db, "snakes", snakeId, "weightHistory"), orderBy("date", "asc"));
             const unsubW = onSnapshot(wRef, (wSnapshot) => {
                 let labels = ['รับเข้า'];
@@ -1295,12 +1263,13 @@
                 listEl.innerHTML = "";
 
                 let maxW = weights[0], minW = weights[0], totalW = weights[0], countW = 1;
-
-                // วนลูปสร้างประวัติย้อนหลัง จากใหม่ไปเก่า (Prepend)
                 const itemsHTML = [];
+                
                 wSnapshot.forEach(doc => {
                     const data = doc.data();
-                    labels.push(new Date(data.date).toLocaleDateString('th-TH', {month:'short', day:'numeric'}));
+                    const dateStr = data.date ? new Date(data.date).toLocaleDateString('th-TH', {month:'short', day:'numeric'}) : '-';
+                    const fullDateStr = data.date ? new Date(data.date).toLocaleDateString('th-TH') : '-';
+                    labels.push(dateStr);
                     weights.push(data.weight);
                     
                     if(data.weight > maxW) maxW = data.weight;
@@ -1310,11 +1279,16 @@
 
                     itemsHTML.unshift(`
                         <div class="list-item-glass p-2.5 rounded-xl flex justify-between items-center text-xs">
-                            <span class="flex items-center text-gray-300"><i class="fa-regular fa-calendar text-gray-500 mr-2 w-4"></i> ${new Date(data.date).toLocaleDateString('th-TH')} <i class="fa-solid fa-caret-right text-gray-600 mx-3 text-[10px]"></i> <b class="text-info text-sm ml-1">${data.weight} g</b></span>
+                            <span class="flex items-center text-gray-300"><i class="fa-regular fa-calendar text-gray-500 mr-2 w-4"></i> ${fullDateStr} <i class="fa-solid fa-caret-right text-gray-600 mx-3 text-[10px]"></i> <b class="text-info text-sm ml-1">${data.weight} g</b></span>
                             <button onclick="window.deleteSubDoc('${snakeId}','weightHistory','${doc.id}')" class="text-gray-500 hover:text-error hover:bg-error/10 rounded-lg p-1.5 transition-colors"><i class="fa-solid fa-trash-can"></i></button>
                         </div>`);
                 });
-                listEl.innerHTML = itemsHTML.join('');
+                
+                if (itemsHTML.length === 0) {
+                    listEl.innerHTML = `<p class="text-gray-500 text-xs text-center py-4 italic">ยังไม่มีประวัติการชั่งน้ำหนัก</p>`;
+                } else {
+                    listEl.innerHTML = itemsHTML.join('');
+                }
 
                 let avgW = (totalW / countW).toFixed(1);
                 let growthPct = (((weights[weights.length-1] - weights[0]) / (weights[0] || 1)) * 100).toFixed(1);
@@ -1359,116 +1333,141 @@
                         }
                     });
                 }
+            }, (err) => {
+                console.error("Subcollection Fetch Error:", err);
+                document.getElementById('subWeightList').innerHTML = `<p class="text-error text-xs text-center py-4">⚠️ ไม่สามารถโหลดประวัติได้ (ติดสิทธิ์ Firebase Rules)</p>`;
             });
             activeSubcollectionListeners.push(unsubW);
 
-            // --- 2. อาหาร ---
             const fRef = query(collection(db, "snakes", snakeId, "feedingHistory"), orderBy("date", "desc"));
             const unsubF = onSnapshot(fRef, (fSnapshot) => {
                 const fList = document.getElementById('subFeedList');
-                if(fList) {
-                    fList.innerHTML = "";
-                    fSnapshot.forEach(doc => {
-                        const data = doc.data();
-                        let colorClass = data.status === 'กิน' ? 'text-success' : (data.status === 'อ้วก' ? 'text-error' : 'text-warning');
-                        let statusIcon = data.status === 'กิน' ? 'fa-check' : (data.status === 'อ้วก' ? 'fa-skull' : 'fa-xmark');
-                        
-                        fList.innerHTML += `
-                            <div class="list-item-glass p-3 rounded-xl mb-2 flex justify-between items-center text-xs relative overflow-hidden">
-                                <div class="absolute left-0 top-0 bottom-0 w-1 ${data.status === 'กิน'?'bg-success':(data.status==='อ้วก'?'bg-error':'bg-warning')}"></div>
-                                <div class="pl-2">
-                                    <div class="flex items-center text-gray-400 mb-1"><i class="fa-regular fa-calendar mr-2 w-4 text-center"></i> ${new Date(data.date).toLocaleDateString('th-TH')}</div>
-                                    <div class="flex items-center text-gray-200"><i class="fa-solid fa-mouse mr-2 w-4 text-center text-gray-500"></i> <span class="font-bold">${data.foodItem || '-'}</span> <span class="text-gray-500 ml-1">(${data.foodWeight || 0}g)</span></div>
+                if(!fList) return;
+                
+                const itemsHTML = [];
+                fSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    let colorClass = data.status === 'กิน' ? 'text-success' : (data.status === 'อ้วก' ? 'text-error' : 'text-warning');
+                    let statusIcon = data.status === 'กิน' ? 'fa-check' : (data.status === 'อ้วก' ? 'fa-skull' : 'fa-xmark');
+                    const fullDateStr = data.date ? new Date(data.date).toLocaleDateString('th-TH') : '-';
+                    
+                    itemsHTML.push(`
+                        <div class="list-item-glass p-3 rounded-xl mb-2 flex justify-between items-center text-xs relative overflow-hidden">
+                            <div class="absolute left-0 top-0 bottom-0 w-1 ${data.status === 'กิน'?'bg-success':(data.status==='อ้วก'?'bg-error':'bg-warning')}"></div>
+                            <div class="pl-2">
+                                <div class="flex items-center text-gray-400 mb-1"><i class="fa-regular fa-calendar mr-2 w-4 text-center"></i> ${fullDateStr}</div>
+                                <div class="flex items-center text-gray-200"><i class="fa-solid fa-mouse mr-2 w-4 text-center text-gray-500"></i> <span class="font-bold">${data.foodItem || '-'}</span> <span class="text-gray-500 ml-1">(${data.foodWeight || 0}g)</span></div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="flex items-center gap-1 bg-[#121212] px-2 py-1 rounded-md border border-gray-800">
+                                    <i class="fa-solid ${statusIcon} ${colorClass} text-[10px]"></i>
+                                    <span class="${colorClass} font-bold">${data.status || ''}</span>
                                 </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="flex items-center gap-1 bg-[#121212] px-2 py-1 rounded-md border border-gray-800">
-                                        <i class="fa-solid ${statusIcon} ${colorClass} text-[10px]"></i>
-                                        <span class="${colorClass} font-bold">${data.status || ''}</span>
-                                    </div>
-                                    <button onclick="window.deleteSubDoc('${snakeId}','feedingHistory','${doc.id}')" class="text-gray-500 hover:text-error hover:bg-error/10 rounded-lg p-1.5 transition-colors"><i class="fa-solid fa-trash-can"></i></button>
-                                </div>
-                            </div>`;
-                    });
-                }
+                                <button onclick="window.deleteSubDoc('${snakeId}','feedingHistory','${doc.id}')" class="text-gray-500 hover:text-error hover:bg-error/10 rounded-lg p-1.5 transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+                        </div>`);
+                });
+                
+                if (itemsHTML.length === 0) fList.innerHTML = `<p class="text-gray-500 text-xs text-center py-4 italic">ยังไม่มีประวัติการให้อาหาร</p>`;
+                else fList.innerHTML = itemsHTML.join('');
+                
+            }, (err) => {
+                document.getElementById('subFeedList').innerHTML = `<p class="text-error text-xs text-center py-4">⚠️ ไม่สามารถโหลดประวัติได้ (ติดสิทธิ์ Firebase Rules)</p>`;
             });
             activeSubcollectionListeners.push(unsubF);
 
-            // --- 3. คราบ ---
             const sRef = query(collection(db, "snakes", snakeId, "shedHistory"), orderBy("date", "desc"));
             const unsubS = onSnapshot(sRef, (sSnapshot) => {
                 const sList = document.getElementById('subShedList');
-                if(sList) {
-                    sList.innerHTML = "";
-                    sSnapshot.forEach(doc => {
-                        const data = doc.data();
-                        let badgeColor = data.status === 'ลอกสมบูรณ์' ? 'text-success' : 'text-warning';
-                        sList.innerHTML += `
-                            <div class="list-item-glass p-3 rounded-xl mb-2 flex justify-between items-center text-xs">
-                                <div>
-                                    <div class="text-gray-400 mb-1"><i class="fa-solid fa-eye text-blue-400 mr-2 w-4 text-center"></i> ตาฟ้า: <span class="text-gray-200">${data.blueDate ? new Date(data.blueDate).toLocaleDateString('th-TH') : '-'}</span></div>
-                                    <div class="text-gray-400"><i class="fa-solid fa-shirt text-emerald-400 mr-2 w-4 text-center"></i> ลอกคราบ: <span class="text-gray-200 font-bold">${data.shedDate ? new Date(data.shedDate).toLocaleDateString('th-TH') : '-'}</span></div>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <span class="${badgeColor} font-bold bg-[#121212] px-2 py-1 rounded-md border border-gray-800">${data.status || ''}</span>
-                                    <button onclick="window.deleteSubDoc('${snakeId}','shedHistory','${doc.id}')" class="text-gray-500 hover:text-error hover:bg-error/10 rounded-lg p-1.5 transition-colors"><i class="fa-solid fa-trash-can"></i></button>
-                                </div>
-                            </div>`;
-                    });
-                }
+                if(!sList) return;
+                
+                const itemsHTML = [];
+                sSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    let badgeColor = data.status === 'ลอกสมบูรณ์' ? 'text-success' : 'text-warning';
+                    const bDate = data.blueDate ? new Date(data.blueDate).toLocaleDateString('th-TH') : '-';
+                    const sDate = data.shedDate ? new Date(data.shedDate).toLocaleDateString('th-TH') : '-';
+                    
+                    itemsHTML.push(`
+                        <div class="list-item-glass p-3 rounded-xl mb-2 flex justify-between items-center text-xs">
+                            <div>
+                                <div class="text-gray-400 mb-1"><i class="fa-solid fa-eye text-blue-400 mr-2 w-4 text-center"></i> ตาฟ้า: <span class="text-gray-200">${bDate}</span></div>
+                                <div class="text-gray-400"><i class="fa-solid fa-shirt text-emerald-400 mr-2 w-4 text-center"></i> ลอกคราบ: <span class="text-gray-200 font-bold">${sDate}</span></div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="${badgeColor} font-bold bg-[#121212] px-2 py-1 rounded-md border border-gray-800">${data.status || ''}</span>
+                                <button onclick="window.deleteSubDoc('${snakeId}','shedHistory','${doc.id}')" class="text-gray-500 hover:text-error hover:bg-error/10 rounded-lg p-1.5 transition-colors h-fit"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+                        </div>`);
+                });
+                if (itemsHTML.length === 0) sList.innerHTML = `<p class="text-gray-500 text-xs text-center py-4 italic">ยังไม่มีประวัติการลอกคราบ</p>`;
+                else sList.innerHTML = itemsHTML.join('');
+                
+            }, (err) => {
+                document.getElementById('subShedList').innerHTML = `<p class="text-error text-xs text-center py-4">⚠️ ไม่สามารถโหลดประวัติได้</p>`;
             });
             activeSubcollectionListeners.push(unsubS);
 
-            // --- 4. ขับถ่าย ---
             const pRef = query(collection(db, "snakes", snakeId, "poopHistory"), orderBy("date", "desc"));
             const unsubP = onSnapshot(pRef, (pSnapshot) => {
                 const pList = document.getElementById('subPoopList');
-                if(pList) {
-                    pList.innerHTML = "";
-                    pSnapshot.forEach(doc => {
-                        const data = doc.data();
-                        let icon = 'fa-check'; let color = 'text-gray-400';
-                        if(data.status === 'ปกติ') { icon = 'fa-check'; color = 'text-success'; }
-                        if(data.status === 'เหลว') { icon = 'fa-water'; color = 'text-warning'; }
-                        if(data.status === 'แข็ง') { icon = 'fa-cube'; color = 'text-gray-400'; }
-                        if(data.status === 'มีเลือด') { icon = 'fa-triangle-exclamation'; color = 'text-error'; }
+                if(!pList) return;
+                
+                const itemsHTML = [];
+                pSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    let icon = 'fa-check'; let color = 'text-gray-400';
+                    if(data.status === 'ปกติ') { icon = 'fa-check'; color = 'text-success'; }
+                    if(data.status === 'เหลว') { icon = 'fa-water'; color = 'text-warning'; }
+                    if(data.status === 'แข็ง') { icon = 'fa-cube'; color = 'text-gray-400'; }
+                    if(data.status === 'มีเลือด') { icon = 'fa-triangle-exclamation'; color = 'text-error'; }
+                    const dDate = data.date ? new Date(data.date).toLocaleDateString('th-TH') : '-';
 
-                        pList.innerHTML += `
-                            <div class="list-item-glass p-3 rounded-xl mb-2 flex justify-between items-center text-xs">
-                                <span class="text-gray-300"><i class="fa-regular fa-calendar text-gray-500 mr-2 w-4"></i> ${new Date(data.date).toLocaleDateString('th-TH')}</span>
-                                <div class="flex items-center gap-3">
-                                    <span class="${color} font-bold bg-[#121212] px-2 py-1 rounded-md border border-gray-800"><i class="fa-solid ${icon} mr-1"></i> ${data.status || ''}</span>
-                                    <button onclick="window.deleteSubDoc('${snakeId}','poopHistory','${doc.id}')" class="text-gray-500 hover:text-error hover:bg-error/10 rounded-lg p-1.5 transition-colors"><i class="fa-solid fa-trash-can"></i></button>
-                                </div>
-                            </div>`;
-                    });
-                }
+                    itemsHTML.push(`
+                        <div class="list-item-glass p-3 rounded-xl mb-2 flex justify-between items-center text-xs">
+                            <span class="text-gray-300"><i class="fa-regular fa-calendar text-gray-500 mr-2 w-4"></i> ${dDate}</span>
+                            <div class="flex items-center gap-3">
+                                <span class="${color} font-bold bg-[#121212] px-2 py-1 rounded-md border border-gray-800"><i class="fa-solid ${icon} mr-1"></i> ${data.status || ''}</span>
+                                <button onclick="window.deleteSubDoc('${snakeId}','poopHistory','${doc.id}')" class="text-gray-500 hover:text-error hover:bg-error/10 rounded-lg p-1.5 transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+                        </div>`);
+                });
+                if (itemsHTML.length === 0) pList.innerHTML = `<p class="text-gray-500 text-xs text-center py-4 italic">ยังไม่มีประวัติการขับถ่าย</p>`;
+                else pList.innerHTML = itemsHTML.join('');
+                
+            }, (err) => {
+                document.getElementById('subPoopList').innerHTML = `<p class="text-error text-xs text-center py-4">⚠️ ไม่สามารถโหลดประวัติได้</p>`;
             });
             activeSubcollectionListeners.push(unsubP);
 
-            // --- 5. รักษาโรค ---
             const mRef = query(collection(db, "snakes", snakeId, "medicalHistory"), orderBy("date", "desc"));
             const unsubM = onSnapshot(mRef, (mSnapshot) => {
                 const mList = document.getElementById('subMedList');
-                if(mList) {
-                    mList.innerHTML = "";
-                    mSnapshot.forEach(doc => {
-                        const data = doc.data();
-                        mList.innerHTML += `
-                            <div class="list-item-glass p-3 rounded-xl mb-2 flex justify-between items-start text-xs border-l-2 border-l-error">
-                                <div>
-                                    <div class="text-gray-400 mb-1"><i class="fa-regular fa-calendar mr-2 w-4 text-center"></i> ${new Date(data.date).toLocaleDateString('th-TH')}</div>
-                                    <div class="font-bold text-error mb-1"><i class="fa-solid fa-virus mr-2 w-4 text-center"></i> อาการ: ${data.symptom || ''}</div>
-                                    <div class="text-gray-300"><i class="fa-solid fa-pills text-gray-500 mr-2 w-4 text-center"></i> ยา: ${data.drug || '-'} <span class="text-gray-500 ml-1">(${(data.cost || 0).toLocaleString()} ฿)</span></div>
-                                </div>
-                                <button onclick="window.deleteSubDoc('${snakeId}','medicalHistory','${doc.id}')" class="text-gray-500 hover:text-error hover:bg-error/10 rounded-lg p-1.5 transition-colors h-fit"><i class="fa-solid fa-trash-can"></i></button>
-                            </div>`;
-                    });
-                }
+                if(!mList) return;
+                
+                const itemsHTML = [];
+                mSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const dDate = data.date ? new Date(data.date).toLocaleDateString('th-TH') : '-';
+                    itemsHTML.push(`
+                        <div class="list-item-glass p-3 rounded-xl mb-2 flex justify-between items-start text-xs border-l-2 border-l-error">
+                            <div>
+                                <div class="text-gray-400 mb-1"><i class="fa-regular fa-calendar mr-2 w-4 text-center"></i> ${dDate}</div>
+                                <div class="font-bold text-error mb-1"><i class="fa-solid fa-virus mr-2 w-4 text-center"></i> อาการ: ${data.symptom || ''}</div>
+                                <div class="text-gray-300"><i class="fa-solid fa-pills text-gray-500 mr-2 w-4 text-center"></i> ยา: ${data.drug || '-'} <span class="text-gray-500 ml-1">(${(data.cost || 0).toLocaleString()} ฿)</span></div>
+                            </div>
+                            <button onclick="window.deleteSubDoc('${snakeId}','medicalHistory','${doc.id}')" class="text-gray-500 hover:text-error hover:bg-error/10 rounded-lg p-1.5 transition-colors h-fit"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>`);
+                });
+                if (itemsHTML.length === 0) mList.innerHTML = `<p class="text-gray-500 text-xs text-center py-4 italic">ยังไม่มีประวัติการรักษา</p>`;
+                else mList.innerHTML = itemsHTML.join('');
+                
+            }, (err) => {
+                document.getElementById('subMedList').innerHTML = `<p class="text-error text-xs text-center py-4">⚠️ ไม่สามารถโหลดประวัติได้</p>`;
             });
             activeSubcollectionListeners.push(unsubM);
-        }
+        };
 
-        // ================= Button Handlers =================
         window.addSubWeight = async (snakeId) => {
             try {
                 const wVal = parseFloat(document.getElementById('sub_w_val').value);
