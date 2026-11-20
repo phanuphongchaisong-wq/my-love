@@ -2,52 +2,254 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Live Sales Counter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>LIVE GMV Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
       user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
+    html, body {
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      font-family: "Plus Jakarta Sans", "Noto Sans Thai", -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #ffffff;
+    }
+
+    /* พื้นหลังไล่สีชมพูบานเย็น -> เขียวอมฟ้า สไตล์ TikTok LIVE */
     body {
-      width: 100vw;
-      height: 100vh;
+      background:
+        radial-gradient(circle at 78% 105%, #22d3d8 0%, rgba(22, 168, 178, 0.92) 32%, transparent 64%),
+        radial-gradient(circle at 18% 95%, #16859b 0%, transparent 50%),
+        radial-gradient(circle at 18% 12%, #ff1457 0%, #e91255 38%, transparent 72%),
+        linear-gradient(165deg, #f81458 0%, #d91c5c 36%, #5c4b75 68%, #149ca8 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      background-color: #000000;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      overflow: hidden;
-      transition: background-color 0.2s ease;
+      position: relative;
     }
 
-    #counter {
-      font-size: 160px;
-      font-weight: 900;
-      color: #ffffff;
+    .dashboard {
+      width: min(92vw, 960px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+      transform: translateY(-2vh);
+    }
+
+    /* แถวหัวข้อด้านบน */
+    .top-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: clamp(16px, 2.2vw, 24px);
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+
+    .live-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(37, 244, 238, 0.28), rgba(20, 184, 166, 0.45));
+      border: 1px solid rgba(110, 250, 245, 0.55);
+      color: #c8fffe;
+      font-size: clamp(12px, 1.4vw, 15px);
+      font-weight: 700;
+      backdrop-filter: blur(8px);
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #4efbf5;
+      box-shadow: 0 0 8px #4efbf5;
+      animation: pulse 1.6s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.8); }
+    }
+
+    /* ตัวเลข GMV หลักขนาดใหญ่ */
+    .gmv-value {
+      font-size: clamp(54px, 11.5vw, 138px);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
       font-variant-numeric: tabular-nums;
-      letter-spacing: -2px;
-      text-shadow: 0 6px 24px rgba(0, 0, 0, 0.55);
-      transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease;
+      text-shadow: 0 6px 28px rgba(0, 0, 0, 0.18);
+      margin-bottom: clamp(18px, 3vh, 30px);
+      transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+      cursor: pointer;
     }
 
-    #counter.bump {
-      transform: scale(1.08);
-      color: #4ade80;
+    .gmv-value.bump {
+      transform: scale(1.028);
     }
 
-    /* แผงตั้งค่า (ซ่อนไว้ตลอด กดดับเบิลคลิกหรือปุ่ม S เพื่อเปิด) */
+    /* แถวการ์ดโปร่งแสง สินค้าที่ขายได้ / ผู้ชมปัจจุบัน */
+    .pill-row {
+      display: flex;
+      justify-content: center;
+      gap: clamp(10px, 1.8vw, 18px);
+      width: 100%;
+      max-width: 760px;
+      margin-bottom: clamp(26px, 4.5vh, 46px);
+      flex-wrap: wrap;
+    }
+
+    .stat-pill {
+      flex: 1 1 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: clamp(10px, 1.5vh, 14px) clamp(16px, 2.2vw, 24px);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .pill-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .pill-icon.bag {
+      background: rgba(255, 78, 125, 0.85);
+    }
+
+    .pill-icon.viewer {
+      background: rgba(56, 189, 248, 0.85);
+    }
+
+    .pill-label {
+      font-size: clamp(14px, 1.7vw, 19px);
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.9);
+      white-space: nowrap;
+    }
+
+    .pill-num {
+      font-size: clamp(22px, 2.9vw, 34px);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      margin-left: 4px;
+      white-space: nowrap;
+    }
+
+    .pill-num .sub {
+      font-size: 0.68em;
+      font-weight: 700;
+      opacity: 0.95;
+    }
+
+    /* แถวอัตราส่วน 3 คอลัมน์ด้านล่าง */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(16px, 4vw, 48px);
+      width: 100%;
+      max-width: 760px;
+      text-align: left;
+      padding: 0 12px;
+    }
+
+    .metric-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .metric-label {
+      font-size: clamp(12px, 1.45vw, 17px);
+      color: rgba(255, 255, 255, 0.84);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .metric-val {
+      font-size: clamp(24px, 3.2vw, 38px);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+    }
+
+    .metric-val .sub {
+      font-size: 0.65em;
+      font-weight: 700;
+    }
+
+    /* ไอคอนเล็กมุมซ้ายล่าง เหมือนหน้าจอจริง */
+    .corner-tools {
+      position: fixed;
+      left: 16px;
+      bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 20;
+    }
+
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 255, 255, 0.14);
+      color: rgba(255, 255, 255, 0.72);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: rgba(255, 255, 255, 0.28);
+      color: #ffffff;
+    }
+
+    /* แผงตั้งค่า (ซ่อนไว้จนกว่าจะกดไอคอนเฟือง / ดับเบิลคลิก / กด S) */
     #panel {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.72);
+      background: rgba(0, 0, 0, 0.68);
+      backdrop-filter: blur(6px);
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 99;
+      z-index: 100;
+      padding: 16px;
     }
 
     #panel.open {
@@ -55,25 +257,55 @@
     }
 
     .card {
-      background: #18181b;
-      color: #f4f4f5;
-      width: 340px;
+      background: #141418;
+      border: 1px solid #2a2a32;
+      border-radius: 16px;
+      width: min(94vw, 420px);
+      max-height: 90dvh;
+      overflow-y: auto;
       padding: 20px;
-      border-radius: 14px;
-      border: 1px solid #27272a;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-      font-size: 14px;
+      color: #f4f4f5;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
     }
 
-    .card h3 {
-      font-size: 16px;
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 14px;
+    }
+
+    .card-header h3 {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .presets {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .preset-btn {
+      flex: 1;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid #32323d;
+      background: #1f1f27;
+      color: #d4d4d8;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .preset-btn:hover {
+      background: #2b2b36;
+      color: #fff;
     }
 
     .row {
       display: flex;
       gap: 10px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .field {
@@ -88,14 +320,15 @@
       color: #a1a1aa;
     }
 
-    input, select {
+    input {
       width: 100%;
       padding: 8px 10px;
       border-radius: 8px;
-      border: 1px solid #3f3f46;
-      background: #09090b;
+      border: 1px solid #33333d;
+      background: #0a0a0d;
       color: #ffffff;
       font-size: 14px;
+      font-family: inherit;
     }
 
     .actions {
@@ -104,28 +337,29 @@
       margin-top: 16px;
     }
 
-    button {
+    .btn {
       flex: 1;
       padding: 10px;
       border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
+      border-radius: 10px;
+      font-weight: 700;
       font-size: 14px;
+      cursor: pointer;
+      font-family: inherit;
     }
 
-    .btn-primary {
-      background: #22c55e;
-      color: #052e16;
+    .btn-save {
+      background: linear-gradient(90deg, #fe2c55, #e11d48);
+      color: #ffffff;
     }
 
-    .btn-secondary {
-      background: #27272a;
+    .btn-pause {
+      background: #27272f;
       color: #e4e4e7;
     }
 
     .hint {
-      margin-top: 12px;
+      margin-top: 10px;
       font-size: 11px;
       color: #71717a;
       line-height: 1.5;
@@ -134,183 +368,312 @@
 </head>
 <body>
 
-  <div id="counter">0</div>
+  <main class="dashboard">
+    <div class="top-label">
+      <span id="titleText">GMV โดยตรง (฿)</span>
+      <span class="live-pill">
+        <span class="live-dot"></span>
+        <span>อัปเดตเรียลไทม์</span>
+      </span>
+    </div>
+
+    <div id="gmvDisplay" class="gmv-value">99,512,065</div>
+
+    <div class="pill-row">
+      <div class="stat-pill">
+        <div class="pill-icon bag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+        </div>
+        <span class="pill-label">สินค้าที่ขายได้</span>
+        <span id="itemsDisplay" class="pill-num">381<span class="sub">.45K</span></span>
+      </div>
+
+      <div class="stat-pill">
+        <div class="pill-icon viewer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <span class="pill-label">ผู้ชมปัจจุบัน</span>
+        <span id="viewersDisplay" class="pill-num">465<span class="sub">.35K</span></span>
+      </div>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-item">
+        <div class="metric-label">อัตราการคลิก</div>
+        <div id="ctrDisplay" class="metric-val">61<span class="sub">.19%</span></div>
+      </div>
+      <div class="metric-item">
+        <div class="metric-label">อัตราการสั่งซื้อ (คำสั่งซื้อ)</div>
+        <div id="ctorDisplay" class="metric-val">1<span class="sub">.72%</span></div>
+      </div>
+      <div class="metric-item">
+        <div class="metric-label">อัตราการเข้าชม</div>
+        <div id="enterDisplay" class="metric-val">0<span class="sub">.83%</span></div>
+      </div>
+    </div>
+  </main>
+
+  <div class="corner-tools">
+    <button class="icon-btn" id="fullscreenBtn" title="เต็มจอ">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 3 21 3 21 9"></polyline>
+        <polyline points="9 21 3 21 3 15"></polyline>
+        <line x1="21" y1="3" x2="14" y2="10"></line>
+        <line x1="3" y1="21" x2="10" y2="14"></line>
+      </svg>
+    </button>
+    <button class="icon-btn" id="settingsBtn" title="ตั้งค่า">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09c-.66 0-1.25.4-1.51 1z"></path>
+      </svg>
+    </button>
+  </div>
 
   <div id="panel">
     <div class="card">
-      <h3>ตั้งค่ายอดขายจำลอง</h3>
+      <div class="card-header">
+        <h3>ตั้งค่าหน้าจอ LIVE GMV</h3>
+      </div>
+
+      <div class="presets">
+        <button class="preset-btn" data-preset="zero">เริ่มจาก 0</button>
+        <button class="preset-btn" data-preset="mid">หลักแสน</button>
+        <button class="preset-btn" data-preset="mega">99 ล้าน (ตามแบบ)</button>
+      </div>
 
       <div class="row">
         <div class="field">
-          <label>ยอดปัจจุบัน / เริ่มต้น</label>
-          <input type="number" id="startVal" value="0" />
+          <label>ยอด GMV ปัจจุบัน (บาท)</label>
+          <input type="number" id="inGmv" />
         </div>
         <div class="field">
-          <label>ขนาดตัวเลข (px)</label>
-          <input type="number" id="fontSize" value="160" />
+          <label>ราคาเฉลี่ยต่อชิ้น (บาท)</label>
+          <input type="number" id="inUnitPrice" />
         </div>
       </div>
 
       <div class="row">
         <div class="field">
-          <label>เพิ่มขั้นต่ำ (ต่อครั้ง)</label>
-          <input type="number" id="minInc" value="1" />
+          <label>เพิ่มต่อครั้ง ขั้นต่ำ (บาท)</label>
+          <input type="number" id="inMinInc" />
         </div>
         <div class="field">
-          <label>เพิ่มสูงสุด (ต่อครั้ง)</label>
-          <input type="number" id="maxInc" value="5" />
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="field">
-          <label>สุ่มทุกๆ กี่วิ (ต่ำสุด)</label>
-          <input type="number" id="minSec" value="3" />
-        </div>
-        <div class="field">
-          <label>สุ่มทุกๆ กี่วิ (สูงสุด)</label>
-          <input type="number" id="maxSec" value="8" />
+          <label>เพิ่มต่อครั้ง สูงสุด (บาท)</label>
+          <input type="number" id="inMaxInc" />
         </div>
       </div>
 
       <div class="row">
         <div class="field">
-          <label>พื้นหลัง</label>
-          <select id="bgMode">
-            <option value="#000000">สีดำ (ทั่วไป)</option>
-            <option value="transparent">โปร่งใส (OBS Browser Source)</option>
-            <option value="#00ff00">ฉากเขียว (Green Screen)</option>
-          </select>
+          <label>สุ่มอัปเดตทุกๆ (วิ ต่ำสุด)</label>
+          <input type="number" id="inMinSec" step="0.5" />
         </div>
         <div class="field">
-          <label>สีตัวเลข</label>
-          <input type="color" id="textColor" value="#ffffff" style="height: 36px; padding: 2px;" />
+          <label>สุ่มอัปเดตทุกๆ (วิ สูงสุด)</label>
+          <input type="number" id="inMaxSec" step="0.5" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>สินค้าที่ขายได้ (ชิ้น)</label>
+          <input type="number" id="inItems" />
+        </div>
+        <div class="field">
+          <label>ผู้ชมปัจจุบัน (คน)</label>
+          <input type="number" id="inViewers" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>อัตราการคลิก (%)</label>
+          <input type="number" id="inCtr" step="0.01" />
+        </div>
+        <div class="field">
+          <label>อัตราการสั่งซื้อ (%)</label>
+          <input type="number" id="inCtor" step="0.01" />
+        </div>
+        <div class="field">
+          <label>อัตราเข้าชม (%)</label>
+          <input type="number" id="inEnter" step="0.01" />
         </div>
       </div>
 
       <div class="actions">
-        <button class="btn-secondary" id="togglePause">หยุดชั่วคราว</button>
-        <button class="btn-primary" id="saveBtn">บันทึกและซ่อน</button>
+        <button class="btn btn-pause" id="pauseBtn">หยุดชั่วคราว</button>
+        <button class="btn btn-save" id="saveBtn">บันทึกและปิด</button>
       </div>
 
       <div class="hint">
-        คีย์ลัดหน้าจอหลัก: <b>S</b> หรือ <b>ดับเบิลคลิก</b> เปิดตั้งค่า | <b>Space</b> หยุด/เดินต่อ | <b>ลูกศรขึ้น</b> เพิ่มยอดทันที
+        แตะ 2 ครั้งที่ตัวเลข หรือกดปุ่ม <b>S</b> เพื่อเปิดตั้งค่า | กด <b>Space</b> หยุด/เดินต่อ | กด <b>ลูกศรขึ้น</b> เร่งยอดทันที
       </div>
     </div>
   </div>
 
   <script>
-    const counterEl = document.getElementById("counter");
-    const panelEl = document.getElementById("panel");
+    const STORAGE_KEY = "live_gmv_dashboard_v2";
 
-    const STORAGE_KEY = "live_sales_sim_v1";
-
-    let config = {
-      value: 0,
-      fontSize: 160,
-      minInc: 1,
-      maxInc: 5,
-      minSec: 3,
-      maxSec: 8,
-      bgMode: "#000000",
-      textColor: "#ffffff"
+    let state = {
+      gmv: 99512065,
+      items: 381450,
+      viewers: 465350,
+      unitPrice: 260,
+      minInc: 590,
+      maxInc: 4500,
+      minSec: 1.2,
+      maxSec: 3.5,
+      ctr: 61.19,
+      ctor: 1.72,
+      enter: 0.83
     };
 
-    let displayedValue = 0;
+    let displayedGmv = state.gmv;
     let isPaused = false;
     let timerId = null;
 
-    function loadConfig() {
+    const gmvEl = document.getElementById("gmvDisplay");
+    const itemsEl = document.getElementById("itemsDisplay");
+    const viewersEl = document.getElementById("viewersDisplay");
+    const ctrEl = document.getElementById("ctrDisplay");
+    const ctorEl = document.getElementById("ctorDisplay");
+    const enterEl = document.getElementById("enterDisplay");
+    const panelEl = document.getElementById("panel");
+
+    function loadState() {
       try {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-        if (saved) config = { ...config, ...saved };
+        if (saved) state = { ...state, ...saved };
       } catch (e) {}
-
-      displayedValue = config.value;
-      applyStyle();
-      renderNumber(displayedValue);
-      syncInputs();
+      displayedGmv = state.gmv;
+      renderAll();
     }
 
-    function saveConfig() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
 
-    function applyStyle() {
-      document.body.style.backgroundColor = config.bgMode;
-      counterEl.style.fontSize = config.fontSize + "px";
-      counterEl.style.color = config.textColor;
+    /* ฟอร์แมตตัวเลขแบบ 381.45K เมื่อเกิน 10,000 เหมือนหน้าจอ TikTok */
+    function formatCompactHTML(num) {
+      if (num >= 10000) {
+        const k = (num / 1000).toFixed(2);
+        const [intPart, decPart] = k.split(".");
+        return `${Number(intPart).toLocaleString("en-US")}<span class="sub">.${decPart}K</span>`;
+      }
+      return Math.floor(num).toLocaleString("en-US");
     }
 
-    function syncInputs() {
-      document.getElementById("startVal").value = config.value;
-      document.getElementById("fontSize").value = config.fontSize;
-      document.getElementById("minInc").value = config.minInc;
-      document.getElementById("maxInc").value = config.maxInc;
-      document.getElementById("minSec").value = config.minSec;
-      document.getElementById("maxSec").value = config.maxSec;
-      document.getElementById("bgMode").value = config.bgMode;
-      document.getElementById("textColor").value = config.textColor;
-      document.getElementById("togglePause").textContent = isPaused ? "เริ่มต่อ" : "หยุดชั่วคราว";
+    function formatPercentHTML(val) {
+      const fixed = Math.max(0.01, Math.min(99.99, val)).toFixed(2);
+      const [intPart, decPart] = fixed.split(".");
+      return `${intPart}<span class="sub">.${decPart}%</span>`;
     }
 
-    function renderNumber(num) {
-      counterEl.textContent = Math.floor(num).toLocaleString("en-US");
+    function renderAll() {
+      gmvEl.textContent = Math.floor(displayedGmv).toLocaleString("en-US");
+      itemsEl.innerHTML = formatCompactHTML(state.items);
+      viewersEl.innerHTML = formatCompactHTML(state.viewers);
+      ctrEl.innerHTML = formatPercentHTML(state.ctr);
+      ctorEl.innerHTML = formatPercentHTML(state.ctor);
+      enterEl.innerHTML = formatPercentHTML(state.enter);
     }
 
-    function randomInt(min, max) {
+    function randFloat(min, max) {
       const lo = Math.min(min, max);
       const hi = Math.max(min, max);
-      return Math.floor(Math.random() * (hi - lo + 1)) + lo;
+      return Math.random() * (hi - lo) + lo;
     }
 
-    function animateTo(target) {
-      const start = displayedValue;
+    function randInt(min, max) {
+      return Math.floor(randFloat(min, max + 1));
+    }
+
+    function animateGmv(target) {
+      const start = displayedGmv;
       const diff = target - start;
-      const duration = Math.min(600, Math.max(200, Math.abs(diff) * 40));
+      const duration = 550;
       const startTime = performance.now();
 
-      counterEl.classList.add("bump");
-      setTimeout(() => {
-        counterEl.classList.remove("bump");
-        counterEl.style.color = config.textColor;
-      }, 320);
+      gmvEl.classList.add("bump");
+      setTimeout(() => gmvEl.classList.remove("bump"), 220);
 
       function step(now) {
-        const progress = Math.min((now - startTime) / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        displayedValue = start + diff * eased;
-        renderNumber(displayedValue);
-
-        if (progress < 1) {
+        const p = Math.min((now - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        displayedGmv = start + diff * eased;
+        gmvEl.textContent = Math.floor(displayedGmv).toLocaleString("en-US");
+        if (p < 1) {
           requestAnimationFrame(step);
         } else {
-          displayedValue = target;
-          renderNumber(target);
+          displayedGmv = target;
+          gmvEl.textContent = Math.floor(target).toLocaleString("en-US");
         }
       }
-
       requestAnimationFrame(step);
     }
 
-    function triggerSale() {
-      const inc = randomInt(Number(config.minInc), Number(config.maxInc));
-      config.value = Number(config.value) + inc;
-      saveConfig();
-      animateTo(config.value);
+    function simulateTick() {
+      const incGmv = randInt(Number(state.minInc), Number(state.maxInc));
+      state.gmv = Number(state.gmv) + incGmv;
+
+      // คำนวณชิ้นที่ขายเพิ่มให้สัมพันธ์กับยอดเงิน
+      const unit = Math.max(1, Number(state.unitPrice) || 260);
+      const incItems = Math.max(1, Math.round(incGmv / unit));
+      state.items = Number(state.items) + incItems;
+
+      // ขยับจำนวนผู้ชมขึ้นลงเล็กน้อยแบบธรรมชาติ
+      const viewerSwing = Math.max(5, Math.round(state.viewers * 0.0015));
+      state.viewers = Math.max(10, Math.round(state.viewers + randInt(-viewerSwing * 0.4, viewerSwing)));
+
+      // ขยับ % เล็กน้อยให้ดูเรียลไทม์
+      state.ctr = Math.max(1, Math.min(99, state.ctr + randFloat(-0.03, 0.04)));
+      state.ctor = Math.max(0.1, Math.min(50, state.ctor + randFloat(-0.02, 0.03)));
+      state.enter = Math.max(0.1, Math.min(50, state.enter + randFloat(-0.01, 0.02)));
+
+      saveState();
+      animateGmv(state.gmv);
+      itemsEl.innerHTML = formatCompactHTML(state.items);
+      viewersEl.innerHTML = formatCompactHTML(state.viewers);
+      ctrEl.innerHTML = formatPercentHTML(state.ctr);
+      ctorEl.innerHTML = formatPercentHTML(state.ctor);
+      enterEl.innerHTML = formatPercentHTML(state.enter);
     }
 
     function scheduleNext() {
       clearTimeout(timerId);
       if (isPaused) return;
-
-      const delayMs = randomInt(Number(config.minSec) * 1000, Number(config.maxSec) * 1000);
+      const delay = randFloat(Number(state.minSec) * 1000, Number(state.maxSec) * 1000);
       timerId = setTimeout(() => {
         if (!isPaused) {
-          triggerSale();
+          simulateTick();
           scheduleNext();
         }
-      }, delayMs);
+      }, Math.max(300, delay));
+    }
+
+    function syncInputs() {
+      document.getElementById("inGmv").value = Math.floor(state.gmv);
+      document.getElementById("inUnitPrice").value = state.unitPrice;
+      document.getElementById("inMinInc").value = state.minInc;
+      document.getElementById("inMaxInc").value = state.maxInc;
+      document.getElementById("inMinSec").value = state.minSec;
+      document.getElementById("inMaxSec").value = state.maxSec;
+      document.getElementById("inItems").value = Math.floor(state.items);
+      document.getElementById("inViewers").value = Math.floor(state.viewers);
+      document.getElementById("inCtr").value = state.ctr.toFixed(2);
+      document.getElementById("inCtor").value = state.ctor.toFixed(2);
+      document.getElementById("inEnter").value = state.enter.toFixed(2);
+      document.getElementById("pauseBtn").textContent = isPaused ? "เริ่มเดินต่อ" : "หยุดชั่วคราว";
     }
 
     function togglePanel(force) {
@@ -319,50 +682,76 @@
       panelEl.classList.toggle("open", open);
     }
 
-    document.getElementById("saveBtn").addEventListener("click", () => {
-      config.value = Number(document.getElementById("startVal").value) || 0;
-      config.fontSize = Math.max(20, Number(document.getElementById("fontSize").value) || 160);
-      config.minInc = Number(document.getElementById("minInc").value) || 1;
-      config.maxInc = Number(document.getElementById("maxInc").value) || 5;
-      config.minSec = Math.max(1, Number(document.getElementById("minSec").value) || 3);
-      config.maxSec = Math.max(1, Number(document.getElementById("maxSec").value) || 8);
-      config.bgMode = document.getElementById("bgMode").value;
-      config.textColor = document.getElementById("textColor").value;
+    // ปุ่มตั้งค่าเร็ว (Presets)
+    document.querySelectorAll(".preset-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const type = btn.dataset.preset;
+        if (type === "zero") {
+          Object.assign(state, { gmv: 0, items: 0, viewers: 120, minInc: 199, maxInc: 990, unitPrice: 199 });
+        } else if (type === "mid") {
+          Object.assign(state, { gmv: 248900, items: 950, viewers: 4820, minInc: 290, maxInc: 1890, unitPrice: 260 });
+        } else if (type === "mega") {
+          Object.assign(state, { gmv: 99512065, items: 381450, viewers: 465350, minInc: 590, maxInc: 4500, unitPrice: 260 });
+        }
+        syncInputs();
+      });
+    });
 
-      displayedValue = config.value;
-      saveConfig();
-      applyStyle();
-      renderNumber(config.value);
+    document.getElementById("saveBtn").addEventListener("click", () => {
+      state.gmv = Number(document.getElementById("inGmv").value) || 0;
+      state.unitPrice = Math.max(1, Number(document.getElementById("inUnitPrice").value) || 260);
+      state.minInc = Math.max(1, Number(document.getElementById("inMinInc").value) || 100);
+      state.maxInc = Math.max(state.minInc, Number(document.getElementById("inMaxInc").value) || 1000);
+      state.minSec = Math.max(0.3, Number(document.getElementById("inMinSec").value) || 1);
+      state.maxSec = Math.max(state.minSec, Number(document.getElementById("inMaxSec").value) || 3);
+      state.items = Math.max(0, Number(document.getElementById("inItems").value) || 0);
+      state.viewers = Math.max(0, Number(document.getElementById("inViewers").value) || 0);
+      state.ctr = Number(document.getElementById("inCtr").value) || 61.19;
+      state.ctor = Number(document.getElementById("inCtor").value) || 1.72;
+      state.enter = Number(document.getElementById("inEnter").value) || 0.83;
+
+      displayedGmv = state.gmv;
+      saveState();
+      renderAll();
       togglePanel(false);
       scheduleNext();
     });
 
-    document.getElementById("togglePause").addEventListener("click", () => {
+    document.getElementById("pauseBtn").addEventListener("click", () => {
       isPaused = !isPaused;
       syncInputs();
       scheduleNext();
     });
 
-    document.body.addEventListener("dblclick", (e) => {
-      if (!panelEl.contains(e.target)) togglePanel();
+    document.getElementById("settingsBtn").addEventListener("click", () => togglePanel(true));
+
+    document.getElementById("fullscreenBtn").addEventListener("click", () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen?.().catch(() => {});
+      } else {
+        document.exitFullscreen?.().catch(() => {});
+      }
+    });
+
+    gmvEl.addEventListener("dblclick", () => togglePanel(true));
+
+    panelEl.addEventListener("click", (e) => {
+      if (e.target === panelEl) togglePanel(false);
     });
 
     window.addEventListener("keydown", (e) => {
-      if (["INPUT", "SELECT"].includes(document.activeElement.tagName)) return;
-
-      if (e.key.toLowerCase() === "s") {
-        togglePanel();
-      } else if (e.code === "Space") {
+      if (document.activeElement.tagName === "INPUT") return;
+      if (e.key.toLowerCase() === "s") togglePanel();
+      if (e.code === "Space") {
         e.preventDefault();
         isPaused = !isPaused;
         syncInputs();
         scheduleNext();
-      } else if (e.key === "ArrowUp") {
-        triggerSale();
       }
+      if (e.key === "ArrowUp") simulateTick();
     });
 
-    loadConfig();
+    loadState();
     scheduleNext();
   </script>
 </body>
